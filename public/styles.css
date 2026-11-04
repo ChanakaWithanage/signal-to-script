@@ -9,3 +9,26 @@
 .article-body .download{border-color:#ced7cf;background:#f4f7f2}
 .article-body .download .btn{margin:1px 0 0}
 .site-header .nav a:focus-visible,.btn:focus-visible{outline:3px solid #245a45;outline-offset:3px}
+
+/* Editorial signature: keep 'by CW' directly under Signal to Script. */
+.brand-wordmark{display:flex;flex-direction:column;justify-content:center;align-items:flex-start;gap:3px;min-width:0}
+.brand-wordmark .brand-name{display:block;white-space:nowrap;line-height:1.05}
+.brand-wordmark .brand-by{display:block;margin:0;line-height:1.2;letter-spacing:1.5px}
+/* Featured editorial entry with a genuinely historical chart. */
+.hero-grid{grid-template-columns:minmax(0,1.12fr) minmax(320px,.88fr);gap:56px;align-items:center}
+.home-hero h1{font-size:clamp(36px,4.45vw,57px)}
+.hero-featured{display:block;min-width:0;background:var(--white);border:1px solid var(--line);text-decoration:none;color:var(--ink);transition:border-color .16s ease,box-shadow .16s ease}
+.hero-featured:hover{border-color:#b7c6bb;box-shadow:0 8px 26px rgba(38,58,42,.075)}
+.hero-featured:focus-visible{outline:3px solid var(--green);outline-offset:3px}
+.hero-featured-image{background:#fbfcfa;border-bottom:1px solid var(--line);overflow:hidden}
+.hero-featured-image img{display:block;width:100%;aspect-ratio:1.9;object-fit:cover;object-position:center}
+.hero-featured-content{padding:20px 23px 22px}
+.hero-featured-content h2{font:600 25px/1.13 var(--serif);letter-spacing:-.4px;margin:9px 0}
+.hero-featured-content p{font-size:13px;line-height:1.65;margin:0;color:var(--muted)}
+.hero-featured-link{display:inline-block;margin-top:14px;color:var(--green);font-size:13px;font-weight:700}
+.feature-media .chart-frame{width:100%;max-width:none;background:white}
+.feature-media .chart-frame img{width:100%;max-width:none;height:auto;aspect-ratio:1.9;object-fit:cover;object-position:center}
+.feature-media .img-caption a{color:var(--green)}
+.article-body .chart-figure img{width:100%;height:auto;max-height:none;object-fit:contain}
+@media(max-width:850px){.hero-grid{grid-template-columns:minmax(0,1fr);gap:28px}.hero-featured{max-width:680px}.home-hero h1{font-size:clamp(37px,5.8vw,54px)}}
+@media(max-width:580px){.hero-featured-content{padding:18px 18px 20px}.hero-featured-content h2{font-size:23px}.hero-featured-image img{aspect-ratio:1.75}.brand-wordmark .brand-name{font-size:19px}.brand-wordmark .brand-by{font-size:9px}}
