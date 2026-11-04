@@ -1,0 +1,85 @@
+//@version=6
+// Signal to Script — by CW. Original SuperTrend concept/source: © KivancOzbilgic.
+// Derived from the open-source SuperTrend (MPL 2.0) and independently adapted for Pine Script v6.
+// SPDX-License-Identifier: MPL-2.0
+// https://www.mozilla.org/en-US/MPL/2.0/
+strategy("Supertrend + DEMA Reversal (CW) — v6", overlay = true, format = format.price,
+     precision = 2, pyramiding = 0, process_orders_on_close = true,
+     calc_on_every_tick = false, margin_long = 0, margin_short = 0)
+
+int atrPeriod = input.int(10, "ATR Period", minval = 1)
+float atrMult = input.float(1.0, "ATR Multiplier", step = 0.1, minval = 0.1)
+bool changeATR = input.bool(true, "Change ATR Calculation Method?")
+string sourceType = input.string("DEMA", "Source", options = ["DEMA", "Close", "HL2", "HLC3", "OHLC4"])
+int demaLen = input.int(50, "DEMA Length", minval = 1)
+bool showSignals = input.bool(true, "Show Buy/Sell Signals?")
+string signalTf = input.timeframe("60", "Signal timeframe")
+
+// The chart must not be higher than the chosen signal timeframe.
+int chartSeconds = timeframe.in_seconds(timeframe.period)
+int signalSeconds = timeframe.in_seconds(signalTf)
+if barstate.isfirst and chartSeconds > signalSeconds
+    runtime.error("Select a chart timeframe equal to or lower than the Signal timeframe.")
+
+calcDema(float src, int length) =>
+    float first = ta.ema(src, length)
+    float second = ta.ema(first, length)
+    2.0 * first - second
+
+// This retains the source/ATR/band-update behavior of the supplied SuperTrend logic.
+supertrendBlock() =>
+    float src = switch sourceType
+        "DEMA" => calcDema(close, demaLen)
+        "Close" => close
+        "HL2" => hl2
+        "HLC3" => hlc3
+        => ohlc4
+    float altAtr = ta.sma(ta.tr(true), atrPeriod)
+    float atrValue = changeATR ? ta.atr(atrPeriod) : altAtr
+    float up = src - (atrMult * atrValue)
+    float previousUp = nz(up[1], up)
+    up := close[1] > previousUp ? math.max(up, previousUp) : up
+    float down = src + (atrMult * atrValue)
+    float previousDown = nz(down[1], down)
+    down := close[1] < previousDown ? math.min(down, previousDown) : down
+    var int trend = 1
+    trend := nz(trend[1], 1)
+    trend := trend == -1 and close > previousDown ? 1 :
+         trend == 1 and close < previousUp ? -1 : trend
+    bool buy = trend == 1 and trend[1] == -1
+    bool sell = trend == -1 and trend[1] == 1
+    [trend, up, down, buy, sell]
+
+// For lower chart timeframes, read only the PREVIOUS CONFIRMED signal candle.
+// Offset + lookahead_on avoids leaking future higher-timeframe information.
+confirmedSupertrendBlock() =>
+    [trend, up, down, buy, sell] = supertrendBlock()
+    [trend[1], up[1], down[1], buy[1], sell[1]]
+
+[localTrend, localUp, localDown, localBuy, localSell] = supertrendBlock()
+[htfTrend, htfUp, htfDown, htfBuy, htfSell] = request.security(
+     syminfo.tickerid, signalTf, confirmedSupertrendBlock(),
+     gaps = barmerge.gaps_off, lookahead = barmerge.lookahead_on)
+
+bool sameTf = chartSeconds == signalSeconds
+int trend = sameTf ? localTrend : htfTrend
+float up = sameTf ? localUp : htfUp
+float down = sameTf ? localDown : htfDown
+bool newSignalCandle = timeframe.change(signalTf)
+bool buySignal = barstate.isconfirmed and (sameTf ? localBuy : (newSignalCandle and htfBuy))
+bool sellSignal = barstate.isconfirmed and (sameTf ? localSell : (newSignalCandle and htfSell))
+
+plot(trend == 1 ? up : na, "Up Trend", color = color.green, style = plot.style_linebr, linewidth = 2)
+plot(trend == -1 ? down : na, "Down Trend", color = color.red, style = plot.style_linebr, linewidth = 2)
+plotshape(showSignals and buySignal ? up : na, title = "Buy", location = location.absolute,
+     style = shape.labelup, text = "Buy", color = color.green, textcolor = color.white, size = size.tiny)
+plotshape(showSignals and sellSignal ? down : na, title = "Sell", location = location.absolute,
+     style = shape.labeldown, text = "Sell", color = color.red, textcolor = color.white, size = size.tiny)
+
+// strategy.entry automatically closes an opposite position and opens the new direction.
+if buySignal
+    strategy.entry("Long", strategy.long)
+    alert('{"signal":"buy","ticker":"' + syminfo.ticker + '","signal_tf":"' + signalTf + '"}', alert.freq_once_per_bar_close)
+if sellSignal
+    strategy.entry("Short", strategy.short)
+    alert('{"signal":"sell","ticker":"' + syminfo.ticker + '","signal_tf":"' + signalTf + '"}', alert.freq_once_per_bar_close)

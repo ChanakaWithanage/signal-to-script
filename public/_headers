@@ -1,0 +1,4 @@
+/api/*
+  Cache-Control: no-store
+/scripts/*
+  X-Content-Type-Options: nosniff
