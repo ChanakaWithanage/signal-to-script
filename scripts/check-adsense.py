@@ -20,14 +20,14 @@ if not pages:
 
 for page in pages:
     html = page.read_text(encoding="utf-8")
-    match = re.search(r"<head\\b[^>]*>(.*?)</head>", html, flags=re.I | re.S)
+    match = re.search(r"<head\b[^>]*>(.*?)</head>", html, flags=re.I | re.S)
     if not match:
         errors.append(f"{page}: missing <head>")
         continue
     head = match.group(1)
     if head.count(LOADER) != 1 or CLIENT not in head:
         errors.append(f"{page}: missing/duplicate AdSense loader or wrong client")
-    if not re.search(r"<script\\b[^>]*\\basync\\b[^>]*src=[\"']" + re.escape(LOADER), head, flags=re.I):
+    if not re.search(r"<script\b[^>]*\basync\b[^>]*src=[\"']" + re.escape(LOADER), head, flags=re.I):
         errors.append(f"{page}: AdSense loader missing async script tag")
 
 if errors:
