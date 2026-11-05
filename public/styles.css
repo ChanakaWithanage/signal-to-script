@@ -32,3 +32,12 @@
 .article-body .chart-figure img{width:100%;height:auto;max-height:none;object-fit:contain}
 @media(max-width:850px){.hero-grid{grid-template-columns:minmax(0,1fr);gap:28px}.hero-featured{max-width:680px}.home-hero h1{font-size:clamp(37px,5.8vw,54px)}}
 @media(max-width:580px){.hero-featured-content{padding:18px 18px 20px}.hero-featured-content h2{font-size:23px}.hero-featured-image img{aspect-ratio:1.75}.brand-wordmark .brand-name{font-size:19px}.brand-wordmark .brand-by{font-size:9px}}
+
+/* Real TradingView screenshot in the featured entry and article intro. */
+.hero-featured-image{background:#101414}
+.hero-featured-image img{aspect-ratio:1000/536;object-fit:contain;object-position:center}
+.article-lead-chart{margin:26px 0 0;border:1px solid var(--line);background:var(--white);border-radius:5px;overflow:hidden}
+.article-lead-chart>a{display:block;line-height:0}
+.article-lead-chart img{width:100%;height:auto;display:block;object-fit:contain}
+.article-lead-chart figcaption{font-size:12px;line-height:1.6;color:var(--muted);padding:10px 14px;background:#f7f8f5;border-top:1px solid var(--line)}
+.article-lead-chart figcaption a{color:var(--green)}
