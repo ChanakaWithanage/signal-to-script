@@ -55,3 +55,13 @@
 .article-body code{background:#f1f4ef;border:1px solid #e0e8df;border-radius:3px;padding:2px 5px;font-size:.9em;color:#1f5842}
 .article-body figure a>img{display:block}
 @media(max-width:580px){.feature--recent{margin-bottom:18px}.bear-hero-image{margin-bottom:18px}}
+
+/* Homepage previews use a tightly cropped real chart; full screenshots remain in articles. */
+.hero-featured-image{background:#101314;overflow:hidden}
+.hero-featured-image img{display:block;width:100%;height:auto;aspect-ratio:2 / 1;object-fit:cover;object-position:center}
+.feature--recent .image-frame--article{background:#101314;overflow:hidden}
+.feature--recent .image-frame--article img{display:block;width:100%;height:auto;aspect-ratio:2 / 1;object-fit:cover;object-position:center}
+@media(max-width:580px){
+ .hero-featured-image img{aspect-ratio:1.8 / 1}
+ .feature--recent .image-frame--article img{aspect-ratio:1.8 / 1}
+}

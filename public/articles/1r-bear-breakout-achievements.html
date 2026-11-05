@@ -1,10 +1,10 @@
 <!doctype html>
 <html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>1R Bear Breakout Indicator — Free TradingView Pine Script v6 | Signal to Script</title>
-<meta name="description" content="How I modified a TradingView bear breakout indicator to track 1R achievements, failures and multiple bearish triggers. Real Bitcoin charts and free Pine Script v6 download.">
+<title>1R Bear Breakout: Track 1R Hits &amp; Misses — Free Pine Script v6 | Signal to Script</title>
+<meta name="description" content="Follow bear breakout signals to their 1R targets. Identify achieved and expired setups, monitor multiple triggers and download the free Pine Script v6 indicator.">
 <meta name="robots" content="index, follow"><meta property="og:type" content="article">
-<meta property="og:title" content="1R Bear Breakout Indicator — Free Pine Script v6">
+<meta property="og:title" content="1R Bear Breakout: Track 1R Hits &amp; Misses — Free Pine Script v6">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="stylesheet" href="/styles.css">
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9855777255503695" crossorigin="anonymous"></script>
 </head><body>
@@ -17,8 +17,8 @@
 <main id="main"><div class="read-wrap article-top">
 <div class="breadcrumb"><a href="/">Home</a> / <a href="/#free-scripts">Free scripts</a> / 1R Bear Breakout</div>
 <div class="eyebrow">Indicator modification · Free Pine Script v6</div>
-<h1>Tracking 1R Achievements from Bear Breakout Signals</h1>
-<p class="lead">I recently worked on a TradingView indicator that identified bearish breakout candles. What I wanted to know was what happened after each signal: did price actually move far enough to reach the 1R target?</p>
+<h1>1R Bear Breakout Signals: Track Which Setups Reach 1R</h1>
+<p class="lead">A bear breakout signal only tells you where a setup started. The more useful question is what happens next: does price actually travel far enough to reach 1R? This version tracks that follow-through, marks regular and strong 1R achievements, and shows when targets expire. You can also track multiple pending breakout bars.</p>
 <div class="article-meta">By CW · TradingView indicator · Free source code</div>
 </div>
 <div class="wrap"><figure class="bear-hero-image">
@@ -55,9 +55,12 @@
 </ul>
 <p>The supplied script still retains its RSI condition, but the volume filter is gone. Its inputs also let you adjust the IBS threshold and other trigger rules.</p>
 <figure><img src="/images/1r-bear-breakout-settings.webp" width="504" height="632" loading="lazy" alt="Modified breakout indicator settings including IBS threshold, size ratio, wick limit, multi-trigger stacking, count on close and expiry"><figcaption>The modified settings panel, including trigger stacking and 1R target options.</figcaption></figure>
+<h2>Why this version is more useful</h2>
+<p>A basic breakout indicator marks a potential setup. This version goes a step further and follows its outcome. Instead of manually measuring each trigger against the candles that followed, you can see 1R achievements and expired targets directly on the chart.</p>
+<p>The biggest practical change is optional multi-trigger tracking. A new bear bar no longer has to replace the previous pending setup. Together with the stronger-breakout distinction, adjustable expiry, and low-or-close hit detection, that makes historical bearish follow-through easier to review.</p>
 <h2>The updated 1R Bear Breakout indicator</h2>
 <p>The updated version shows more than the original breakout signal. It can mark when the next part of the move reached the target and when a tracked setup expired. The Bitcoin daily screenshot at the top shows these labels applied to an actual TradingView chart.</p>
-<p>I've also converted the completed indicator source to Pine Script v6 for this free release.</p>
+<p>The downloadable version uses Pine Script v6 and keeps the configurable trigger and target-tracking settings.</p>
 <div class="download" id="download"><div class="release-label">Free TradingView indicator · Pine Script v6</div>
 <h2>Download the full script for free</h2>
 <p>Download the complete 1R Bear Breakout Achievements indicator.</p>
