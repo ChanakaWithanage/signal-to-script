@@ -56,3 +56,15 @@ Support currently points to GitHub issues in this new repository. Update the URL
 ## Attribution and publishing rights
 
 Supertrend originally published by KivancOzbilgic. The Pine file includes an MPL-2.0 attribution header. Review the licensing and rights in any client-delivered custom script before making it public.
+
+## Google AdSense / Auto ads
+
+AdSense publisher ID: `pub-9855777255503695`.
+
+- `public/ads.txt` contains the required authorized-sellers entry and is published at `/ads.txt`.
+- The asynchronous AdSense loader is inside `<head>` on the homepage and each content article.
+- `public/404.html` intentionally has no ad code because it is an error page without article content.
+- When adding **any new public HTML content page**, include the same loader in its `<head>` and run `python scripts/check-adsense.py`. The GitHub Actions check enforces this on pushes and pull requests.
+- AdSense ad serving is **not automatic upon deployment**. Add the actual site/domain to AdSense, obtain site approval, and turn on **Auto ads** under AdSense → Ads → Edit site → Apply to site.
+- Once deployed, verify that `https://YOUR-DOMAIN/ads.txt` returns the expected line, and inspect the page source on both homepage and articles for the loader.
+- Google controls whether and where an ad is shown. The code enables eligible content pages to request Auto ads, not a guaranteed ad impression on each page. Consider relevant regional consent requirements before serving personalized ads.
