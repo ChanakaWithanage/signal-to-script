@@ -15,6 +15,12 @@ int demaLen = input.int(50, "DEMA Length", minval = 1)
 bool showSignals = input.bool(true, "Show Buy/Sell Signals?")
 string signalTf = input.timeframe("60", "Signal timeframe")
 
+// Optional backtest/trading window. Inputs use chart-selectable dates and times.
+int startDate = input.time(timestamp("01 Jan 2020 00:00 +0000"), "Start Date", group = "Trading Date Range")
+int endDate = input.time(timestamp("31 Dec 2099 23:59 +0000"), "End Date", group = "Trading Date Range")
+if barstate.isfirst and startDate >= endDate
+    runtime.error("Start Date must be earlier than End Date.")
+
 // The chart must not be higher than the chosen signal timeframe.
 int chartSeconds = timeframe.in_seconds(timeframe.period)
 int signalSeconds = timeframe.in_seconds(signalTf)
@@ -76,10 +82,19 @@ plotshape(showSignals and buySignal ? up : na, title = "Buy", location = locatio
 plotshape(showSignals and sellSignal ? down : na, title = "Sell", location = location.absolute,
      style = shape.labeldown, text = "Sell", color = color.red, textcolor = color.white, size = size.tiny)
 
+// Only enter after Start Date and before End Date.
+// Check closing timestamps so an order cannot be filled at or beyond the selected end time.
+bool inTradingDateRange = time >= startDate and time_close < endDate
+
+// Exit any remaining position at the first chart-bar close reaching the End Date.
+if barstate.isconfirmed and time_close >= endDate and strategy.position_size != 0
+    strategy.close_all(comment = "End Date reached")
+    alert('{"signal":"close","reason":"end_date","ticker":"' + syminfo.ticker + '","signal_tf":"' + signalTf + '"}', alert.freq_once_per_bar_close)
+
 // strategy.entry automatically closes an opposite position and opens the new direction.
-if buySignal
+if inTradingDateRange and buySignal
     strategy.entry("Long", strategy.long)
     alert('{"signal":"buy","ticker":"' + syminfo.ticker + '","signal_tf":"' + signalTf + '"}', alert.freq_once_per_bar_close)
-if sellSignal
+if inTradingDateRange and sellSignal
     strategy.entry("Short", strategy.short)
     alert('{"signal":"sell","ticker":"' + syminfo.ticker + '","signal_tf":"' + signalTf + '"}', alert.freq_once_per_bar_close)
