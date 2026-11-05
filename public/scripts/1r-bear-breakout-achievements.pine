@@ -1,0 +1,337 @@
+//@version=6
+indicator('1R Bear Breakout Achievements (CW) - v6', overlay=true, max_lines_count=500, max_labels_count=500)
+
+// Port of the supplied final indicator; signals and trigger-tracking rules retained.
+// The unused volume input was removed. IBS is Data Window-only to avoid distorting price scale.
+
+//=============================================================================
+// INPUT PARAMETERS
+//=============================================================================
+showDebugLabels = input.bool(false, title="Show Debug Labels")
+// Bear Breakout IBS Parameters
+ibsThreshold = input.float(1, title='IBS Threshold', minval=0.0, maxval=1.0, step=0.1)
+minBarSizeRatio = input.float(1.0, title='Min Bar Size Ratio', minval=0.5, maxval=2.0, step=0.1)
+// tail filter (require small lower tail for trigger)
+tailThreshold = input.float(0.2, title='Max lower-tail fraction of range', minval=0.0, maxval=1.0, step=0.05)
+// Visual customization
+bearBreakoutColor = input.color(color.orange, title="1R Signal Color")
+strongBearBreakoutColor = input.color(color.maroon, title="Strong 1R Signal Color")
+enableMultiTriggers = input.bool(false, title="Enable Multi-Trigger Stacking")
+countOnClose = input.bool(false, title="Count on Close (instead of Low)")
+// expiry / lookahead for targets (auto-expire stale triggers)
+lookaheadBars = input.int(10, title="Lookahead bars to auto-expire (0 = no expiry)", minval=0)
+// mark failure when expiry occurs
+markFailures = input.bool(true, title="Mark failures on expiry")
+
+// >>> NEW TOGGLE (minimal change): ignore/require survival before 1R <<<
+requireNoStopBefore1R = input.bool(false, title="Require no stop-out before 1R (strict)")
+
+//=============================================================================
+// IBS (Internal Bar Strength) CALCULATION
+//=============================================================================
+float ibs = (high - low) != 0 ? (close - low) / (high - low) : 0.5
+bool closeBelowThreshold = ibs < ibsThreshold
+
+//=============================================================================
+// ENHANCED FILTERS FOR BEAR BREAKOUT
+//=============================================================================
+bool isInsideBar = high <= high[1] and low >= low[1]
+bool isOutsideBar = high > high[1] and low < low[1]
+float prevIbs = (high[1] - low[1]) != 0 ? (close[1] - low[1]) / (high[1] - low[1]) : 0.5
+bool prevBarAboveThreshold = prevIbs >= ibsThreshold
+bool isBearBar = close < open
+float currentBarRange = high - low
+float prevBarRange = high[1] - low[1]
+bool currentBarLargeEnough = currentBarRange >= (prevBarRange * minBarSizeRatio)
+float recentLow = ta.lowest(low, 3)
+bool breakingSupport = low < recentLow[1]
+float rsi = ta.rsi(close, 14)
+bool rsiNeutralOrBearish = rsi <= 60
+float lowerTail = isBearBar ? (close - low) : (math.min(open, close) - low)
+bool tailOK = currentBarRange != 0 ? math.abs(lowerTail) <= (currentBarRange * tailThreshold) : false
+
+//=============================================================================
+// BEAR BREAKOUT SIGNAL GENERATION
+//=============================================================================
+bool bearBreakout = closeBelowThreshold and
+                   not isInsideBar and
+                   not prevBarAboveThreshold and
+                   isBearBar and
+                   currentBarLargeEnough and
+                   rsiNeutralOrBearish and
+                   tailOK
+
+bool strongBearBreakout = bearBreakout and
+                         isOutsideBar and
+                         breakingSupport and
+                         ibs < 0.3
+
+// ============================================================================
+// TRACKING / STORAGE (single or multi trigger modes)
+// ============================================================================
+var float triggerHigh = na
+var float triggerLow = na
+var int   triggerIndex = na
+var bool  triggerWasStrong = false
+var bool  hasHit1R = false
+
+var line singleTargetLine = na
+
+var float[] multiTriggerHighs = array.new_float()
+var float[] multiTriggerLows  = array.new_float()
+var int[]   multiTriggerIndices = array.new_int()
+var bool[]  multiTriggerWasStrong = array.new_bool()
+var line[]  multiTargetLines = array.new_line()
+var int[]   multiTriggerExpiry = array.new_int()
+
+var int total1RHits = 0
+var int totalStrong1RHits = 0
+var int total1RFails = 0
+
+if (bearBreakout)
+    if enableMultiTriggers
+        array.push(multiTriggerHighs, high)
+        array.push(multiTriggerLows, low)
+        array.push(multiTriggerIndices, bar_index)
+        array.push(multiTriggerWasStrong, strongBearBreakout)
+        int exp = lookaheadBars > 0 ? bar_index + lookaheadBars : 0
+        array.push(multiTriggerExpiry, exp)
+        float triggerRange = high - low
+        float target = low - triggerRange
+        line ln = line.new(x1=bar_index, y1=target, x2=bar_index + 1, y2=target, xloc=xloc.bar_index, extend=extend.right, color=color.new(bearBreakoutColor, 70), style=line.style_dashed)
+        array.push(multiTargetLines, ln)
+    else
+        triggerHigh := high
+        triggerLow := low
+        triggerIndex := bar_index
+        triggerWasStrong := strongBearBreakout
+        hasHit1R := false
+        if not na(singleTargetLine)
+            line.delete(singleTargetLine)
+            singleTargetLine := na
+        float trgRange = high - low
+        float singleTarget = low - trgRange
+        singleTargetLine := line.new(x1=bar_index, y1=singleTarget, x2=bar_index + 1, y2=singleTarget, xloc=xloc.bar_index, extend=extend.right, color=color.new(bearBreakoutColor, 70), style=line.style_dashed)
+
+//=============================================================================
+// CHECK TRIGGERS (multi or single)
+//=============================================================================
+bool is1RAchieved = false
+bool isStrong1RAchieved = false
+
+if enableMultiTriggers
+    int n = array.size(multiTriggerHighs)
+    if n > 0
+        for j = 0 to n - 1
+            i = n - 1 - j
+            if i < 0
+                continue
+            if array.size(multiTriggerIndices) <= i or array.size(multiTargetLines) <= i or array.size(multiTriggerExpiry) <= i or array.size(multiTriggerWasStrong) <= i
+                continue
+            idx = array.get(multiTriggerIndices, i)
+            exp = array.get(multiTriggerExpiry, i)
+            if exp != 0 and bar_index > exp
+                if markFailures
+                    label.new(bar_index, high * 1.03, "1R FAIL", color=color.yellow, textcolor=color.black, style=label.style_label_down, size=size.small)
+                total1RFails += 1
+                lnref = array.get(multiTargetLines, i)
+                if not na(lnref)
+                    line.delete(lnref)
+                array.remove(multiTargetLines, i)
+                array.remove(multiTriggerHighs, i)
+                array.remove(multiTriggerLows, i)
+                array.remove(multiTriggerIndices, i)
+                array.remove(multiTriggerWasStrong, i)
+                array.remove(multiTriggerExpiry, i)
+                continue
+            if idx < bar_index
+                float tHigh = array.get(multiTriggerHighs, i)
+                float tLow  = array.get(multiTriggerLows, i)
+                float triggerRange = tHigh - tLow
+                float target = tLow - triggerRange
+                bool hitCondition = countOnClose ? close <= target : low <= target
+
+                // >>> MINIMAL CHANGE HERE: only respect stop-out if user demands it <<<
+                bool stopViolated = requireNoStopBefore1R ? (high >= tHigh) : false
+
+                if hitCondition
+                    if array.get(multiTriggerWasStrong, i)
+                        isStrong1RAchieved := true
+                        totalStrong1RHits += 1
+                    else
+                        is1RAchieved := true
+                        total1RHits += 1
+                    hasHit1R := true
+                    lnref = array.get(multiTargetLines, i)
+                    if not na(lnref)
+                        line.delete(lnref)
+                    array.remove(multiTargetLines, i)
+                    array.remove(multiTriggerHighs, i)
+                    array.remove(multiTriggerLows, i)
+                    array.remove(multiTriggerIndices, i)
+                    array.remove(multiTriggerWasStrong, i)
+                    array.remove(multiTriggerExpiry, i)
+                    break
+                else if stopViolated
+                    // strict mode: stop-out cancels the trigger
+                    lnref = array.get(multiTargetLines, i)
+                    if not na(lnref)
+                        line.delete(lnref)
+                    array.remove(multiTargetLines, i)
+                    array.remove(multiTriggerHighs, i)
+                    array.remove(multiTriggerLows, i)
+                    array.remove(multiTriggerIndices, i)
+                    array.remove(multiTriggerWasStrong, i)
+                    array.remove(multiTriggerExpiry, i)
+else
+    if not na(triggerLow) and not hasHit1R and bar_index > triggerIndex
+        float triggerRange = triggerHigh - triggerLow
+        float target = triggerLow - triggerRange
+        bool hitCondition = countOnClose ? close <= target : low <= target
+
+        // >>> MINIMAL CHANGE HERE as well <<<
+        bool stopViolated = requireNoStopBefore1R ? (high >= triggerHigh) : false
+
+        if hitCondition
+            if triggerWasStrong
+                isStrong1RAchieved := true
+                totalStrong1RHits += 1
+            else
+                is1RAchieved := true
+                total1RHits += 1
+            hasHit1R := true
+            if not na(singleTargetLine)
+                line.delete(singleTargetLine)
+                singleTargetLine := na
+        else if stopViolated
+            // strict mode: cancel the single trigger on stop-out
+            triggerHigh := na
+            triggerLow := na
+            triggerIndex := na
+            triggerWasStrong := false
+            hasHit1R := false
+            if not na(singleTargetLine)
+                line.delete(singleTargetLine)
+                singleTargetLine := na
+        else
+            if lookaheadBars > 0 and bar_index > (triggerIndex + lookaheadBars) and not hasHit1R
+                if markFailures
+                    label.new(bar_index, high * 1.03, "1R FAIL", color=color.yellow, textcolor=color.black, style=label.style_label_down, size=size.small)
+                total1RFails += 1
+                triggerHigh := na
+                triggerLow := na
+                triggerIndex := na
+                triggerWasStrong := false
+                hasHit1R := false
+                if not na(singleTargetLine)
+                    line.delete(singleTargetLine)
+                    singleTargetLine := na
+
+//=============================================================================
+// VISUALIZATION
+//=============================================================================
+plotshape(is1RAchieved,
+          title='1R Bear Breakout Achieved',
+          location=location.belowbar,
+          color=bearBreakoutColor,
+          style=shape.arrowdown,
+          size=size.normal,
+          text="1R")
+plotshape(isStrong1RAchieved,
+          title='Strong 1R Bear Breakout Achieved',
+          location=location.belowbar,
+          color=strongBearBreakoutColor,
+          style=shape.arrowdown,
+          size=size.large,
+          text="STRONG 1R")
+
+// Plot IBS and IBS threshold for context
+plot(ibs, title='IBS', color=color.blue, linewidth=1, display=display.data_window)
+hline(ibsThreshold, title='IBS Threshold', color=color.gray, linestyle=hline.style_dashed, display=display.none)
+
+//=============================================================================
+// DEBUG INFORMATION
+//=============================================================================
+if showDebugLabels
+    if is1RAchieved
+        label.new(bar_index, low * 0.98,
+                 "1R ACHIEVED",
+                 color=bearBreakoutColor,
+                 textcolor=color.white,
+                 style=label.style_label_up,
+                 size=size.normal)
+    if isStrong1RAchieved
+        label.new(bar_index, low * 0.97,
+                 "STRONG 1R ACHIEVED",
+                 color=strongBearBreakoutColor,
+                 textcolor=color.white,
+                 style=label.style_label_up,
+                 size=size.normal)
+
+plotchar(showDebugLabels and closeBelowThreshold and isInsideBar,
+         title='Filtered - Inside Bar',
+         location=location.belowbar,
+         color=color.yellow,
+         char='I',
+         size=size.tiny)
+plotchar(showDebugLabels and closeBelowThreshold and prevBarAboveThreshold and not isInsideBar,
+         title='Filtered - Prev Above Threshold',
+         location=location.belowbar,
+         color=color.orange,
+         char='P',
+         size=size.tiny)
+plotchar(showDebugLabels and closeBelowThreshold and not isBearBar and not isInsideBar and not prevBarAboveThreshold,
+         title='Filtered - Not Bear Bar',
+         location=location.belowbar,
+         color=color.red,
+         char='B',
+         size=size.tiny)
+plotchar(showDebugLabels and closeBelowThreshold and not currentBarLargeEnough and not isInsideBar and not prevBarAboveThreshold and isBearBar,
+         title='Filtered - Small Bar',
+         location=location.belowbar,
+         color=color.purple,
+         char='S',
+         size=size.tiny)
+plotchar(showDebugLabels and closeBelowThreshold and not rsiNeutralOrBearish and not isInsideBar and not prevBarAboveThreshold and isBearBar and currentBarLargeEnough,
+         title='Filtered - RSI Overbought',
+         location=location.belowbar,
+         color=color.lime,
+         char='R',
+         size=size.tiny)
+
+// NEW: Debug for hits (persistent flag)
+plotchar(showDebugLabels and hasHit1R, title='1R Hit (persist)', location=location.belowbar, color=color.green, char='H', size=size.tiny)
+
+//=============================================================================
+// ALERTS
+//=============================================================================
+alertcondition(is1RAchieved,
+               title='1R Bear Breakout Achieved Alert',
+               message='1R Bear Breakout achieved from trigger')
+alertcondition(isStrong1RAchieved,
+               title='Strong 1R Bear Breakout Achieved Alert',
+               message='STRONG 1R Bear Breakout achieved from trigger')
+
+//=============================================================================
+// STATUS TABLE
+//=============================================================================
+if showDebugLabels
+    var table statusTable = table.new(position.top_left, 2, 9, bgcolor=color.new(color.black, 80), border_width=1)
+    table.cell(statusTable, 0, 0, "1R Bear Breakout Status", text_color=color.white, bgcolor=color.orange, text_size=size.small)
+    table.cell(statusTable, 1, 0, "Values", text_color=color.white, bgcolor=color.orange, text_size=size.small)
+    table.cell(statusTable, 0, 1, "Current IBS:", text_color=color.white, text_size=size.tiny)
+    table.cell(statusTable, 1, 1, "Check Data Window", text_color=closeBelowThreshold ? color.red : color.green, text_size=size.tiny)
+    table.cell(statusTable, 0, 2, "RSI:", text_color=color.white, text_size=size.tiny)
+    table.cell(statusTable, 1, 2, "Check Data Window", text_color=rsiNeutralOrBearish ? color.green : color.red, text_size=size.tiny)
+    table.cell(statusTable, 0, 3, "Bear Bar:", text_color=color.white, text_size=size.tiny)
+    table.cell(statusTable, 1, 3, isBearBar ? "YES" : "NO", text_color=isBearBar ? color.green : color.red, text_size=size.tiny)
+    table.cell(statusTable, 0, 4, "Inside Bar:", text_color=color.white, text_size=size.tiny)
+    table.cell(statusTable, 1, 4, isInsideBar ? "YES" : "NO", text_color=isInsideBar ? color.red : color.green, text_size=size.tiny)
+    table.cell(statusTable, 0, 5, "1R Hits (count):", text_color=color.white, text_size=size.tiny)
+    table.cell(statusTable, 1, 5, str.tostring(total1RHits), text_color=color.white, text_size=size.tiny)
+    table.cell(statusTable, 0, 6, "Strong 1R Hits:", text_color=color.white, text_size=size.tiny)
+    table.cell(statusTable, 1, 6, str.tostring(totalStrong1RHits), text_color=color.white, text_size=size.tiny)
+    table.cell(statusTable, 0, 7, "1R Fails:", text_color=color.white, text_size=size.tiny)
+    table.cell(statusTable, 1, 7, str.tostring(total1RFails), text_color=color.white, text_size=size.tiny)
+    table.cell(statusTable, 0, 8, "Active Targets:", text_color=color.white, text_size=size.tiny)
+    table.cell(statusTable, 1, 8, enableMultiTriggers ? str.tostring(array.size(multiTriggerHighs)) : (not na(triggerLow) and not hasHit1R ? "1 (single)" : "0"), text_color=color.white, text_size=size.tiny)

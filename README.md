@@ -68,3 +68,13 @@ AdSense publisher ID: `pub-9855777255503695`.
 - AdSense ad serving is **not automatic upon deployment**. Add the actual site/domain to AdSense, obtain site approval, and turn on **Auto ads** under AdSense → Ads → Edit site → Apply to site.
 - Once deployed, verify that `https://YOUR-DOMAIN/ads.txt` returns the expected line, and inspect the page source on both homepage and articles for the loader.
 - Google controls whether and where an ad is shown. The code enables eligible content pages to request Auto ads, not a guaranteed ad impression on each page. Consider relevant regional consent requirements before serving personalized ads.
+
+## 1R Bear Breakout Achievements
+
+- Article: `public/articles/1r-bear-breakout-achievements.html`
+- Pine v6 source: `public/scripts/1r-bear-breakout-achievements.pine`
+- Original material was supplied as an existing indicator; no public TradingView source link is asserted.
+- Main chart: `public/images/1r-bear-breakout-btc-daily.webp`. Other screenshots illustrate early missed signals, indicator settings, and the 1R concept.
+- The download and download-count Cloudflare endpoints permit `1r-bear-breakout-achievements`.
+- The Pine source was ported from the supplied delivered script with its trigger tracking, expiry and alerts; the unused volume input is removed and IBS plot hidden from the price pane.
+- Complete a Pine Editor v6 compile and chart-behavior check before public release. Confirm you have redistribution rights for the client-delivered script.

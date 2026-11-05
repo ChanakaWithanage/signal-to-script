@@ -1,4 +1,4 @@
-const AVAILABLE = new Set(['supertrend-dema-reversal']);
+const AVAILABLE = new Set(['supertrend-dema-reversal','1r-bear-breakout-achievements']);
 export async function onRequestGet({ request, env }) {
   const slug = new URL(request.url).searchParams.get('script');
   if (!AVAILABLE.has(slug)) return new Response('Script not found', { status: 404 });

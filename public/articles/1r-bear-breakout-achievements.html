@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>1R Bear Breakout Indicator — Free TradingView Pine Script v6 | Signal to Script</title>
+<meta name="description" content="How I modified a TradingView bear breakout indicator to track 1R achievements, failures and multiple bearish triggers. Real Bitcoin charts and free Pine Script v6 download.">
+<meta name="robots" content="index, follow"><meta property="og:type" content="article">
+<meta property="og:title" content="1R Bear Breakout Indicator — Free Pine Script v6">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="stylesheet" href="/styles.css">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9855777255503695" crossorigin="anonymous"></script>
+</head><body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header"><div class="wrap head">
+<a class="brand" href="/"><span class="brand-mark">CW.</span><span class="brand-wordmark"><span class="brand-name">Signal to Script</span><span class="brand-by">by CW</span></span></a>
+<button aria-expanded="false" aria-label="Open menu" class="menu-toggle" id="menu" type="button">☰</button>
+<nav aria-label="Main navigation" class="nav" id="nav"><a href="/#free-scripts">Free scripts</a><a href="/#articles">Articles</a><a href="/#about">About CW</a><a href="/#support">Get help</a></nav>
+</div></header>
+<main id="main"><div class="read-wrap article-top">
+<div class="breadcrumb"><a href="/">Home</a> / <a href="/#free-scripts">Free scripts</a> / 1R Bear Breakout</div>
+<div class="eyebrow">Indicator modification · Free Pine Script v6</div>
+<h1>Tracking 1R Achievements from Bear Breakout Signals</h1>
+<p class="lead">I recently worked on a TradingView indicator that identified bearish breakout candles. What I wanted to know was what happened after each signal: did price actually move far enough to reach the 1R target?</p>
+<div class="article-meta">By CW · TradingView indicator · Free source code</div>
+</div>
+<div class="wrap"><figure class="bear-hero-image">
+<a href="/images/1r-bear-breakout-btc-daily.webp" target="_blank" rel="noopener noreferrer" aria-label="View the Bitcoin daily breakout chart in full size"><img src="/images/1r-bear-breakout-btc-daily.webp" width="1759" height="876" alt="Real Bitcoin daily TradingView chart with 1R ACHIEVED, STRONG 1R ACHIEVED and 1R FAIL labels" fetchpriority="high"></a>
+<figcaption>The modified indicator on the Bitcoin daily chart, with 1R achievements and failures marked. <a href="/images/1r-bear-breakout-btc-daily.webp" target="_blank" rel="noopener noreferrer">Open full image</a>.</figcaption>
+</figure></div>
+<section class="article"><div class="read-wrap article-body">
+<h2>The original indicator</h2>
+<p>The starting point was an existing Pine Script indicator called <em>1R Bear Breakout Signals</em>. It looked for bearish breakout bars using a few candle and market conditions, then marked possible signals on the chart.</p>
+<p>One of those conditions was Internal Bar Strength (IBS). In simple terms, IBS tells us where the candle closed within its high-to-low range. A close near the low has a low IBS value. A close near the high has a higher one.</p>
+<p>The original script also considered the candle's size, whether it was an inside bar, and extra filters such as volume and RSI. It helped identify potential bearish setups, but it wasn't following each setup to see whether price made enough progress afterward.</p>
+<figure><img src="/images/1r-bear-breakout-original.webp" width="849" height="527" loading="lazy" alt="Original example chart showing bearish candles and the idea of price moving at least 1R"><figcaption>The chart example used to explain the original 1R concept.</figcaption></figure>
+<h2>What was the expected modification?</h2>
+<p>The idea was straightforward: when a qualifying bearish candle appears, remember it and check whether a later candle reaches a price level one full candle-range below its low.</p>
+<p>Here, <strong>1R</strong> is the trigger candle's high minus its low. The target is calculated from the low:</p>
+<p><code>1R = Trigger high − Trigger low</code></p>
+<p><code>Target = Trigger low − 1R</code></p>
+<p>For example, if a bearish candle has a high of 110 and a low of 100, its range is 10. The 1R target is 90. The indicator checks the following candles for that level.</p>
+<p>Not every red candle should become a trigger. We wanted to exclude inside bars, bullish bars, and weak bearish candles with closes too far from their lows.</p>
+<h2>Why some signals were missing</h2>
+<p>After trying the first version, we compared the labels with some marked chart examples. A few of the moves that looked like valid 1R setups weren't being captured.</p>
+<p>Some bars failed one of the trigger filters. Sometimes the target level hadn't actually been reached. But there was another limitation: the first implementation only remembered the latest trigger. When a new breakout appeared, the previous one was forgotten.</p>
+<p>That was a problem when several potential setups appeared before the first one had reached its target.</p>
+<figure><a href="/images/1r-bear-breakout-marked-candles.webp" target="_blank" rel="noopener noreferrer"><img src="/images/1r-bear-breakout-marked-candles.webp" width="1379" height="775" loading="lazy" alt="TradingView chart with several bearish bars circled in red for review"></a><figcaption>Some of the chart areas we examined while refining the detection rules. <a href="/images/1r-bear-breakout-marked-candles.webp" target="_blank" rel="noopener noreferrer">View full chart</a>.</figcaption></figure>
+<h2>What I changed</h2>
+<p>The main improvement was <strong>multi-trigger tracking</strong>. The indicator can now remember multiple pending breakouts, rather than replacing the previous trigger every time a new one appears. Each pending target can be checked against the candles that follow.</p>
+<p>I also removed the volume filter, added an adjustable lower-wick limit, and introduced a few controls for what should count as a successful 1R move.</p>
+<ul>
+<li><strong>1R ACHIEVED:</strong> a later candle reaches the price target for a regular trigger.</li>
+<li><strong>STRONG 1R ACHIEVED:</strong> the target is reached for a trigger that met the stronger breakout conditions.</li>
+<li><strong>1R FAIL:</strong> a pending target expires without being reached, when expiry marking is enabled.</li>
+<li><strong>Multiple triggers:</strong> independently track more than one outstanding setup.</li>
+<li><strong>Optional settings:</strong> count hits by a candle's low or close, set the target expiry period, or require that the trigger was not stopped out first.</li>
+</ul>
+<p>The supplied script still retains its RSI condition, but the volume filter is gone. Its inputs also let you adjust the IBS threshold and other trigger rules.</p>
+<figure><img src="/images/1r-bear-breakout-settings.webp" width="504" height="632" loading="lazy" alt="Modified breakout indicator settings including IBS threshold, size ratio, wick limit, multi-trigger stacking, count on close and expiry"><figcaption>The modified settings panel, including trigger stacking and 1R target options.</figcaption></figure>
+<h2>The updated 1R Bear Breakout indicator</h2>
+<p>The updated version shows more than the original breakout signal. It can mark when the next part of the move reached the target and when a tracked setup expired. The Bitcoin daily screenshot at the top shows these labels applied to an actual TradingView chart.</p>
+<p>I've also converted the completed indicator source to Pine Script v6 for this free release.</p>
+<div class="download" id="download"><div class="release-label">Free TradingView indicator · Pine Script v6</div>
+<h2>Download the full script for free</h2>
+<p>Download the complete 1R Bear Breakout Achievements indicator.</p>
+<a class="btn" href="/api/download?script=1r-bear-breakout-achievements" download="1r-bear-breakout-achievements.pine">Download free Pine Script ↓</a>
+<div class="download-meta" data-download-count="1r-bear-breakout-achievements" aria-live="polite">Download count available after launch</div></div>
+<p class="support-note">Having issues with installation, chart configuration, or anything else related to the script? <a href="https://github.com/ChanakaWithanage/signal-to-script/issues/new" target="_blank" rel="noopener noreferrer">Feel free to contact me.</a></p>
+<div class="author-card"><div class="author-monogram">CW.</div><div><strong>Written by CW</strong><p>Sharing free TradingView scripts, indicator modifications and Pine Script development notes.</p></div></div>
+</div></section></main>
+<footer class="footer"><div class="wrap foot"><div>© 2026 Signal to Script · by CW. Independent Pine Script guides and examples.</div><div>TradingView is a trademark of its respective owner. Not financial advice.</div></div></footer>
+<script defer src="/site.js"></script></body></html>

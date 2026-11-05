@@ -41,3 +41,17 @@
 .article-lead-chart img{width:100%;height:auto;display:block;object-fit:contain}
 .article-lead-chart figcaption{font-size:12px;line-height:1.6;color:var(--muted);padding:10px 14px;background:#f7f8f5;border-top:1px solid var(--line)}
 .article-lead-chart figcaption a{color:var(--green)}
+
+/* Real TradingView screenshot for the second article and latest featured entry. */
+.feature--recent{margin-bottom:24px}
+.feature--recent .feature-media{background:#f6f7f4}
+.feature--recent .image-frame--article{display:block;width:100%;max-width:100%;background:#101315;line-height:0}
+.feature--recent .image-frame--article img{height:auto;width:100%;aspect-ratio:1759/876;object-fit:contain}
+.bear-hero-image{margin:4px 0 30px;border:1px solid var(--line);border-radius:5px;background:var(--white);overflow:hidden}
+.bear-hero-image>a{display:block;line-height:0}
+.bear-hero-image img{width:100%;height:auto;display:block;object-fit:contain}
+.bear-hero-image figcaption{font-size:12px;line-height:1.6;color:var(--muted);padding:10px 14px;background:#f7f8f5;border-top:1px solid var(--line)}
+.bear-hero-image figcaption a{color:var(--green)}
+.article-body code{background:#f1f4ef;border:1px solid #e0e8df;border-radius:3px;padding:2px 5px;font-size:.9em;color:#1f5842}
+.article-body figure a>img{display:block}
+@media(max-width:580px){.feature--recent{margin-bottom:18px}.bear-hero-image{margin-bottom:18px}}
