@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pinbar + 3 Line Strike Alerts for TradingView — Free Pine Script v6 | Signal to Script</title>
+<meta name="description" content="Combine pinbar and 3 Line Strike signals into one confirmed TradingView alert. Separate bullish, bearish and combined conditions, real chart examples, and a free Pine Script v6 download.">
+<meta name="robots" content="index, follow">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Pinbar + 3 Line Strike Alerts — Free TradingView Pine Script v6">
+<meta property="og:description" content="Detect a pinbar immediately followed by a 3 Line Strike, confirm at candle close, and choose bullish, bearish or any-direction alerts.">
+<meta property="og:image" content="/images/pinbar-signal-chart.webp">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="stylesheet" href="/styles.css">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9855777255503695" crossorigin="anonymous"></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header"><div class="wrap head">
+<a class="brand" href="/"><span class="brand-mark">CW.</span><span class="brand-wordmark"><span class="brand-name">Signal to Script</span><span class="brand-by">by CW</span></span></a>
+<button aria-expanded="false" aria-label="Open menu" class="menu-toggle" id="menu" type="button">☰</button>
+<nav aria-label="Main navigation" class="nav" id="nav"><a href="/#free-scripts">Free scripts</a><a href="/#articles">Articles</a><a href="/#about">About CW</a><a href="/#support">Get help</a></nav>
+</div></header>
+<main id="main">
+<div class="read-wrap article-top">
+<div class="breadcrumb"><a href="/">Home</a> / <a href="/#free-scripts">Free TradingView scripts</a> / Pinbar + 3LS</div>
+<div class="eyebrow">Pattern combination · Confirmed alerts · Free Pine Script v6</div>
+<h1>Pinbar + 3 Line Strike Alerts for TradingView</h1>
+<p class="lead">A pinbar can be a useful signal, and so can a 3 Line Strike. But what if you only want a notification when one appears immediately after the other? This indicator combines both checks, waits for the second candle to close, and lets you choose bullish, bearish or either-direction alerts.</p>
+<div class="article-meta">By CW · Goat Trap Pinbar + 3LS Combo · Free source code</div>
+<figure class="article-lead-chart">
+  <a href="/images/pinbar-signal-chart.webp" target="_blank" rel="noopener noreferrer" aria-label="Open pinbar chart reference in full">
+    <img src="/images/pinbar-signal-chart.webp" width="1050" height="442" alt="TradingView candlestick chart with bullish and bearish pinbar labels" fetchpriority="high">
+  </a>
+  <figcaption>The starting point: a pinbar indicator marking bullish and bearish candles on a real TradingView chart. <a href="/images/pinbar-signal-chart.webp" target="_blank" rel="noopener noreferrer">Open chart</a>.</figcaption>
+</figure>
+</div>
+<section class="article"><div class="read-wrap article-body">
+<h2>The starting point: a pinbar indicator</h2>
+<p>The original indicator was fairly simple. It looked at the candle body, the upper and lower shadows, and the previous candle to decide whether to mark a bullish or bearish pinbar.</p>
+<p>A bullish pinbar has a relatively long lower shadow. A bearish pinbar has a relatively long upper shadow. The supplied rules also compare the current candle’s body with the previous candle’s body, so not every candle with a wick gets a label.</p>
+<p>The chart already displayed <em>BULLISH PINBAR</em> and <em>BEARISH PINBAR</em> markers. What it didn't have was a TradingView alert condition you could select when creating a notification.</p>
+<h2>First improvement: alerts for pinbars</h2>
+<p>That first change was to add alerts without changing the basic pinbar detection. Instead of watching the chart for a triangle to appear, the indicator could notify you when its pinbar condition was met.</p>
+<p>There was also a timing detail to work through. A close-confirmed pinbar only fires after the candle has finished. A real-time pinbar alert can fire while the candle is still forming, which is useful for earlier notifications but means the signal can change before the close.</p>
+<p>The later requirement was different: combine the pinbar with another candlestick pattern and alert only once the complete sequence was confirmed.</p>
+<h2>The next requirement: Pinbar followed by a 3 Line Strike</h2>
+<p>The new request was specific. A pinbar must appear first, and the very next candle must complete a qualifying 3 Line Strike signal. There should be no unrelated candle in between.</p>
+<figure>
+  <a href="/images/pinbar-3ls-reference.webp" target="_blank" rel="noopener noreferrer" aria-label="Open example 3 Line Strike setup chart">
+    <img src="/images/pinbar-3ls-reference.webp" width="648" height="579" loading="lazy" alt="TradingView USD/CAD chart showing bearish and bullish 3 Line Strike markers">
+  </a>
+  <figcaption>A TradingView reference chart showing bearish and bullish 3 Line Strike markers. The combined indicator checks these alongside the preceding pinbar.</figcaption>
+</figure>
+<p>The supplied 3 Line Strike logic looks for three preceding candles in the same direction, followed by an opposite-colour candle with a larger body than the immediately preceding candle. The combined alert then also requires the previous candle to satisfy the pinbar rules.</p>
+<p>That last condition matters: this is a <strong>specific combination of the supplied Pinbar and 3LS rules</strong>, not an alert for every possible textbook variation of either pattern.</p>
+<h2>What changed in the combined version?</h2>
+<p>I brought both sets of conditions into one Pine Script v6 indicator. The final script checks the pinbar on the previous candle, checks the 3LS signal on the current candle, and triggers only when both conditions line up and the current candle has closed.</p>
+<ul>
+  <li><strong>Next-candle sequence:</strong> the pinbar must be immediately before the completing 3LS candle.</li>
+  <li><strong>Close-confirmed alerts:</strong> combined alerts do not trigger while the final candle is still forming.</li>
+  <li><strong>Three alert choices:</strong> bullish combination, bearish combination, or either direction.</li>
+  <li><strong>Cleaner chart markers:</strong> combo labels are placed below the candles using an ATR-based offset.</li>
+  <li><strong>Separate from existing alerts:</strong> the combined signal is its own indicator, so existing standalone pinbar and 3LS alerts can remain as they are.</li>
+</ul>
+<h2>Why wait for the candle to close?</h2>
+<p>A pinbar can form partway through a candle and disappear before the candle closes. For this combined indicator, the request was to wait for the completed 3LS candle instead of sending an early notification that might no longer match the pattern.</p>
+<p>The code uses Pine Script's confirmed-bar check for that. This makes the combined condition suitable for a <em>Once Per Bar Close</em> TradingView alert.</p>
+<figure>
+  <a href="/images/pinbar-3ls-placement.webp" target="_blank" rel="noopener noreferrer" aria-label="Open annotated chart with candle-close and marker-placement examples">
+    <img src="/images/pinbar-3ls-placement.webp" width="1150" height="748" loading="lazy" alt="Annotated TradingView chart showing pinbar and 3LS candle-close timing and requested marker placement">
+  </a>
+  <figcaption>The reference chart used to clarify candle-close timing and marker placement, keeping the extra combination label away from other chart labels where possible.</figcaption>
+</figure>
+<h2>Available TradingView alerts</h2>
+<p>In the completed script, the alert menu offers three conditions:</p>
+<table>
+  <thead><tr><th>Alert condition</th><th>When it triggers</th></tr></thead>
+  <tbody>
+    <tr><td>Bullish Pinbar + 3LS</td><td>The bullish combination is confirmed at candle close.</td></tr>
+    <tr><td>Bearish Pinbar + 3LS</td><td>The bearish combination is confirmed at candle close.</td></tr>
+    <tr><td>Any Pinbar + 3LS</td><td>Either confirmed combination is detected.</td></tr>
+  </tbody>
+</table>
+<figure>
+  <a href="/images/pinbar-3ls-alert-options.webp" target="_blank" rel="noopener noreferrer" aria-label="Open TradingView alert condition options screenshot">
+    <img src="/images/pinbar-3ls-alert-options.webp" width="482" height="477" loading="lazy" alt="TradingView alert setup showing bullish bearish and any Pinbar plus 3LS conditions">
+  </a>
+  <figcaption>The separate bullish, bearish and combined alert options in the TradingView alert dialog.</figcaption>
+</figure>
+<h2>The finished Pinbar + 3LS indicator</h2>
+<p>The result is a focused TradingView indicator that watches for a particular two-part candlestick sequence and makes it available as a selectable alert. It keeps the original pinbar and 3LS rules together, with no need to keep checking the chart manually for the combination.</p>
+<p>The downloadable version is written in Pine Script v6 and retains the candle-close confirmation and separate alert conditions.</p>
+<div class="download" id="download">
+  <div class="release-label">Free TradingView indicator · Pine Script v6</div>
+  <h2>Download the full script for free</h2>
+  <p>Download the complete Goat Trap Pinbar + 3LS Combo indicator.</p>
+  <a class="btn" href="/api/download?script=goat-trap-pinbar-3ls-combo" download="goat-trap-pinbar-3ls-combo.pine">Download free Pine Script ↓</a>
+  <div class="download-meta" data-download-count="goat-trap-pinbar-3ls-combo" aria-live="polite">Download count available after launch</div>
+</div>
+<p class="support-note">Having issues with installation, chart configuration, or anything else related to the script? <a href="https://github.com/ChanakaWithanage/signal-to-script/issues/new" target="_blank" rel="noopener noreferrer">Feel free to contact me.</a></p>
+<div class="author-card"><div class="author-monogram">CW.</div><div><strong>Written by CW</strong><p>Sharing free TradingView scripts, indicator modifications and Pine Script development notes.</p></div></div>
+</div></section></main>
+<footer class="footer"><div class="wrap foot"><div>© 2026 Signal to Script · by CW. Independent Pine Script guides and examples.</div><div>TradingView is a trademark of its respective owner. Not financial advice.</div></div></footer>
+<script defer src="/site.js"></script></body></html>

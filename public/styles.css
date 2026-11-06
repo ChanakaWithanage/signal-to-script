@@ -65,3 +65,10 @@
  .hero-featured-image img{aspect-ratio:1.8 / 1}
  .feature--recent .image-frame--article img{aspect-ratio:1.8 / 1}
 }
+
+/* Pinbar + 3LS article: readable chart references and alert screenshots. */
+.article-body figure img{height:auto}
+.article-body figure a{display:block;line-height:0}
+.article-body figure figcaption a{display:inline;line-height:inherit}
+.feature--recent .image-frame--article img[src="/images/pinbar-signal-chart.webp"]{aspect-ratio:2.25;object-fit:cover;object-position:center}
+@media(max-width:580px){.feature--recent .image-frame--article img[src="/images/pinbar-signal-chart.webp"]{aspect-ratio:1.8;object-fit:cover}}

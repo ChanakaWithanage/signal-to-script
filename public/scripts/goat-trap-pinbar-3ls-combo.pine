@@ -1,0 +1,98 @@
+//@version=6
+indicator("Goat Trap Pinbar + 3LS Combo", overlay=true)
+
+// PINBAR LOGIC
+body       = math.abs(close - open)
+upShadow   = high - math.max(open, close)
+downShadow = math.min(open, close) - low
+
+prevBody = math.abs(close[1] - open[1])
+prevBull = close[1] > open[1]
+prevBear = open[1] > close[1]
+
+// Pinbar conditions (same logic as your current code)
+bearPinbar = prevBull and (prevBody > body) and (upShadow > 0.5 * body) and (upShadow > 2 * downShadow)
+bullPinbar = prevBear and (prevBody > body) and (downShadow > 0.5 * body) and (downShadow > 2 * upShadow)
+
+
+// 3 LINE STRIKE LOGIC
+getCandleColorIndex(barIndex) =>
+    int ret = na
+    if close[barIndex] > open[barIndex]
+        ret := 1
+    else if close[barIndex] < open[barIndex]
+        ret := -1
+    else
+        ret := 0
+    ret
+
+isEngulfing(checkBearish) =>
+    ret = false
+    sizePrevCandle = close[1] - open[1]
+    sizeCurrentCandle = close - open
+    isCurrentLagerThanPrevious = math.abs(sizeCurrentCandle) > math.abs(sizePrevCandle) ? true : false
+    switch checkBearish
+        true =>
+            isGreenToRed = ((getCandleColorIndex(0) < 0) and (getCandleColorIndex(1) > 0)) ? true : false
+            ret := (isCurrentLagerThanPrevious and isGreenToRed) ? true : false
+        false =>
+            isRedToGreen = ((getCandleColorIndex(0) > 0) and (getCandleColorIndex(1) < 0)) ? true : false
+            ret := (isCurrentLagerThanPrevious and isRedToGreen) ? true : false
+        =>
+            ret := false
+    ret
+
+isBearishEngulfuing() =>
+    ret = isEngulfing(true)
+    ret
+
+isBullishEngulfuing() =>
+    ret = isEngulfing(false)
+    ret
+
+is3LSBear() =>
+    ret = false
+    is3LineSetup = ((getCandleColorIndex(1) > 0) and (getCandleColorIndex(2) > 0) and (getCandleColorIndex(3) > 0)) ? true : false
+    ret := (is3LineSetup and isBearishEngulfuing()) ? true : false
+    ret
+
+is3LSBull() =>
+    ret = false
+    is3LineSetup = ((getCandleColorIndex(1) < 0) and (getCandleColorIndex(2) < 0) and (getCandleColorIndex(3) < 0)) ? true : false
+    ret := (is3LineSetup and isBullishEngulfuing()) ? true : false
+    ret
+
+is3LSBearSig = is3LSBear()
+is3LSBullSig = is3LSBull()
+
+
+// COMBINED BUYER REQUIREMENT
+// Pinbar must be the previous candle, and 3LS must be the current candle.
+// Alert should happen only after the current candle closes.
+bearCombo = barstate.isconfirmed and bearPinbar[1] and is3LSBearSig
+bullCombo = barstate.isconfirmed and bullPinbar[1] and is3LSBullSig
+
+
+// COMBO MARKERS SLIGHTLY AWAY FROM CANDLES
+markerOffset = ta.atr(14) * 0.25
+
+if bullCombo
+    label.new(bar_index, low - markerOffset, "PB + 3LS Bull",
+         yloc=yloc.price, style=label.style_label_up,
+         color=color.lime, textcolor=color.black, size=size.tiny)
+
+if bearCombo
+    label.new(bar_index, low - markerOffset, "PB + 3LS Bear",
+         yloc=yloc.price, style=label.style_label_up,
+         color=color.red, textcolor=color.white, size=size.tiny)
+
+
+// ALERTS
+alertcondition(bullCombo, title="Bullish Pinbar + 3LS",
+     message="Bullish Pinbar + 3 Line Strike on {{exchange}}:{{ticker}} ({{interval}})")
+
+alertcondition(bearCombo, title="Bearish Pinbar + 3LS",
+     message="Bearish Pinbar + 3 Line Strike on {{exchange}}:{{ticker}} ({{interval}})")
+
+alertcondition(bullCombo or bearCombo, title="Any Pinbar + 3LS",
+     message="Pinbar + 3 Line Strike on {{exchange}}:{{ticker}} ({{interval}})")

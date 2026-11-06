@@ -111,3 +111,11 @@ curl -s -D - -o /dev/null "https://YOUR_HOST/api/count?script=supertrend-dema-re
 ```
 
 The first four should show their configured revalidation/TTL headers, and the API response should show `no-store`. Check actual response headers after the deployment: the repository itself does not establish the state of dashboard-level cache rules.
+
+## Pinbar + 3 Line Strike Combo (v6)
+- Article: `public/articles/pinbar-3-line-strike-combo-alerts.html`
+- Download: `public/scripts/goat-trap-pinbar-3ls-combo.pine`
+- TradingView screenshots: `public/images/pinbar-*.webp`
+- The uploaded source was already in Pine Script v6 and has been retained unchanged. It uses `barstate.isconfirmed` for **combined** pinbar + 3LS alerts, so alerts are confirmed at bar close; the earlier standalone pinbar alert could be configured for intrabar triggering.
+- This implements the supplied 3LS candle-color + immediate previous-body comparison rules, not every possible 3 Line Strike definition.
+- The original pinbar and 3LS fragments were supplied by a client; confirm redistribution rights and the appropriate original-source attribution before licensing these scripts further.
