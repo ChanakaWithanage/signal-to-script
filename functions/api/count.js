@@ -1,7 +1,7 @@
 const AVAILABLE = new Set(['supertrend-dema-reversal','1r-bear-breakout-achievements']);
 export async function onRequestGet({ request, env }) {
   const slug = new URL(request.url).searchParams.get('script');
-  if (!AVAILABLE.has(slug)) return Response.json({ error: 'Unknown script' }, { status: 404 });
+  if (!AVAILABLE.has(slug)) return Response.json({ error: 'Unknown script' }, { status: 404, headers: { 'Cache-Control': 'no-store' } });
   if (!env.DB) return Response.json({ count: null, configured: false }, { headers: { 'Cache-Control': 'no-store' } });
   try {
     const record = await env.DB.prepare('SELECT downloads FROM script_downloads WHERE slug = ?').bind(slug).first();

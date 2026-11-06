@@ -78,3 +78,36 @@ AdSense publisher ID: `pub-9855777255503695`.
 - The download and download-count Cloudflare endpoints permit `1r-bear-breakout-achievements`.
 - The Pine source was ported from the supplied delivered script with its trigger tracking, expiry and alerts; the unused volume input is removed and IBS plot hidden from the price pane.
 - Complete a Pine Editor v6 compile and chart-behavior check before public release. Confirm you have redistribution rights for the client-delivered script.
+
+## Browser caching (Cloudflare Pages)
+
+This repository is a **plain HTML/CSS/JavaScript** Cloudflare Pages site. The deployed output is `public/`. It does **not** use Astro or generate content-hashed assets. Cloudflare Pages already has CDN caching and ETag-based revalidation for static files; browser rules below are deliberately conservative.
+
+The policy in `public/_headers` is:
+
+| Resource | Browser `Cache-Control` | Reason |
+| --- | --- | --- |
+| `/`, `/index.html`, `/articles/*`, `/404.html` | `public, max-age=0, must-revalidate` | HTML updates must appear on the next visit. |
+| `/styles.css`, `/site.js` | `public, max-age=0, must-revalidate` | They are not fingerprinted and can change at the same URL. |
+| `/images/*` | `public, max-age=3600, must-revalidate` | Original screenshots and chart images may be replaced. The maximum browser-stale period is one hour. |
+| `/favicon.svg` | `public, max-age=86400, must-revalidate` | Infrequently changed artwork. |
+| `/scripts/*`, `/ads.txt`, `/robots.txt` | `public, max-age=0, must-revalidate` | Always revalidate updated downloads and site metadata. |
+| `/api/count`, `/api/download` | `no-store` | Cloudflare Pages Functions set this header themselves on both success and errors. |
+
+Do **not** add one-year `immutable` rules for `styles.css`, `site.js`, or image paths unless the build is changed to include a **content hash in every referenced URL**. In particular, copying `/_astro/*` rules from a different website does not help this repository.
+
+The `_headers` file applies to **Pages static asset responses only**, not Functions. Avoid custom Cache Everything / Edge Cache TTL rules on the Cloudflare domain that would cache HTML or bypass Functions and redirects. When adding another section outside `/articles/`, ensure its HTML is covered by revalidation rules.
+
+### Verify after Cloudflare deployment
+
+From a shell, replace `YOUR_HOST` with the deployed `pages.dev` or custom domain:
+
+```bash
+curl -sI https://YOUR_HOST/ | grep -iE '^cache-control:|^etag:'
+curl -sI https://YOUR_HOST/styles.css | grep -i '^cache-control:'
+curl -sI https://YOUR_HOST/images/1r-bear-breakout-featured.webp | grep -i '^cache-control:'
+curl -sI https://YOUR_HOST/favicon.svg | grep -i '^cache-control:'
+curl -s -D - -o /dev/null "https://YOUR_HOST/api/count?script=supertrend-dema-reversal" | grep -i '^cache-control:'
+```
+
+The first four should show their configured revalidation/TTL headers, and the API response should show `no-store`. Check actual response headers after the deployment: the repository itself does not establish the state of dashboard-level cache rules.

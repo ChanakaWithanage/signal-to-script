@@ -1,4 +1,45 @@
-/api/*
-  Cache-Control: no-store
+# Cloudflare Pages static-file browser caching.
+# Do not add /_astro/: this site is plain HTML, CSS, and JavaScript.
+# HTML always revalidates so published article and homepage updates are visible immediately.
+/
+  Cache-Control: public, max-age=0, must-revalidate
+
+/index.html
+  Cache-Control: public, max-age=0, must-revalidate
+
+/articles/*
+  Cache-Control: public, max-age=0, must-revalidate
+
+/404.html
+  Cache-Control: public, max-age=0, must-revalidate
+
+# Site CSS and JS are NOT fingerprinted: never cache them as immutable.
+/styles.css
+  Cache-Control: public, max-age=0, must-revalidate
+
+/site.js
+  Cache-Control: public, max-age=0, must-revalidate
+
+# Original chart screenshots can be replaced under the same URLs.
+# Cache them for one hour, then revalidate.
+/images/*
+  Cache-Control: public, max-age=3600, must-revalidate
+
+# Favicon rarely changes, but its filename is not fingerprinted.
+/favicon.svg
+  Cache-Control: public, max-age=86400, must-revalidate
+
+# Public Pine Script files may be updated without a filename change.
 /scripts/*
+  Cache-Control: public, max-age=0, must-revalidate
   X-Content-Type-Options: nosniff
+
+# Site verification and crawler directives should always be current.
+/ads.txt
+  Cache-Control: public, max-age=0, must-revalidate
+
+/robots.txt
+  Cache-Control: public, max-age=0, must-revalidate
+
+# /api/count and /api/download are Pages Functions, not static files:
+# _headers rules do not apply. They set Cache-Control: no-store in their responses.
