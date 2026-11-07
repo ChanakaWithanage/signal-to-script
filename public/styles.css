@@ -72,3 +72,18 @@
 .article-body figure figcaption a{display:inline;line-height:inherit}
 .feature--recent .image-frame--article img[src="/images/pinbar-signal-chart.webp"]{aspect-ratio:2.25;object-fit:cover;object-position:center}
 @media(max-width:580px){.feature--recent .image-frame--article img[src="/images/pinbar-signal-chart.webp"]{aspect-ratio:1.8;object-fit:cover}}
+
+/* Signal-to-exchange architecture guide. Editorial, not a product dashboard. */
+.automation-teaser{display:flex;align-items:center;justify-content:space-between;gap:28px;margin:48px 0 10px;padding:27px 30px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:#f4f6f1}
+.automation-teaser h2{font:600 27px/1.2 var(--serif);margin:7px 0 8px;letter-spacing:-.35px}
+.automation-teaser p{max-width:700px;margin:0;color:var(--muted);line-height:1.65;font-size:14px}
+.automation-teaser .entry-link{flex-shrink:0;white-space:nowrap}
+.automation-flow{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:28px 0 33px}
+.automation-flow>div{border:1px solid var(--line);background:#f7f9f5;padding:15px 13px 16px;min-width:0}
+.automation-flow-step{display:block;font:700 10px var(--sans);text-transform:uppercase;letter-spacing:.8px;color:var(--green);margin-bottom:10px}
+.automation-flow strong{display:block;font:700 13px/1.4 var(--sans);color:var(--ink);margin-bottom:5px}
+.automation-flow small{display:block;font-size:11px;line-height:1.5;color:var(--muted)}
+.article-body .automation-code{white-space:pre-wrap;overflow-wrap:anywhere;background:#19251e;border:1px solid #304637;color:#edf6ef;font:13px/1.6 ui-monospace,SFMono-Regular,Consolas,monospace;padding:20px 17px;overflow-x:auto;border-radius:5px;margin:17px 0 24px}
+.article-body .automation-code code{border:0;background:none;color:inherit;padding:0;font:inherit}
+@media(max-width:800px){.automation-flow{grid-template-columns:repeat(2,minmax(0,1fr))}.automation-teaser{align-items:flex-start;flex-direction:column}}
+@media(max-width:580px){.automation-flow{gap:8px}.automation-flow>div{padding:13px 10px}.automation-teaser{padding:22px 18px}.automation-teaser h2{font-size:24px}}

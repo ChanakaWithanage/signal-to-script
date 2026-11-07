@@ -119,3 +119,11 @@ The first four should show their configured revalidation/TTL headers, and the AP
 - The uploaded source was already in Pine Script v6 and has been retained unchanged. It uses `barstate.isconfirmed` for **combined** pinbar + 3LS alerts, so alerts are confirmed at bar close; the earlier standalone pinbar alert could be configured for intrabar triggering.
 - This implements the supplied 3LS candle-color + immediate previous-body comparison rules, not every possible 3 Line Strike definition.
 - The original pinbar and 3LS fragments were supplied by a client; confirm redistribution rights and the appropriate original-source attribution before licensing these scripts further.
+
+## Browser-only TradingView automation guide
+
+- Article: `public/articles/automate-tradingview-strategies-chrome-extension.html`
+- The guide uses the existing `public/scripts/supertrend-dema-reversal.pine` as its real Pine v6 example.
+- The Chrome extension is an **architecture proposal**, not included or confirmed working in this repository. Do not advertise it as a tested download or link to an unverified repo.
+- Before live rollout, confirm TradingView alert-log access, browser extension permissions, exchange demo execution, account-mode handling and secure key storage. Free TradingView Basic accounts currently lack technical alerts.
+- When adding extension screenshots, capture genuine TradingView alert-log entries, extension demo settings, and Binance Futures Demo execution records; do not invent trade confirmations.
