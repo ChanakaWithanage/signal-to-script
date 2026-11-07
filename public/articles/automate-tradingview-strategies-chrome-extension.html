@@ -2,7 +2,7 @@
 <html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Automate TradingView to Binance for Free (No Paid Alerts) | Signal to Script</title>
-<meta name="description" content="How to automate TradingView indicators and strategies on Binance Futures for free—no paid alerts or webhooks. Real Supertrend example, Chrome extension and Pine Script v6.">
+<meta name="description" content="How to automate TradingView indicators and strategies on Binance Futures for free without paid alerts or webhooks. Real Supertrend example, Chrome extension and Pine Script v6.">
 <meta name="robots" content="index, follow">
 <meta property="og:type" content="article">
 <meta property="og:title" content="How to Automate TradingView Indicators on Binance for Free">
@@ -22,7 +22,7 @@
   <div class="breadcrumb"><a href="/">Home</a> / <a href="/#articles">Articles</a> / TradingView automation</div>
   <div class="eyebrow">Free TradingView automation · Pine Script v6 · Binance Futures</div>
   <h1>How to Automate Any TradingView Indicator or Strategy to Trade on Binance for Free</h1>
-  <p class="lead">You have an indicator that tells you exactly when to go LONG or SHORT. But unless you're sitting in front of the chart, that signal doesn't turn into an actual trade. I wanted to find a way around that—without paying for TradingView alerts, a webhook service, or another monthly trading-bot subscription.</p>
+  <p class="lead">You have an indicator that tells you exactly when to go LONG or SHORT. But unless you're sitting in front of the chart, that signal doesn't turn into an actual trade. I wanted to find a way around that without paying for TradingView alerts, a webhook service, or another monthly trading-bot subscription.</p>
   <p class="lead bridge-lead-second">The solution I experimented with was surprisingly simple: make the Pine Script communicate through the chart itself, then let a Chrome extension read it and connect to Binance Futures.</p>
   <div class="article-meta">By CW · Supertrend example · Free Pine Script and Chrome extension source</div>
   <figure class="article-lead-chart">
@@ -33,7 +33,7 @@
   </figure>
 </div>
 <section class="article"><div class="read-wrap article-body">
-<h2>First, the usual way—and why I wanted something different</h2>
+<h2>First, the usual way and why I wanted something different</h2>
 <p>Most TradingView automation tutorials follow the same route: indicator signal, TradingView alert, webhook, third-party trading bot, and finally an exchange order. It makes sense, but it has a catch. TradingView's free Basic plan has no technical alerts for indicators or strategies, and no webhook notifications.</p>
 <p>Then there are services such as 3Commas that add another subscription between your signal and the exchange. I wanted to see whether we could skip both dependencies. Not by breaking the trading rules, but by changing how the signal reaches the execution side.</p>
 <div class="bridge-steps" role="group" aria-label="How the browser-only visual bridge works">
@@ -67,7 +67,7 @@
   <a href="/images/tv-futures-bridge-extension-popup.webp" target="_blank" rel="noopener noreferrer" aria-label="View full extension popup screenshot">
     <img src="/images/tv-futures-bridge-extension-popup.webp" width="520" height="748" loading="lazy" alt="Actual TV Futures Bridge extension popup showing ALGOUSDT, position size, 10x leverage, live trading selection and empty API key inputs">
   </a>
-  <figcaption>The actual extension settings. This screenshot shows a stopped, unconnected configuration screen—not a completed live trade.</figcaption>
+  <figcaption>The actual extension settings. This screenshot shows a stopped, unconnected configuration screen, not a completed live trade.</figcaption>
 </figure>
 <p>One useful detail is how trade size works. If you enter 10 USDT at 2x leverage, that means a target position worth 10 USDT, with roughly 5 USDT initial margin before fees. The extension does not silently increase the position to satisfy an exchange minimum. Binance's contract rules still decide what sizes and leverage are accepted.</p>
 <p>There are also position checks and duplicate-signal handling. If the new signal is opposite to an existing position, the intended flow is to close the old position, confirm the exchange state and only then open the new one. If an order outcome is uncertain, the extension pauses instead of blindly repeating it.</p>

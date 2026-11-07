@@ -1,4 +1,4 @@
-# Signal to Script — by CW
+# Signal to Script | by CW
 
 A simple publication for free TradingView scripts, strategy breakdowns and Pine Script development notes. Static HTML/CSS/JS on **Cloudflare Pages** with optional Pages Functions + D1 download tracking.
 
