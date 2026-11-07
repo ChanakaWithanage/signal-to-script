@@ -73,7 +73,7 @@
 <p>There are also position checks and duplicate-signal handling. If the new signal is opposite to an existing position, the intended flow is to close the old position, confirm the exchange state and only then open the new one. If an order outcome is uncertain, the extension pauses instead of blindly repeating it.</p>
 <h2>How to try the free setup</h2>
 <ol>
-  <li><strong>Get the Chrome extension.</strong> <a href="https://github.com/ChanakaWithanage/tradingview-binance-bridge" target="_blank" rel="noopener noreferrer">Open the free extension on GitHub</a>, download the repository ZIP and extract it. In Chrome, go to <code>chrome://extensions</code>, enable Developer mode, click <em>Load unpacked</em>, and choose the <code>extension</code> folder.</li>
+  <li><strong>Get the Chrome extension.</strong> <a href="https://github.com/signal2chart/tradingview-binance-bridge" target="_blank" rel="noopener noreferrer">Open the free extension on GitHub</a>, download the repository ZIP and extract it. In Chrome, go to <code>chrome://extensions</code>, enable Developer mode, click <em>Load unpacked</em>, and choose the <code>extension</code> folder.</li>
   <li><strong>Download the Supertrend script.</strong> Use the free Pine Script v6 download near the end of this article. Open Pine Editor in TradingView, paste it and add it to a Binance USDT-M chart. The colored strip should be visible at the top-right.</li>
   <li><strong>Match the settings.</strong> Select the same Binance symbol and visual channel in the extension. Keep the TradingView tab active and the strip fully visible.</li>
   <li><strong>Test chart detection.</strong> Start in <em>Observe only</em> mode. Open <em>Chart diagnostics &amp; activity</em> and use <em>Scan chart now</em> to check whether the extension finds and decodes the strip.</li>
@@ -89,7 +89,7 @@ bool bridgeOpenLong   = buyCondition
 bool bridgeOpenShort  = sellCondition
 bool bridgeCloseLong  = exitLongCondition
 bool bridgeCloseShort = exitShortCondition</code></pre>
-<p>These are example names, not a standalone working script. The <a href="https://github.com/ChanakaWithanage/tradingview-binance-bridge/tree/main/pine" target="_blank" rel="noopener noreferrer">reusable adapter and examples</a> are in the project source. You generally need access to an indicator's Pine Script code to add the bridge; protected indicators can't necessarily be modified.</p>
+<p>These are example names, not a standalone working script. The <a href="https://github.com/signal2chart/tradingview-binance-bridge/tree/main/pine" target="_blank" rel="noopener noreferrer">reusable adapter and examples</a> are in the project source. You generally need access to an indicator's Pine Script code to add the bridge; protected indicators can't necessarily be modified.</p>
 <h2>Can we connect Bybit or another exchange?</h2>
 <p>The current extension supports Binance USDT-M Futures, including Demo and Live connection modes. Bybit and other exchanges could be added by implementing separate API adapters for their authentication, position modes and order rules. That expansion is possible, but Bybit execution is not included in the current release.</p>
 <h2>Is this actually free?</h2>
@@ -103,10 +103,10 @@ bool bridgeCloseShort = exitShortCondition</code></pre>
   <a class="btn" href="/api/download?script=supertrend-visual-bridge" download="supertrend-visual-bridge.pine">Download free Pine Script ↓</a>
   <div class="download-meta" data-download-count="supertrend-visual-bridge" aria-live="polite">Download count available after launch</div>
 </div>
-<p><a class="bridge-repo-link" href="https://github.com/ChanakaWithanage/tradingview-binance-bridge" target="_blank" rel="noopener noreferrer">Get the Chrome extension and setup instructions on GitHub →</a></p>
+<p><a class="bridge-repo-link" href="https://github.com/signal2chart/tradingview-binance-bridge" target="_blank" rel="noopener noreferrer">Get the Chrome extension and setup instructions on GitHub →</a></p>
 <h2>Want to automate your own TradingView indicator or strategy?</h2>
 <p>If you already have a Pine Script that generates buy and sell signals, I can help connect its logic to the visual bridge, map the correct entry and exit behavior and adapt the integration for your trading setup. This can also be extended to other exchanges with the appropriate exchange-specific development.</p>
-<p class="support-note">Need help with installation, chart configuration, signal logic or a custom TradingView-to-exchange integration? <a href="https://github.com/ChanakaWithanage/signal-to-script/issues/new" target="_blank" rel="noopener noreferrer">Feel free to contact me.</a></p>
+<p class="support-note">Need help with installation, chart configuration, signal logic or a custom TradingView-to-exchange integration? <a href="https://github.com/signal2chart/tradingview-binance-bridge/issues/new" target="_blank" rel="noopener noreferrer">Feel free to contact me.</a></p>
 <div class="author-card"><div class="author-monogram">CW.</div><div><strong>Written by CW</strong><p>Free TradingView scripts, Pine Script modifications and practical indicator development experiments.</p></div></div>
 </div></section></main>
 <footer class="footer"><div class="wrap foot"><div>© 2026 Signal to Script · by CW. Independent Pine Script guides and examples.</div><div>TradingView and exchange trademarks belong to their respective owners. Trading involves risk.</div></div></footer>
