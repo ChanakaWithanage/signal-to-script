@@ -1,104 +1,113 @@
 <!doctype html>
 <html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Automate TradingView Strategies with a Chrome Extension | Signal to Script</title>
-<meta name="description" content="Learn how TradingView indicator and strategy alerts could trigger Binance Futures orders through a browser-only Chrome extension, without a separate paid bot service.">
+<title>Automate TradingView to Binance for Free (No Paid Alerts) | Signal to Script</title>
+<meta name="description" content="How to automate TradingView indicators and strategies on Binance Futures for free—no paid alerts or webhooks. Real Supertrend example, Chrome extension and Pine Script v6.">
 <meta name="robots" content="index, follow">
 <meta property="og:type" content="article">
-<meta property="og:title" content="TradingView to Binance Futures: Automate Signals with a Chrome Extension">
-<meta property="og:description" content="From a Supertrend signal to a Futures order: a browser-based integration plan, its setup, and the practical limitations.">
+<meta property="og:title" content="How to Automate TradingView Indicators on Binance for Free">
+<meta property="og:description" content="Supertrend signals, a colored visual bridge and a free Chrome extension for Binance Futures. Real screenshots and downloadable Pine Script.">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/styles.css">
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9855777255503695" crossorigin="anonymous"></script>
-</head><body>
+<meta property="og:image" content="/images/supertrend-visual-bridge-chart.webp"></head><body>
 <a class="skip-link" href="#main">Skip to content</a>
 <header class="site-header"><div class="wrap head">
 <a class="brand" href="/"><span class="brand-mark">CW.</span><span class="brand-wordmark"><span class="brand-name">Signal to Script</span><span class="brand-by">by CW</span></span></a>
 <button aria-expanded="false" aria-label="Open menu" class="menu-toggle" id="menu" type="button">☰</button>
 <nav aria-label="Main navigation" class="nav" id="nav"><a href="/#free-scripts">Free scripts</a><a href="/#articles">Articles</a><a href="/#about">About CW</a><a href="/#support">Get help</a></nav>
 </div></header>
-<main id="main"><div class="read-wrap article-top">
-<div class="breadcrumb"><a href="/">Home</a> / <a href="/#articles">Articles</a> / TradingView automation</div>
-<div class="eyebrow">TradingView automation / Chrome extension / Binance Futures</div>
-<h1>Automate TradingView Signals with a Chrome Extension—Without a Paid Bot Service</h1>
-<p class="lead">Your indicator already knows when to buy or sell. What if that signal could go a step further and place the order on an exchange? A small Chrome extension offers an interesting way to connect TradingView alerts to Binance Futures without paying a separate automation platform every month.</p>
-<div class="article-meta">By CW · Pine Script v6 · Browser-based trading automation guide</div>
-<figure class="article-lead-chart">
-  <a href="/images/algo-supertrend-real-chart.webp" target="_blank" rel="noopener noreferrer" aria-label="Open the real TradingView Supertrend screenshot"><img src="/images/algo-supertrend-real-chart.webp" width="1000" height="536" alt="Actual TradingView chart showing Supertrend DEMA reversal signals and historical Strategy Tester results" fetchpriority="high"></a>
-  <figcaption>Our <a href="/articles/supertrend-dema-reversal-strategy.html">Supertrend + DEMA reversal strategy</a> already identifies long and short changes. Its chart is real; the browser-to-exchange connection discussed below is a proposed extension workflow, not a verified trade execution screenshot.</figcaption>
-</figure></div>
-<section class="article"><div class="read-wrap article-body">
-<h2>The idea: let your signal do more than send a notification</h2>
-<p>TradingView makes it easy to build indicators and strategies. A Supertrend reversal might display <strong>Buy</strong> when the trend turns bullish and <strong>Sell</strong> when it turns bearish. But a chart signal does not automatically place a Binance Futures order.</p>
-<p>There are services that connect alerts to exchanges, often with another subscription or a hosted webhook receiver. For someone experimenting with one or two custom scripts, that can be more infrastructure than they really want.</p>
-<p>The alternative worth exploring is a local Chrome extension. The indicator produces an alert, the TradingView Alerts Log shows it, and the extension reads that signal and sends an authenticated API request to the exchange. No separate paid bot platform or dedicated backend is required for the proposed design.</p>
-<div class="automation-flow" role="group" aria-label="Proposed signal-to-order architecture">
-  <div><span class="automation-flow-step">01 / Signal</span><strong>TradingView + Pine Script</strong><small>Buy, sell, close or reversal condition</small></div>
-  <div><span class="automation-flow-step">02 / Alert</span><strong>TradingView Alerts Log</strong><small>Structured JSON message</small></div>
-  <div><span class="automation-flow-step">03 / Local bridge</span><strong>Chrome extension</strong><small>Read, validate and deduplicate</small></div>
-  <div><span class="automation-flow-step">04 / Execution</span><strong>Binance Futures API</strong><small>Position check, order and status</small></div>
+<main id="main">
+<div class="read-wrap article-top">
+  <div class="breadcrumb"><a href="/">Home</a> / <a href="/#articles">Articles</a> / TradingView automation</div>
+  <div class="eyebrow">Free TradingView automation · Pine Script v6 · Binance Futures</div>
+  <h1>How to Automate Any TradingView Indicator or Strategy to Trade on Binance for Free</h1>
+  <p class="lead">You have an indicator that tells you exactly when to go LONG or SHORT. But unless you're sitting in front of the chart, that signal doesn't turn into an actual trade. I wanted to find a way around that—without paying for TradingView alerts, a webhook service, or another monthly trading-bot subscription.</p>
+  <p class="lead bridge-lead-second">The solution I experimented with was surprisingly simple: make the Pine Script communicate through the chart itself, then let a Chrome extension read it and connect to Binance Futures.</p>
+  <div class="article-meta">By CW · Supertrend example · Free Pine Script and Chrome extension source</div>
+  <figure class="article-lead-chart">
+    <a href="/images/supertrend-visual-bridge-chart.webp" target="_blank" rel="noopener noreferrer" aria-label="View the TradingView Supertrend visual bridge screenshot">
+      <img src="/images/supertrend-visual-bridge-chart.webp" width="1450" height="724" fetchpriority="high" alt="Actual 1-minute TradingView ALGOUSDT chart showing Supertrend LONG and SHORT signals and the visual color strip along the top right">
+    </a>
+    <figcaption>A real TradingView chart showing the modified Supertrend and the color strip in the upper-right corner. Those colors carry the signal to the extension.</figcaption>
+  </figure>
 </div>
-<h2>Start with a real strategy: Supertrend + DEMA</h2>
-<p>We've already shared a <a href="/articles/supertrend-dema-reversal-strategy.html">Supertrend + DEMA Reversal Strategy</a> in Pine Script v6. It calculates Supertrend using a configurable source, including DEMA(50), and can reverse simulated long and short positions when the trend changes.</p>
-<p>The strategy already has buy and sell alert calls. For the extension design, we don't need to rewrite the strategy's trading logic. We need to make the alert messages more explicit, so the extension understands <em>what action</em> to take and <em>which signal</em> it has received.</p>
-<p><a href="https://github.com/ChanakaWithanage/signal-to-script/blob/main/public/scripts/supertrend-dema-reversal.pine" target="_blank" rel="noopener noreferrer">View the actual Supertrend + DEMA Pine Script v6 source on GitHub</a>.</p>
-<h2>One small change to the alerts</h2>
-<p>A message like “BUY” works for a human, but it's not enough to safely operate a Futures account. I would use a structured JSON message like this:</p>
-<pre class="automation-code"><code>{
-  "source": "TV_FUTURES_EXTENSION",
-  "symbol": "BTCUSDT",
-  "action": "OPEN_LONG",
-  "signal_id": "BTCUSDT-60-1794048000000-LONG"
-}</code></pre>
-<p>The extension can support four clear actions: <code>OPEN_LONG</code>, <code>OPEN_SHORT</code>, <code>CLOSE_LONG</code> and <code>CLOSE_SHORT</code>. A new Supertrend buy signal could use <code>OPEN_LONG</code>; if a short is already open, the extension should first close it and then open the long, only after confirming the exchange position.</p>
-<p>Inside the existing Pine v6 script, the alert-generation portion could be adapted along these lines. This is an illustrative excerpt, not a separate ready-to-run strategy; it would replace the existing simple buy/sell alert calls:</p>
-<pre class="automation-code"><code>string exchangeSymbol = input.string("BTCUSDT", "Execution Symbol")
-
-if buySignal
-    alert('{"source":"TV_FUTURES_EXTENSION","symbol":"' +
-      exchangeSymbol + '","action":"OPEN_LONG","signal_id":"' +
-      exchangeSymbol + '-' + str.tostring(time_close) + '-LONG"}',
-      alert.freq_once_per_bar_close)
-
-if sellSignal
-    alert('{"source":"TV_FUTURES_EXTENSION","symbol":"' +
-      exchangeSymbol + '","action":"OPEN_SHORT","signal_id":"' +
-      exchangeSymbol + '-' + str.tostring(time_close) + '-SHORT"}',
-      alert.freq_once_per_bar_close)</code></pre>
-<p>Using a signal ID helps the extension recognize an alert it has already processed. The extension still needs independent checks against the actual exchange account before placing an order.</p>
-<h2>How the Chrome extension would work</h2>
-<p>The first version would be deliberately small. A Chrome content script watches the TradingView alert log for new entries and passes relevant messages to the extension's background service worker. That service worker validates the JSON and, once automated execution is enabled, makes the signed request to Binance.</p>
+<section class="article"><div class="read-wrap article-body">
+<h2>First, the usual way—and why I wanted something different</h2>
+<p>Most TradingView automation tutorials follow the same route: indicator signal, TradingView alert, webhook, third-party trading bot, and finally an exchange order. It makes sense, but it has a catch. TradingView's free Basic plan has no technical alerts for indicators or strategies, and no webhook notifications.</p>
+<p>Then there are services such as 3Commas that add another subscription between your signal and the exchange. I wanted to see whether we could skip both dependencies. Not by breaking the trading rules, but by changing how the signal reaches the execution side.</p>
+<div class="bridge-steps" role="group" aria-label="How the browser-only visual bridge works">
+  <div><span>01</span><strong>TradingView</strong><small>Pine Script detects LONG / SHORT</small></div>
+  <div><span>02</span><strong>Color strip</strong><small>Encodes the signal</small></div>
+  <div><span>03</span><strong>Chrome extension</strong><small>Reads chart pixels</small></div>
+  <div><span>04</span><strong>Binance Futures</strong><small>Receives order requests</small></div>
+</div>
+<h2>The idea: turn a trading signal into colors</h2>
+<p>Pine Script can't directly send a signed Binance API request. And TradingView's chart is drawn graphically, so a Chrome extension cannot reliably read the BUY and SELL labels as ordinary webpage text.</p>
+<p>But Pine Script <em>can</em> draw a fixed-position table. I used that to display a row of <strong>19 colored cells</strong> at the top of the chart. They're not decoration. Each cell represents part of a compact message.</p>
+<p>The message includes the intended trade action, the signal time, a channel number, a symbol fingerprint and a checksum. The extension captures a screenshot of the visible TradingView chart, finds the strip and decodes it back into an instruction. It doesn't use OCR, TradingView alerts or webhooks.</p>
+<p>It's a different way of doing things, but it has a practical advantage: the indicator's signal logic and the visual communication adapter are separate. We can keep the same bridge and connect other Pine Script conditions to it.</p>
+<h2>Using Supertrend as the first example</h2>
+<p>I started with the regular Supertrend indicator. The example uses ATR period 10 and factor 3 with TradingView's built-in <code>ta.supertrend()</code>. When the Supertrend direction changes on a confirmed candle, the modified script marks LONG or SHORT and updates the color strip.</p>
+<p>This is the <strong>Supertrend Visual Bridge</strong> example, not the DEMA-source Supertrend reversal strategy I published earlier. The bridge can be adapted to that strategy as well, or to any other script whose source and signal conditions are available.</p>
+<p>Its protocol understands four main trading actions:</p>
+<table>
+<thead><tr><th>Action</th><th>What the extension should do</th></tr></thead>
+<tbody>
+<tr><td><code>OPEN_LONG</code></td><td>Check the current position, then open a long.</td></tr>
+<tr><td><code>OPEN_SHORT</code></td><td>Check the current position, then open a short.</td></tr>
+<tr><td><code>CLOSE_LONG</code></td><td>Close an existing long, without opening a new short.</td></tr>
+<tr><td><code>CLOSE_SHORT</code></td><td>Close an existing short, without opening a new long.</td></tr>
+</tbody>
+</table>
+<p>The example uses the LONG and SHORT reversal signals; separate exit actions are available when another script has dedicated close conditions.</p>
+<h2>The Chrome extension: TradingView to Binance Futures</h2>
+<p>The second part is a Chrome extension called <strong>TV Futures Bridge</strong>. It monitors the visible chart, decodes new signals and can send signed requests to Binance USDT-M Futures. I kept the popup focused on a few useful controls: Observe, Demo or Live trading, symbol, USDT position size, leverage, API credentials, connection testing and an automatic-trading switch.</p>
+<figure class="bridge-popup-figure">
+  <a href="/images/tv-futures-bridge-extension-popup.webp" target="_blank" rel="noopener noreferrer" aria-label="View full extension popup screenshot">
+    <img src="/images/tv-futures-bridge-extension-popup.webp" width="520" height="748" loading="lazy" alt="Actual TV Futures Bridge extension popup showing ALGOUSDT, position size, 10x leverage, live trading selection and empty API key inputs">
+  </a>
+  <figcaption>The actual extension settings. This screenshot shows a stopped, unconnected configuration screen—not a completed live trade.</figcaption>
+</figure>
+<p>One useful detail is how trade size works. If you enter 10 USDT at 2x leverage, that means a target position worth 10 USDT, with roughly 5 USDT initial margin before fees. The extension does not silently increase the position to satisfy an exchange minimum. Binance's contract rules still decide what sizes and leverage are accepted.</p>
+<p>There are also position checks and duplicate-signal handling. If the new signal is opposite to an existing position, the intended flow is to close the old position, confirm the exchange state and only then open the new one. If an order outcome is uncertain, the extension pauses instead of blindly repeating it.</p>
+<h2>How to try the free setup</h2>
 <ol>
-<li><strong>Create the TradingView alert.</strong> Select the strategy's <em>alert() function calls only</em> condition and let TradingView record the custom JSON whenever the script signals.</li>
-<li><strong>Open TradingView in Chrome.</strong> The extension monitors the currently accessible alert log. It must be tested against the live TradingView interface, which can change.</li>
-<li><strong>Configure the exchange.</strong> Choose Binance USDT-M Futures Demo Trading, the permitted symbols, a trading size and a maximum position size.</li>
-<li><strong>Process a new signal.</strong> Validate its source, timestamp, symbol, action and unique ID. Ignore duplicates and anything outside the user's allowed settings.</li>
-<li><strong>Check the existing position.</strong> A close action must reduce an existing position, never accidentally open a new position in the opposite direction. For a reversal, confirm the close before placing the new order.</li>
-<li><strong>Verify the exchange result.</strong> Record the order ID, fill status and any errors. If the exchange state is uncertain, pause instead of sending another order blindly.</li>
+  <li><strong>Get the Chrome extension.</strong> <a href="https://github.com/ChanakaWithanage/tradingview-binance-bridge" target="_blank" rel="noopener noreferrer">Open the free extension on GitHub</a>, download the repository ZIP and extract it. In Chrome, go to <code>chrome://extensions</code>, enable Developer mode, click <em>Load unpacked</em>, and choose the <code>extension</code> folder.</li>
+  <li><strong>Download the Supertrend script.</strong> Use the free Pine Script v6 download near the end of this article. Open Pine Editor in TradingView, paste it and add it to a Binance USDT-M chart. The colored strip should be visible at the top-right.</li>
+  <li><strong>Match the settings.</strong> Select the same Binance symbol and visual channel in the extension. Keep the TradingView tab active and the strip fully visible.</li>
+  <li><strong>Test chart detection.</strong> Start in <em>Observe only</em> mode. Open <em>Chart diagnostics &amp; activity</em> and use <em>Scan chart now</em> to check whether the extension finds and decodes the strip.</li>
+  <li><strong>Move to Binance Demo.</strong> Enter your Binance Futures Demo API credentials, choose a supported position size and leverage, then test the connection. Use the manual order controls if you want to test actual Demo exchange execution separately.</li>
+  <li><strong>Start monitoring.</strong> Click <em>Start automatic trading</em>. The extension ignores the currently displayed signal as its starting baseline and waits for the next new, confirmed signal.</li>
 </ol>
-<p>The extension could also have a compact popup for Demo/Live mode, approved symbols, trade size, a pause switch and recent execution history. Those are proposed controls; there isn't a published production-ready extension or verified execution demo for this article yet.</p>
-<h2>Why use a browser extension instead of a paid bot platform?</h2>
-<ul>
-<li><strong>No separate automation-service subscription.</strong> The bridge can run locally without paying an ongoing third-party bot platform just to forward a signal.</li>
-<li><strong>Your own trading logic.</strong> We can adapt the alert format to Supertrend, EMA crossovers, breakout indicators, custom strategies and other scripts whose signals are accessible and can be expressed as alerts.</li>
-<li><strong>Direct exchange integration.</strong> The first exchange adapter can target Binance USDT-M Futures. A Bybit adapter or another supported exchange can be added later.</li>
-<li><strong>Clear control over order behavior.</strong> Rather than assuming Buy always means “open long,” the extension can use explicit actions, check positions and enforce trade limits.</li>
-<li><strong>Reusable approach.</strong> Once the integration is built and tested, the same extension architecture can be reused with different Pine Script alerts.</li>
-</ul>
-<h2>What about Binance and Bybit?</h2>
-<p>Binance USDT-M Futures exposes signed order APIs, including market orders, and provides a <a href="https://developers.binance.me/en/docs/products/derivatives-trading-usds-futures/general-info" target="_blank" rel="noopener noreferrer">Futures demo endpoint</a>. The proposed initial version targets Binance with one-way position mode. More complicated position modes need separate handling.</p>
-<p><a href="https://bybit-exchange.github.io/docs/v5/order/create-order" target="_blank" rel="noopener noreferrer">Bybit's V5 API</a> also supports order placement, including derivatives, but it uses different request formats and account rules. Extending the bridge to Bybit is possible by implementing and testing another exchange adapter; it is not something a Binance-only build supports automatically.</p>
-<h2>Is this completely free?</h2>
-<p>There would be <strong>no required subscription to a third-party automation service</strong> for this browser-only approach. You could run your own extension locally, without paying for hosting or a separate webhook platform.</p>
-<p>But there are two important distinctions. First, TradingView's free Basic plan currently does not include technical alerts for indicators or strategies, so you may still need a TradingView subscription to generate these alerts. Second, exchange trading fees and any market-data or other account charges still apply. See <a href="https://www.tradingview.com/pricing/" target="_blank" rel="noopener noreferrer">TradingView's current plan comparison</a>.</p>
-<p>Because the extension reads an on-screen alert log, your browser and TradingView session need to remain available. It is not a 24/7 server replacement: a sleeping computer, closed tab or changed TradingView page can interrupt the workflow. Secure local API-key handling, duplicate protection and exchange reconciliation are also essential before considering live trading.</p>
-<h2>Where the implementation stands</h2>
-<p>The <a href="/articles/supertrend-dema-reversal-strategy.html">Supertrend strategy</a> and its Pine v6 source are already available. The Chrome extension, TradingView log reader and Binance execution bridge described here are a proposed integration design, not a published or end-to-end-verified trading bot. The extension repository and setup screenshots can be linked here once a working demo version is ready.</p>
-<p>The right order is to validate alert-log detection, verify signal parsing, execute mock orders, test Binance Futures Demo Trading, and only then consider live trading.</p>
+<p>You can also select special <code>VISUAL TEST</code> LONG and SHORT inputs in the Pine script to check screenshot recognition without waiting for a market signal. Those test signals are deliberately blocked from placing orders, even in Live mode. Manual Demo orders are a separate feature.</p>
+<h2>Does this work with other TradingView indicators?</h2>
+<p>That's the part I find most useful. The Chrome extension doesn't need a new implementation for every RSI, EMA crossover, breakout or custom Supertrend strategy. It only needs the four standard actions from the Pine Script adapter.</p>
+<p>For another indicator, the main work is mapping its existing trading conditions to these inputs:</p>
+<pre class="automation-code"><code>// Map confirmed conditions from your indicator
+bool bridgeOpenLong   = buyCondition
+bool bridgeOpenShort  = sellCondition
+bool bridgeCloseLong  = exitLongCondition
+bool bridgeCloseShort = exitShortCondition</code></pre>
+<p>These are example names, not a standalone working script. The <a href="https://github.com/ChanakaWithanage/tradingview-binance-bridge/tree/main/pine" target="_blank" rel="noopener noreferrer">reusable adapter and examples</a> are in the project source. You generally need access to an indicator's Pine Script code to add the bridge; protected indicators can't necessarily be modified.</p>
+<h2>Can we connect Bybit or another exchange?</h2>
+<p>The current extension supports Binance USDT-M Futures, including Demo and Live connection modes. Bybit and other exchanges could be added by implementing separate API adapters for their authentication, position modes and order rules. That expansion is possible, but Bybit execution is not included in the current release.</p>
+<h2>Is this actually free?</h2>
+<p><strong>Yes, the Pine Script and Chrome extension source are free.</strong> The visual bridge doesn't require TradingView technical alerts or webhook access, and you don't need a hosted bot or another subscription just to relay signals.</p>
+<p>There are practical limits, though. Exchange fees still apply. More importantly, the browser must remain open with TradingView active and visible. A sleeping computer, hidden chart, changed layout or missed screenshot can mean a missed trade. This is a browser-based experiment, not a reliable unattended 24/7 trading server.</p>
+<p>The repository includes synthetic visual-decoder tests and mocked Binance API tests. Those are useful for development, but they do not prove complete live exchange execution. This prototype does not automatically place protective stop-loss or take-profit orders, so Binance Demo Trading is the appropriate place to test it before considering real money.</p>
+<div class="download" id="download">
+  <div class="release-label">Free TradingView automation example · Pine Script v6</div>
+  <h2>Download the Supertrend Visual Bridge for free</h2>
+  <p>The complete Supertrend example, including the 19-cell color signal adapter.</p>
+  <a class="btn" href="/api/download?script=supertrend-visual-bridge" download="supertrend-visual-bridge.pine">Download free Pine Script ↓</a>
+  <div class="download-meta" data-download-count="supertrend-visual-bridge" aria-live="polite">Download count available after launch</div>
+</div>
+<p><a class="bridge-repo-link" href="https://github.com/ChanakaWithanage/tradingview-binance-bridge" target="_blank" rel="noopener noreferrer">Get the Chrome extension and setup instructions on GitHub →</a></p>
 <h2>Want to automate your own TradingView indicator or strategy?</h2>
-<p>You don't necessarily need a brand-new trading strategy. If you already have an indicator that gives reliable Buy/Sell signals, its Pine Script can often be adapted to produce the structured alerts an execution system needs. We can also help define open/close rules, prevent duplicate signals and tailor the messages for an exchange-specific integration.</p>
-<p>If you're looking to connect your TradingView script to Binance, Bybit or another exchange—or want help understanding how this approach could work with your indicator—<a href="https://github.com/ChanakaWithanage/signal-to-script/issues/new" target="_blank" rel="noopener noreferrer">get in touch</a>. I’m happy to discuss the script and integration requirements.</p>
-<div class="author-card"><div class="author-monogram">CW.</div><div><strong>Written by CW</strong><p>Free TradingView scripts, custom Pine Script modifications and practical development guides.</p></div></div>
+<p>If you already have a Pine Script that generates buy and sell signals, I can help connect its logic to the visual bridge, map the correct entry and exit behavior and adapt the integration for your trading setup. This can also be extended to other exchanges with the appropriate exchange-specific development.</p>
+<p class="support-note">Need help with installation, chart configuration, signal logic or a custom TradingView-to-exchange integration? <a href="https://github.com/ChanakaWithanage/signal-to-script/issues/new" target="_blank" rel="noopener noreferrer">Feel free to contact me.</a></p>
+<div class="author-card"><div class="author-monogram">CW.</div><div><strong>Written by CW</strong><p>Free TradingView scripts, Pine Script modifications and practical indicator development experiments.</p></div></div>
 </div></section></main>
 <footer class="footer"><div class="wrap foot"><div>© 2026 Signal to Script · by CW. Independent Pine Script guides and examples.</div><div>TradingView and exchange trademarks belong to their respective owners. Trading involves risk.</div></div></footer>
 <script defer src="/site.js"></script>

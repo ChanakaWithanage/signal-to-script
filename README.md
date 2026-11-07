@@ -127,3 +127,11 @@ The first four should show their configured revalidation/TTL headers, and the AP
 - The Chrome extension is an **architecture proposal**, not included or confirmed working in this repository. Do not advertise it as a tested download or link to an unverified repo.
 - Before live rollout, confirm TradingView alert-log access, browser extension permissions, exchange demo execution, account-mode handling and secure key storage. Free TradingView Basic accounts currently lack technical alerts.
 - When adding extension screenshots, capture genuine TradingView alert-log entries, extension demo settings, and Binance Futures Demo execution records; do not invent trade confirmations.
+
+## Free TradingView visual bridge article
+
+The article at `public/articles/automate-tradingview-strategies-chrome-extension.html` explains a working codebase and experimental local Chrome extension for Binance Futures, avoiding paid TradingView technical alerts via visual table encoding.
+
+The site's `public/scripts/supertrend-visual-bridge.pine` is the Pine Script v6 Supertrend example from the external extension repository. Download slug `supertrend-visual-bridge` is supported by both Cloudflare API allowlists. The existing D1 counter creates its database row on the first download.
+
+Genuine images from the sample: `public/images/supertrend-visual-bridge-chart.webp` and `public/images/tv-futures-bridge-extension-popup.webp`. The popup image does not prove a trade filled. No live end-to-end execution claim is made. The home hero continues to feature the existing Supertrend + DEMA article.

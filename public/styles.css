@@ -87,3 +87,18 @@
 .article-body .automation-code code{border:0;background:none;color:inherit;padding:0;font:inherit}
 @media(max-width:800px){.automation-flow{grid-template-columns:repeat(2,minmax(0,1fr))}.automation-teaser{align-items:flex-start;flex-direction:column}}
 @media(max-width:580px){.automation-flow{gap:8px}.automation-flow>div{padding:13px 10px}.automation-teaser{padding:22px 18px}.automation-teaser h2{font-size:24px}}
+
+/* Free TradingView visual bridge article and real extension screenshot. */
+.bridge-lead-second{margin-top:10px}
+.bridge-steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:28px 0 32px}
+.bridge-steps>div{padding:15px 13px 17px;background:#f3f6f1;border:1px solid var(--line)}
+.bridge-steps span{display:block;font:700 12px var(--sans);color:var(--green);letter-spacing:.8px;margin-bottom:11px}
+.bridge-steps strong{display:block;font:700 13px/1.3 var(--sans);color:var(--ink)}
+.bridge-steps small{display:block;font-size:11px;line-height:1.5;color:var(--muted);margin-top:5px}
+.bridge-popup-figure{margin:27px auto 32px;max-width:400px}
+.bridge-popup-figure>a{display:block;line-height:0}
+.bridge-popup-figure img{width:100%;height:auto;display:block;object-fit:contain;border:1px solid var(--line);border-radius:5px}
+.bridge-popup-figure figcaption{text-align:left;font-size:12px;line-height:1.55;color:var(--muted);padding:8px 2px}
+.bridge-repo-link{display:inline-block;font-weight:700;margin:12px 0 20px}
+.bridge-library-feature .feature-media .image-frame img{display:block;width:100%;height:auto;aspect-ratio:2/1;object-fit:cover;object-position:center}
+@media(max-width:700px){.bridge-steps{grid-template-columns:repeat(2,minmax(0,1fr))}}
