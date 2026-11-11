@@ -153,3 +153,17 @@ The existing Cloudflare Pages **D1 binding named `DB` is required**. The same D1
 The one-guest-download policy is intentionally a **soft limit**: clearing cookies or using another browser allows another guest download, and the Pine files also exist in the public repository and static asset routes. This is an invitation to register, not a paywall or a robust per-human abuse control. Consider private storage and stronger rate-limiting before introducing paid products.
 
 CI runs syntax checks, link/schema wiring checks and offline RSA signature/claims tests in `scripts/test-google-auth.mjs`. A completed build does not prove live Google authentication: test the browser popup, an approved Google account, a successful verified D1 session, and downloading from the deployed Pages domain.
+
+## SEO migration to signaltoscript.com
+
+The primary website address is `https://signaltoscript.com`. Cloudflare dashboard redirects handle `www.signaltoscript.com` and the legacy `signal-to-script.pages.dev` hostname; those redirect rules are not managed in this repository.
+
+- `public/sitemap.xml`: canonical homepage, four published articles, and Google signup page.
+- `public/robots.txt`: advertises the sitemap at the new domain.
+- Public HTML pages: one canonical link and matching Open Graph URL per page; homepage and article images have full absolute URLs.
+- `public/_headers`: sitemap XML response type and conservative caching.
+- `scripts/check-seo.py`: verifies canonicals, sitemap coverage and real image paths in CI.
+
+After deployment, verify `https://signaltoscript.com/sitemap.xml` and `https://signaltoscript.com/robots.txt` are accessible, add `signaltoscript.com` as a Domain property in Google Search Console, and submit `sitemap.xml`. For Google authentication, make sure `https://signaltoscript.com` is in Authorized JavaScript origins on the existing OAuth client before using the new domain. No new Client ID is needed.
+
+Do not add guessed sitemap `lastmod` dates or redirect every old article to the homepage. The Cloudflare redirect should preserve each original article path.
