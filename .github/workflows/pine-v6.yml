@@ -17,6 +17,7 @@ jobs:
       - run: node --check public/join.js
       - run: node --check functions/_lib/download-access.js
       - run: node --check functions/api/download.js
+      - run: node --check functions/scripts/_middleware.js
       - run: node --check functions/api/join.js
       - run: node --check functions/api/access.js
       - run: node --check functions/api/logout.js
