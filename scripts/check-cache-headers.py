@@ -37,9 +37,14 @@ assert all("immutable" not in value for rule in rules.values() for value in rule
 assert "/_astro/*" not in rules
 for path in ["functions/api/count.js", "functions/api/download.js"]:
     source = (root / path).read_text(encoding="utf-8")
-    for line in source.splitlines():
-        if "new Response(" in line or "Response.json(" in line:
-            if "return" in line and ("status: 404" in line or "status: 503" in line):
-                assert "'Cache-Control': 'no-store'" in line, (path, line)
-    assert "'Cache-Control': 'no-store'" in source, path
+    if path.endswith("download.js"):
+        # Download responses use a shared no-store constant and fail closed.
+        assert "const HEADERS" in source and "'Cache-Control':'no-store'" in source, path
+        assert "headers:HEADERS" in source and "Cache-Control':'no-store'" in source, path
+    else:
+        for line in source.splitlines():
+            if "new Response(" in line or "Response.json(" in line:
+                if "return" in line and ("status: 404" in line or "status: 503" in line):
+                    assert "'Cache-Control': 'no-store'" in line, (path, line)
+        assert "'Cache-Control': 'no-store'" in source, path
 print(f"Cache policy verified ({len(rules)} static path rules, APIs no-store).")
