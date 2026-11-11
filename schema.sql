@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS script_downloads (
   downloads INTEGER NOT NULL DEFAULT 0 CHECK(downloads >= 0)
 );
  
--- Optional free member access and one guest download per browser cookie.
+-- Google member login. Legacy unverified email data may still exist in D1.
 -- Pages Functions also create these tables on first use when the DB binding exists.
 CREATE TABLE IF NOT EXISTS free_download_members (
   id TEXT PRIMARY KEY,
@@ -14,11 +14,6 @@ CREATE TABLE IF NOT EXISTS free_download_sessions (
   token_hash TEXT PRIMARY KEY,
   member_id TEXT NOT NULL,
   expires_at TEXT NOT NULL,
-  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
-CREATE TABLE IF NOT EXISTS free_guest_downloads (
-  token_hash TEXT PRIMARY KEY,
-  script_slug TEXT NOT NULL,
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
  
