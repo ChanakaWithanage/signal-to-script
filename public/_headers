@@ -50,5 +50,9 @@
 /robots.txt
   Cache-Control: public, max-age=0, must-revalidate
 
+/sitemap.xml
+  Cache-Control: public, max-age=0, must-revalidate
+  Content-Type: application/xml; charset=utf-8
+
 # /api/count and /api/download are Pages Functions, not static files:
 # _headers rules do not apply. They set Cache-Control: no-store in their responses.
