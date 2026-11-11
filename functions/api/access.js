@@ -2,14 +2,14 @@ import {ensureAccessSchema,isMember,guestUsed,noStore} from '../_lib/download-ac
 
 export async function onRequestGet({request,env}) {
   if (!env.DB) return Response.json(
-    {member:false,guestUsed:false,registrationAvailable:false,guestLimit:1},
+    {member:false,guestUsed:false,registrationAvailable:false,googleEnabled:true,guestLimit:1},
     {headers:noStore()}
   );
   try {
     await ensureAccessSchema(env.DB);
     const [member,spent]=await Promise.all([isMember(env.DB,request),guestUsed(env.DB,request)]);
     return Response.json(
-      {member,guestUsed:spent,registrationAvailable:true,guestLimit:1},
+      {member,guestUsed:spent,registrationAvailable:true,googleEnabled:true,guestLimit:1},
       {headers:noStore()}
     );
   } catch(error) {

@@ -21,3 +21,18 @@ CREATE TABLE IF NOT EXISTS free_guest_downloads (
   script_slug TEXT NOT NULL,
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+ 
+-- Google sign-in identities and sessions. Legacy unverified email data is preserved
+-- but the old registration endpoint is disabled.
+CREATE TABLE IF NOT EXISTS free_google_members (
+  google_sub TEXT PRIMARY KEY,
+  email TEXT NOT NULL,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  last_login_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE IF NOT EXISTS free_google_sessions (
+  token_hash TEXT PRIMARY KEY,
+  google_sub TEXT NOT NULL,
+  expires_at TEXT NOT NULL,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
