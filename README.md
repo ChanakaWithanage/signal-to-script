@@ -136,22 +136,20 @@ The site's `public/scripts/supertrend-visual-bridge.pine` is the Pine Script v6 
 
 Genuine images from the sample: `public/images/supertrend-visual-bridge-chart.webp` and `public/images/tv-futures-bridge-extension-popup.webp`. The popup image does not prove a trade filled. No live end-to-end execution claim is made. The home hero continues to feature the existing Supertrend + DEMA article.
 
-## Optional free signup and one guest download
+## Google sign-in and one guest download
 
-The existing script download links open an optional signup dialog. Visitors can sign up with an email address to access all downloadable scripts and installation guidance, or decline and use one free guest download per browser.
+The free download popup promotes membership and still lets visitors download one script as a guest. The signup page uses Google Identity Services (GIS), so an authenticated user can sign in again on another device and continue downloading free scripts. No payment gateway is connected.
 
-- `public/site.js`: download dialog, browser fallback and real download counts.
-- `public/join.html` and `public/join.js`: email registration form and download after signup.
-- `functions/api/access.js`, `join.js`, `logout.js`: registration status, signup and sign-out.
-- `functions/api/download.js`: checks membership or spends a one-time guest allowance before serving the file.
-- `functions/_lib/download-access.js`: Cloudflare D1 schema initialization and secure random session cookies with hashed tokens.
-- `public/privacy.html`: privacy notice.
-- `schema.sql`: D1 table definitions for manual review.
+- Production site: `https://signal-to-script.pages.dev/`
+- Google OAuth application type: **Web application**
+- Google OAuth Client ID (public, not secret): `121639481880-4lrf81h9me5o35tdv3p9jjb4gmr9983b.apps.googleusercontent.com`
+- Authorized JavaScript origin required in Google Cloud: `https://signal-to-script.pages.dev` (no trailing slash)
+- For Google Auth Platform, publish the app to **Production** when ready for public sign-in. Testing audience may be limited to configured test users.
 
-### Deployment requirements
+The frontend loads Google's official GIS JS library on `/join.html` and POSTs a Google ID token to `/api/google-login`. The Pages Function validates the RSA signature using Google's public JWKS, issuer, audience, token dates, and email verification, then uses the stable Google `sub` identifier to create or update a D1 member record. It returns a 30-day secure, HTTP-only session cookie; the D1 session stores only a hash of the random token. `/api/access` and `/api/download` check these Google sessions. Existing unverified email sessions are not recognized, and the legacy `/api/join` endpoint returns HTTP 410.
 
-Use the Cloudflare Pages D1 binding named `DB`. You can reuse the database used for existing download counters. Pages Functions create the additional tables automatically with `CREATE TABLE IF NOT EXISTS`. You can alternatively run the SQL in `schema.sql` from the D1 Console. Without the `DB` binding, email signup is disabled and guest restriction is enforced only by the browser UI; the underlying download endpoint remains available.
+The existing Cloudflare Pages **D1 binding named `DB` is required**. The same D1 used by download counts can be reused. The Functions automatically create `free_google_members`, `free_google_sessions`, and `free_guest_downloads` with `CREATE TABLE IF NOT EXISTS`; the schema is also documented in `schema.sql`. No new paid Google services or credentials are required. The Google Client ID is not a secret. Do not add a client secret to the frontend.
 
-**This is a soft limit, not a paywall:** Guest identity is one browser cookie, so switching browsers or clearing cookies resets it. The Pine Script source files are also still available publicly through static URLs and GitHub.
+The one-guest-download policy is intentionally a **soft limit**: clearing cookies or using another browser allows another guest download, and the Pine files also exist in the public repository and static asset routes. This is an invitation to register, not a paywall or a robust per-human abuse control. Consider private storage and stronger rate-limiting before introducing paid products.
 
-Email signup is unverified and does not yet include Google sign-in, password authentication or a reliable login across devices. A 30-day secure, HTTP-only browser session is issued after registration. No payment gateway is used. Promotional email consent is not assumed. Consider Google OAuth or verified email login, Turnstile, and moving files to private Cloudflare R2 if robust user identities and enforcement are eventually needed.
+CI runs syntax checks, link/schema wiring checks and offline RSA signature/claims tests in `scripts/test-google-auth.mjs`. A completed build does not prove live Google authentication: test the browser popup, an approved Google account, a successful verified D1 session, and downloading from the deployed Pages domain.

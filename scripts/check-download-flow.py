@@ -32,5 +32,10 @@ helper = (root / "functions/_lib/download-access.js").read_text(encoding="utf-8"
 assert "INSERT OR IGNORE INTO free_guest_downloads" in helper, "Missing atomic guest quota"
 assert "HttpOnly" in helper and "SameSite=Lax" in helper, "Missing secure session cookie"
 assert "showModal()" in (public / "site.js").read_text(encoding="utf-8")
-assert "free_download_sessions" in (root / "functions/api/join.js").read_text(encoding="utf-8")
+assert "free_google_sessions" in (root / "functions/api/google-login.js").read_text(encoding="utf-8")
+assert "verifyGoogleCredential" in (root / "functions/api/google-login.js").read_text(encoding="utf-8")
+assert "email signup" not in (public / "join.html").read_text(encoding="utf-8").lower()
+assert 'id="google-button"' in (public / "join.html").read_text(encoding="utf-8")
+assert "/api/google-login" in (public / "join.js").read_text(encoding="utf-8")
+assert "410" in (root / "functions/api/join.js").read_text(encoding="utf-8")
 print("Optional signup, guest quota and all four download routes verified.")
