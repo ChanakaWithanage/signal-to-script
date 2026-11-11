@@ -11,3 +11,11 @@ jobs:
       - run: python scripts/check-pine-v6.py
       - run: python scripts/check-adsense.py
       - run: python scripts/check-cache-headers.py
+      - run: python scripts/check-download-flow.py
+      - run: node --check public/site.js
+      - run: node --check public/join.js
+      - run: node --check functions/_lib/download-access.js
+      - run: node --check functions/api/download.js
+      - run: node --check functions/api/join.js
+      - run: node --check functions/api/access.js
+      - run: node --check functions/api/logout.js
