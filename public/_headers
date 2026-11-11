@@ -13,11 +13,20 @@
 /404.html
   Cache-Control: public, max-age=0, must-revalidate
 
+/join.html
+  Cache-Control: public, max-age=0, must-revalidate
+
+/privacy.html
+  Cache-Control: public, max-age=0, must-revalidate
+
 # Site CSS and JS are NOT fingerprinted: never cache them as immutable.
 /styles.css
   Cache-Control: public, max-age=0, must-revalidate
 
 /site.js
+  Cache-Control: public, max-age=0, must-revalidate
+
+/join.js
   Cache-Control: public, max-age=0, must-revalidate
 
 # Original chart screenshots can be replaced under the same URLs.
