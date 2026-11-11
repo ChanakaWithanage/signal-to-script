@@ -135,3 +135,23 @@ The article at `public/articles/automate-tradingview-strategies-chrome-extension
 The site's `public/scripts/supertrend-visual-bridge.pine` is the Pine Script v6 Supertrend example from the external extension repository. Download slug `supertrend-visual-bridge` is supported by both Cloudflare API allowlists. The existing D1 counter creates its database row on the first download.
 
 Genuine images from the sample: `public/images/supertrend-visual-bridge-chart.webp` and `public/images/tv-futures-bridge-extension-popup.webp`. The popup image does not prove a trade filled. No live end-to-end execution claim is made. The home hero continues to feature the existing Supertrend + DEMA article.
+
+## Optional free signup and one guest download
+
+The existing script download links open an optional signup dialog. Visitors can sign up with an email address to access all downloadable scripts and installation guidance, or decline and use one free guest download per browser.
+
+- `public/site.js`: download dialog, browser fallback and real download counts.
+- `public/join.html` and `public/join.js`: email registration form and download after signup.
+- `functions/api/access.js`, `join.js`, `logout.js`: registration status, signup and sign-out.
+- `functions/api/download.js`: checks membership or spends a one-time guest allowance before serving the file.
+- `functions/_lib/download-access.js`: Cloudflare D1 schema initialization and secure random session cookies with hashed tokens.
+- `public/privacy.html`: privacy notice.
+- `schema.sql`: D1 table definitions for manual review.
+
+### Deployment requirements
+
+Use the Cloudflare Pages D1 binding named `DB`. You can reuse the database used for existing download counters. Pages Functions create the additional tables automatically with `CREATE TABLE IF NOT EXISTS`. You can alternatively run the SQL in `schema.sql` from the D1 Console. Without the `DB` binding, email signup is disabled and guest restriction is enforced only by the browser UI; the underlying download endpoint remains available.
+
+**This is a soft limit, not a paywall:** Guest identity is one browser cookie, so switching browsers or clearing cookies resets it. The Pine Script source files are also still available publicly through static URLs and GitHub.
+
+Email signup is unverified and does not yet include Google sign-in, password authentication or a reliable login across devices. A 30-day secure, HTTP-only browser session is issued after registration. No payment gateway is used. Promotional email consent is not assumed. Consider Google OAuth or verified email login, Turnstile, and moving files to private Cloudflare R2 if robust user identities and enforcement are eventually needed.
