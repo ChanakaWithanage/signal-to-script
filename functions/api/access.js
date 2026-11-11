@@ -1,22 +1,16 @@
-import {ensureAccessSchema,isMember,guestUsed,noStore} from '../_lib/download-access.js';
+import {ensureAccessSchema,isMember,noStore} from '../_lib/download-access.js';
 
 export async function onRequestGet({request,env}) {
-  if (!env.DB) return Response.json(
-    {member:false,guestUsed:false,registrationAvailable:false,googleEnabled:true,guestLimit:1},
-    {headers:noStore()}
-  );
-  try {
+  if(!env.DB)return Response.json({member:false,registrationAvailable:false,googleEnabled:true},{headers:noStore()});
+  try{
     await ensureAccessSchema(env.DB);
-    const [member,spent]=await Promise.all([isMember(env.DB,request),guestUsed(env.DB,request)]);
-    return Response.json(
-      {member,guestUsed:spent,registrationAvailable:true,googleEnabled:true,guestLimit:1},
-      {headers:noStore()}
-    );
-  } catch(error) {
-    console.error('Could not check free download access',error);
-    return Response.json(
-      {error:'Free download access is temporarily unavailable.'},
-      {status:503,headers:noStore()}
-    );
+    return Response.json({
+      member:await isMember(env.DB,request),
+      registrationAvailable:true,
+      googleEnabled:true
+    },{headers:noStore()});
+  }catch(error){
+    console.error('Could not check download access',error);
+    return Response.json({error:'Sign-in service is temporarily unavailable.'},{status:503,headers:noStore()});
   }
 }
