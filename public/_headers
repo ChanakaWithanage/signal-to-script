@@ -40,7 +40,7 @@
 
 # Public Pine Script files may be updated without a filename change.
 /scripts/*
-  Cache-Control: public, max-age=0, must-revalidate
+  Cache-Control: private, no-store
   X-Content-Type-Options: nosniff
 
 # Site verification and crawler directives should always be current.
