@@ -27,8 +27,7 @@ dialog.innerHTML='<div class="gate-head"><span class="eyebrow">Free Pine Script 
  '<ul><li>Complete Pine Script source code</li><li>Help with setup and configuration</li><li>Access to more free indicator downloads</li></ul>'+
  '<a class="btn gate-join" href="/join.html">Join free and download</a>'+
  '<button type="button" class="gate-guest">Continue as guest, 1 free download</button>'+
- '<p class="gate-feedback" role="status" aria-live="polite"></p>'+
- '<small>Joining is optional. Existing public source code is not paywalled.</small>';
+ '<p class="gate-feedback" role="status" aria-live="polite"></p>';
 document.body.append(dialog);
 dialog.querySelector('.gate-close').addEventListener('click',()=>dialog.close());
 dialog.addEventListener('click',e=>{if(e.target===dialog)dialog.close()});
