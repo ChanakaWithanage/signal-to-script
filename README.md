@@ -136,23 +136,25 @@ The site's `public/scripts/supertrend-visual-bridge.pine` is the Pine Script v6 
 
 Genuine images from the sample: `public/images/supertrend-visual-bridge-chart.webp` and `public/images/tv-futures-bridge-extension-popup.webp`. The popup image does not prove a trade filled. No live end-to-end execution claim is made. The home hero continues to feature the existing Supertrend + DEMA article.
 
-## Google sign-in and one guest download
+## Google sign-in required for free downloads
 
-The free download popup promotes membership and still lets visitors download one script as a guest. The signup page uses Google Identity Services (GIS), so an authenticated user can sign in again on another device and continue downloading free scripts. No payment gateway is connected.
+All website download buttons now use Google sign-in. There is no guest download option or payment requirement. The Google Identity Services button appears directly inside the download dialog so users do not need to navigate to a separate registration page. Successful sign-in automatically downloads the selected Pine Script. Returning members download immediately.
 
-- Production site: `https://signal-to-script.pages.dev/`
-- Google OAuth application type: **Web application**
-- Google OAuth Client ID (public, not secret): `121639481880-4lrf81h9me5o35tdv3p9jjb4gmr9983b.apps.googleusercontent.com`
-- Authorized JavaScript origin required in Google Cloud: `https://signal-to-script.pages.dev` (no trailing slash)
-- For Google Auth Platform, publish the app to **Production** when ready for public sign-in. Testing audience may be limited to configured test users.
+The dedicated `public/join.html` page remains available from navigation. It uses the shared Google sign-in functionality in `public/site.js` and `public/join.js`. The Google OAuth Web client must authorize `https://signaltoscript.com`.
 
-The frontend loads Google's official GIS JS library on `/join.html` and POSTs a Google ID token to `/api/google-login`. The Pages Function validates the RSA signature using Google's public JWKS, issuer, audience, token dates, and email verification, then uses the stable Google `sub` identifier to create or update a D1 member record. It returns a 30-day secure, HTTP-only session cookie; the D1 session stores only a hash of the random token. `/api/access` and `/api/download` check these Google sessions. Existing unverified email sessions are not recognized, and the legacy `/api/join` endpoint returns HTTP 410.
+- `functions/api/google-login.js` verifies Google's signed ID token and creates a secure, HttpOnly, 30-day session whose random token is hashed in Cloudflare D1.
+- `functions/api/access.js` reports membership session status.
+- `functions/api/download.js` returns HTTP 401 without a valid Google session and HTTP 503 if D1 is missing or unavailable. Only authorized requests can download scripts.
+- `functions/scripts/_middleware.js` validates the session before serving direct `/scripts/*.pine` static asset URLs, preventing an easy website download bypass.
+- `functions/_lib/download-access.js` retains only Google member session helpers.
+- `public/_headers` and the functions set no-store caching on script responses.
+- `scripts/check-download-flow.py` checks both API and direct asset access policies.
 
-The existing Cloudflare Pages **D1 binding named `DB` is required**. The same D1 used by download counts can be reused. The Functions automatically create `free_google_members`, `free_google_sessions`, and `free_guest_downloads` with `CREATE TABLE IF NOT EXISTS`; the schema is also documented in `schema.sql`. No new paid Google services or credentials are required. The Google Client ID is not a secret. Do not add a client secret to the frontend.
+Cloudflare Pages requires the existing D1 binding named `DB`. Legacy guest database rows are not used; this change does not delete historical data. The deprecated unverified email signup still returns HTTP 410.
 
-The one-guest-download policy is intentionally a **soft limit**: clearing cookies or using another browser allows another guest download, and the Pine files also exist in the public repository and static asset routes. This is an invitation to register, not a paywall or a robust per-human abuse control. Consider private storage and stronger rate-limiting before introducing paid products.
+**After deployment:** Confirm that unsigned requests to `/api/download?script=supertrend-dema-reversal` and `/scripts/supertrend-dema-reversal.pine` return 401. Confirm the Google popup signs in successfully, automatically downloads the selected script, and lets returning users download immediately. Cloudflare zone Cache Rules should not cache the protected routes.
 
-CI runs syntax checks, link/schema wiring checks and offline RSA signature/claims tests in `scripts/test-google-auth.mjs`. A completed build does not prove live Google authentication: test the browser popup, an approved Google account, a successful verified D1 session, and downloading from the deployed Pages domain.
+**Source visibility:** The GitHub repository still publicly contains the Pine Script files. This changes access to download routes on the website, not GitHub repository permissions. Private storage or a private repository would be necessary for fully private source distribution.
 
 ## SEO migration to signaltoscript.com
 
