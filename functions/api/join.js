@@ -14,7 +14,7 @@ export async function onRequestPost({request,env}) {
   catch {return Response.json({error:'Invalid form data.'},{status:400,headers});}
   if (data.website) return Response.json({error:'Unable to process this signup.'},{status:400,headers});
   const email=typeof data.email === 'string' ? data.email.trim().toLowerCase() : '';
-  if(email.length<6 || email.length>254 || !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)) {
+  if(email.length<6 || email.length>254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return Response.json({error:'Enter a valid email address.'},{status:400,headers});
   }
   if(data.accepted !== true) return Response.json(
