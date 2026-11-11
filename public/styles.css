@@ -143,3 +143,9 @@
 [hidden]{display:none!important}
 @media(max-width:850px){.join-layout{grid-template-columns:1fr;gap:30px;padding-top:45px}.join-card{max-width:600px}}
 @media(max-width:580px){.download-gate{padding:21px 19px}.download-gate h2{font-size:28px}.join-card{padding:24px 21px}.join-layout{padding-bottom:65px}.join-copy h1{font-size:38px}}
+
+/* Google Identity Services signup button. */
+.join-google-intro{font-size:14px;line-height:1.7;color:var(--muted);margin:0 0 18px}
+.join-google-button{min-height:45px;display:flex;align-items:center;justify-content:flex-start;max-width:100%}
+.join-google-button iframe{max-width:100%}
+.join-google-privacy{font-size:12px;line-height:1.6;color:var(--muted);margin:12px 0 0}
