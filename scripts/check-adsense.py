@@ -14,7 +14,9 @@ ads_file = ROOT / "ads.txt"
 if not ads_file.exists() or ADS_LINE not in ads_file.read_text(encoding="utf-8").splitlines():
     errors.append("public/ads.txt: publisher entry missing")
 
-pages = sorted(p for p in ROOT.rglob("*.html") if p.name != "404.html")
+pages = sorted(p for p in ROOT.rglob("*.html") if p.name not in {"404.html", "join.html", "privacy.html"})
+for private_page in ("join.html", "privacy.html"):
+    assert LOADER not in (ROOT / private_page).read_text(encoding="utf-8"), private_page
 if not pages:
     errors.append("No public HTML content pages found")
 
