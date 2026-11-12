@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gold 15-Minute Breakout Strategy: Free Pine Script v6 + Backtest</title>
+<meta name="description" content="Explore a free 15-minute gold breakout strategy for TradingView. See its entry rules, risk settings, real backtest screenshots and Pine Script v6 download.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://signaltoscript.com/articles/gold-breakout-15m-strategy.html">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="stylesheet" href="/styles.css">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Gold 15-Minute Breakout Strategy: Rules, Backtest and Free Pine Script">
+<meta property="og:description" content="One overnight range, one trade a day. Explore the real TradingView charts, backtest and downloadable Pine Script v6 strategy.">
+<meta property="og:url" content="https://signaltoscript.com/articles/gold-breakout-15m-strategy.html">
+<meta property="og:image" content="https://signaltoscript.com/images/gold-breakout-15m-chart.webp">
+<meta property="og:image:width" content="1210">
+<meta property="og:image:height" content="750">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Gold 15-Minute Breakout Strategy: Rules, Backtest and Free Pine Script v6",
+  "description": "A practical guide to the Gold Breakout 15M TradingView strategy, including real historical results, trade examples, broker time settings and free Pine Script v6 source.",
+  "datePublished": "2026-11-12",
+  "dateModified": "2026-11-12",
+  "mainEntityOfPage": "https://signaltoscript.com/articles/gold-breakout-15m-strategy.html",
+  "image": "https://signaltoscript.com/images/gold-breakout-15m-chart.webp",
+  "author": {"@type": "Person", "name": "CW"},
+  "publisher": {"@type": "Organization", "name": "Signal to Script", "url": "https://signaltoscript.com/"}
+}
+</script>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9855777255503695" crossorigin="anonymous"></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header"><div class="wrap head">
+<a class="brand" href="/"><span class="brand-mark">CW.</span><span class="brand-wordmark"><span class="brand-name">Signal to Script</span><span class="brand-by">by CW</span></span></a>
+<button aria-expanded="false" aria-label="Open menu" class="menu-toggle" id="menu" type="button">☰</button>
+<nav aria-label="Main navigation" class="nav" id="nav">
+<a href="/#free-scripts">Free scripts</a><a href="/#articles">Articles</a><a href="/#about">About CW</a><a href="/#support">Get help</a><a href="/join.html">Join free</a>
+</nav></div></header>
+<main id="main">
+<div class="read-wrap article-top">
+<div class="breadcrumb"><a href="/">Home</a> / <a href="/#free-scripts">Free TradingView scripts</a> / Gold Breakout 15M</div>
+<div class="eyebrow">Gold trading strategy · Pine Script v6 · Free download</div>
+<h1>Gold 15-Minute Breakout Strategy: One Range, One Trade a Day</h1>
+<p class="lead">Gold can spend hours moving inside a tight range before making its next move. Instead of guessing which way it will break, this strategy tracks the overnight high and low, waits for price to cross either boundary, and takes at most one trade for the day. I tested it on the 15-minute gold chart and kept the actual screenshots, including the losing trades.</p>
+<div class="article-meta">By CW · Published November 12, 2026 · TradingView strategy · Free Pine Script v6</div>
+<figure class="gold-lead-image">
+  <a href="/images/gold-breakout-15m-chart.webp" target="_blank" rel="noopener noreferrer" aria-label="Open the full Gold Breakout 15M TradingView strategy chart">
+    <img src="/images/gold-breakout-15m-chart.webp" width="1210" height="750" alt="Real TradingView gold 15-minute chart with purple overnight range, short entry, stop area, and a green profitable trade box" fetchpriority="high">
+  </a>
+  <figcaption>The Gold Breakout 15M strategy on a real TradingView chart. The purple area shows the overnight range, with trade boxes and entry and exit labels. <a href="/images/gold-breakout-15m-chart.webp" target="_blank" rel="noopener noreferrer">Open full chart</a>.</figcaption>
+</figure>
+<div class="gold-early-download" id="download">
+  <div class="gold-download-copy">
+    <div class="release-label">Free strategy · Complete Pine Script v6 source</div>
+    <h2>Want to try this on your gold chart?</h2>
+    <p>Get the full Gold Breakout 15M strategy, including its risk settings, dashboard and alert templates. Download the code and add it to TradingView to test your own symbol and broker session.</p>
+  </div>
+  <div class="gold-download-action">
+    <a class="btn" href="/api/download?script=gold-breakout-15m" download="gold-breakout-15m.pine">Get the free strategy ↓</a>
+    <span class="gold-download-trust">Free download · Google sign-in required · No credit card</span>
+    <span class="download-meta" data-download-count="gold-breakout-15m" aria-live="polite">Download count available after launch</span>
+  </div>
+</div>
+<p class="gold-small-disclaimer">The figures below are historical Strategy Tester results, not a forecast. The test does not include spread and assumes zero slippage.</p>
+</div>
+<section class="article"><div class="read-wrap article-body">
+<h2>What makes this breakout strategy different?</h2>
+<p>Many breakout scripts keep opening new trades whenever price moves above or below a level. This one is deliberately more restrained. It builds one range from the early part of the broker day, places two pending breakout orders, and only allows the first one to become a position. After that, it is finished for the day.</p>
+<p>There is also no fixed take-profit target. A trade stays open until its stop-loss is hit or the configured closing time arrives. That makes the rules easy to follow, although it also means a profitable trade can give back part of its move before the time exit.</p>
+<div class="gold-quick-facts" aria-label="Default Gold Breakout 15M strategy settings">
+  <div><strong>00:00 to 07:00</strong><span>Build the overnight range</span></div>
+  <div><strong>07:00</strong><span>Start looking for a breakout</span></div>
+  <div><strong>1 trade</strong><span>Maximum per broker day</span></div>
+  <div><strong>20:00</strong><span>Close any open position</span></div>
+</div>
+<p>Those hours use broker time, not necessarily your local time. The default fixed timezone is GMT+3, and the script also has a New York + 7 hours broker clock mode for brokers following that convention.</p>
+
+<h2>How a trade is opened and closed</h2>
+<ol class="gold-steps">
+<li><strong>Build the range.</strong> Between 00:00 and 07:00, the script records the highest high and lowest low on the chart.</li>
+<li><strong>Place both breakout orders.</strong> At the end of that window, it prepares a buy stop at the range high and a sell stop at the range low. These are pending orders, not market orders placed simply because the clock reaches 07:00.</li>
+<li><strong>Take the first breakout.</strong> The first order filled becomes that day's position. The opposite order is cancelled, so the strategy does not reverse and trade back and forth all day.</li>
+<li><strong>Exit by stop or time.</strong> There is no take-profit. An open position closes at its stop-loss or is scheduled to close at 20:00 broker time. The script runs on confirmed bars, so the close order fills on the next available bar in the TradingView simulation.</li>
+</ol>
+<p>It is possible to have no trade on a day when neither boundary is crossed during the trading window. The strategy also skips the first day of loaded chart history because the overnight range may be incomplete.</p>
+
+<h2>What the long and short trades look like</h2>
+<p>The source document includes both directions, which is useful because the strategy does not assume that gold has to rise. It reacts to the boundary that breaks first.</p>
+<figure class="gold-figure">
+<a href="/images/gold-breakout-15m-long.webp" target="_blank" rel="noopener noreferrer"><img src="/images/gold-breakout-15m-long.webp" width="985" height="774" loading="lazy" alt="Historical gold breakout long trade after a 3919.20 to 3964.77 overnight range, ending with a positive 283.54 USD time exit"></a>
+<figcaption>Long example from the supplied TradingView chart: range 3,919.20 to 3,964.77. The buy breakout was filled and the 20:00 time exit recorded +283.54 USD, or +2.55R.</figcaption>
+</figure>
+<figure class="gold-figure gold-figure-narrow">
+<a href="/images/gold-breakout-15m-short.webp" target="_blank" rel="noopener noreferrer"><img src="/images/gold-breakout-15m-short.webp" width="632" height="775" loading="lazy" alt="Historical gold short trade after a 3990.00 to 4026.41 overnight range, showing downward follow-through and a positive time exit"></a>
+<figcaption>Short example: range 3,990.00 to 4,026.41. Price broke the lower boundary, and the documented time exit finished at +252.22 USD.</figcaption>
+</figure>
+<p>These are individual examples from the historical test, not a typical daily profit or a promise about what the next breakout will do.</p>
+
+<h2>Gold Breakout 15M backtest results</h2>
+<p>I used the TradingView Strategy Tester on <strong>TVC:GOLD, 15-minute candles</strong>, for August 3 to November 11, 2026. The test started with 10,000 USD. Over that sample, the strategy closed 67 trades, of which 40 were profitable and 27 were losing trades.</p>
+<div class="gold-stats" aria-label="Historical TradingView backtest summary">
+<div><span>Net P&amp;L</span><strong>+$1,783.94</strong><small>+17.84% on 10,000 USD</small></div>
+<div><span>Win rate</span><strong>59.7%</strong><small>40 of 67 trades</small></div>
+<div><span>Profit factor</span><strong>1.893</strong><small>Historical test</small></div>
+<div><span>Max drawdown</span><strong>3.49%</strong><small>390.57 USD, Strategy Tester</small></div>
+</div>
+<figure class="gold-figure gold-figure-wide">
+<a href="/images/gold-breakout-15m-equity.webp" target="_blank" rel="noopener noreferrer"><img src="/images/gold-breakout-15m-equity.webp" width="1800" height="712" loading="lazy" alt="TradingView Gold Breakout 15M cumulative profit and loss curve from August to November 2026, rising to approximately 1784 USD"></a>
+<figcaption>Actual cumulative P&amp;L screenshot from TradingView Strategy Tester over the reported sample. <a href="/images/gold-breakout-15m-equity.webp" target="_blank" rel="noopener noreferrer">View full screenshot</a>.</figcaption>
+</figure>
+<p>The average winner was 94.72 USD and the average loser was 74.10 USD, giving a payoff ratio of 1.28. The reported expectancy was +26.69 USD per trade, or about +0.26R, and the longest losing streak was five trades. The separate intrabar drawdown estimate shown in the script was 4.36%, which is higher than the Strategy Tester drawdown figure.</p>
+<figure class="gold-figure gold-figure-wide">
+<a href="/images/gold-breakout-15m-performance.webp" target="_blank" rel="noopener noreferrer"><img src="/images/gold-breakout-15m-performance.webp" width="1781" height="621" loading="lazy" alt="Gold Breakout 15M TradingView Strategy Tester profit by long and short direction with return and trade distribution charts"></a>
+<figcaption>Trade distribution and directional results from the Strategy Tester. This helps show the winning and losing trades, not just the equity curve.</figcaption>
+</figure>
+<p>A good-looking backtest is a starting point for investigation, not a reason to assume live profitability. This is roughly a three-month sample on one data feed. The published test used 0.40 USD commission per order, zero slippage, and did not model spread. Different gold feeds, trading costs, contract specifications and session clocks can change the result substantially. Small differences between the original screenshot panels reflect live chart updates and an open trade at capture time.</p>
+
+<h2>Risk management is part of the strategy, not an afterthought</h2>
+<p>The default stop is 1% from the entry price. You can change it to the opposite boundary of the overnight range if you prefer a stop based on market structure. In percentage mode, the script recalculates the stop once using the actual simulated fill price.</p>
+<p>Position size can be based on a target percentage of account equity at risk, set to 1% by default, or entered as a fixed quantity. The calculated order size is capped by the maximum leverage setting, 10x by default, and rounded down to the symbol's quantity step. If a position is smaller than one allowed step, the strategy skips it.</p>
+<p>The risk amount is a planning estimate, not a guaranteed maximum loss. Gaps, commissions, spread, slippage and execution behavior can increase realized losses. For futures such as Micro Gold (MGC), review the contract's point value, contract step, trading session and the broker's margin requirements before trusting the position size or comparing backtests. The results above were not tested on MGC.</p>
+<p>An optional prop-firm-style guard can close positions and halt the day's trading after an estimated daily equity drawdown threshold. It is off by default, acts at bar close, and cannot guarantee compliance with a firm's loss limit.</p>
+
+<h2>A dashboard that explains what the script is doing</h2>
+<p>The chart includes a dashboard so you do not have to guess why a trade did or did not appear. It shows the current session, trend relative to the range, planned stop levels, risk amount, position size, leverage, open P&amp;L, and the running strategy statistics.</p>
+<figure class="gold-figure gold-dashboard-figure">
+<a href="/images/gold-breakout-15m-dashboard.webp" target="_blank" rel="noopener noreferrer"><img src="/images/gold-breakout-15m-dashboard.webp" width="258" height="643" loading="lazy" alt="Gold Breakout 15M on-chart dashboard showing signal status, range, long and short position plans, win rate, profit factor and expectancy"></a>
+<figcaption>The dashboard from the supplied chart. You can reposition it or hide its statistics in the settings.</figcaption>
+</figure>
+
+<h2>Settings worth checking before your first test</h2>
+<p>Start with the 15-minute chart and regular candles. The range is most accurate when the chart interval divides an hour evenly, such as 5, 10, 15, 30 or 60 minutes. The strategy warns about nonstandard charts or incompatible timeframes but does not automatically disable trades for those warnings.</p>
+<p>The most important setting is the broker clock. If the broker's server moves between GMT+2 and GMT+3 with daylight saving time, selecting a fixed GMT+3 value all year can shift your range by an hour. Use the available New York + 7 hours mode when it matches your broker, or enter the correct fixed timezone.</p>
+<div class="gold-image-pair">
+<figure class="gold-figure"><a href="/images/gold-breakout-15m-settings.webp" target="_blank" rel="noopener noreferrer"><img src="/images/gold-breakout-15m-settings.webp" width="440" height="880" loading="lazy" alt="TradingView Gold Breakout 15M main inputs for broker time, range hours, stop-loss and risk sizing"></a><figcaption>Main session and risk settings.</figcaption></figure>
+<figure class="gold-figure"><a href="/images/gold-breakout-15m-visual-options.webp" target="_blank" rel="noopener noreferrer"><img src="/images/gold-breakout-15m-visual-options.webp" width="447" height="865" loading="lazy" alt="Gold Breakout 15M optional dashboard, entry labels, accuracy warnings, performance chart and visual display settings"></a><figcaption>Visual controls and dashboard options.</figcaption></figure>
+</div>
+<p>The built-in cumulative P&amp;L panel is optional and off by default. It uses trades available on the loaded chart, so it should not be confused with results from a separate Deep Backtesting range.</p>
+
+<h2>Alerts and automation</h2>
+<p>The Pine v6 strategy includes order alert messages for entries and exits. You can choose readable text or editable JSON templates containing the symbol, direction, order level, stop, quantity and range. It can be connected to a webhook workflow when the TradingView account and downstream service support that setup.</p>
+<p>For a TradingView strategy alert, use <code>{{strategy.order.alert_message}}</code> as the alert message. The script also includes an optional secret placeholder. Treat that value as sensitive because it is stored in chart settings, and never share a screenshot that exposes it.</p>
+<figure class="gold-figure gold-alerts-figure">
+<a href="/images/gold-breakout-15m-alerts.webp" target="_blank" rel="noopener noreferrer"><img src="/images/gold-breakout-15m-alerts.webp" width="438" height="880" loading="lazy" alt="TradingView Gold Breakout 15M editable text and JSON webhook entry and exit alert templates"></a>
+<figcaption>Editable alert templates shown in the strategy settings. Alert availability still depends on your TradingView plan.</figcaption>
+</figure>
+<p>For a separate example of visual-signal automation without relying on TradingView technical alerts, read the <a href="/articles/automate-tradingview-strategies-chrome-extension.html">TradingView to Binance visual bridge guide</a>. That is a different implementation, not an automatic feature of this gold strategy.</p>
+
+<h2>How to install the free Pine Script in TradingView</h2>
+<ol>
+<li>Use the free download button to get <code>gold-breakout-15m.pine</code>. The site asks you to sign in with Google once; it does not ask for your trading account credentials.</li>
+<li>Open TradingView and select the gold chart or another instrument you want to test.</li>
+<li>Open Pine Editor, paste the source code from the downloaded file, save it, and add the strategy to the chart.</li>
+<li>Set the chart timeframe to 15 minutes, then check broker timezone, range hours, stop-loss, risk and commission settings.</li>
+<li>Open Strategy Tester and compare the signals, fills and costs with your own market and data feed before considering any live use.</li>
+</ol>
+
+<h2>Common questions</h2>
+<h3>Does this gold breakout strategy repaint?</h3>
+<p>The supplied code evaluates its strategy logic on completed bars and submits orders for simulated fills from the next bar. It does not use an intentional future-bar lookahead mechanism. That does not mean all historical and live fills will match, especially with gaps, intrabar volatility or different market data.</p>
+<h3>Can I use it on XAUUSD or Micro Gold futures?</h3>
+<p>The script can be added to other compatible symbols, and it contains size-label handling for several gold instruments. The documented backtest is specifically for TVC:GOLD on the 15-minute chart. XAUUSD and MGC have different data, spread, contract and broker-session characteristics, so test them separately.</p>
+<h3>Why is there no take-profit?</h3>
+<p>That is part of the setup. The position is allowed to run until the stop-loss or closing time. You can adjust stop placement, but the supplied version does not have a fixed profit target.</p>
+<h3>Why do my backtest results look different?</h3>
+<p>Check that the symbol, date range, broker timezone, commission, slippage, contract size and TradingView Strategy Tester settings match. The source test used zero slippage and did not include spread. Even a one-hour session shift can change which range gets traded.</p>
+
+<div class="download gold-download-bottom" id="download-strategy">
+  <div class="release-label">Free Gold Breakout 15M · Pine Script v6</div>
+  <h2>Ready to put the rules on your chart?</h2>
+  <p>Download the complete strategy and test it with your own gold symbol, timezone and costs. The code includes the range visuals, risk controls, dashboard and order alerts.</p>
+  <a class="btn" href="/api/download?script=gold-breakout-15m" download="gold-breakout-15m.pine">Download Gold Breakout 15M ↓</a>
+  <div class="download-meta" data-download-count="gold-breakout-15m" aria-live="polite">Download count available after launch</div>
+  <p class="gold-download-footnote">One Google sign-in unlocks the free scripts on this site. No credit card required.</p>
+</div>
+<p class="support-note">Having trouble installing or configuring this strategy? Email <a href="mailto:support@signaltoscript.com">support@signaltoscript.com</a>. I can help you check the script setup, but backtest figures are not financial advice.</p>
+<p>Want to compare a different approach? You can also try the free <a href="/articles/supertrend-dema-reversal-strategy.html">Supertrend + DEMA reversal strategy</a>, which follows trend signals rather than daily range breakouts.</p>
+<div class="author-card"><div class="author-monogram">CW.</div><div><strong>Written by CW</strong><p>Sharing free TradingView scripts, strategy experiments and practical Pine Script development notes.</p></div></div>
+</div></section>
+</main>
+<footer class="footer"><div class="wrap foot"><div>© 2026 Signal to Script · by CW. Independent Pine Script guides and examples.</div><div>TradingView is a trademark of its respective owner. Historical results are not financial advice.</div></div><nav class="policy-links" aria-label="Legal and business policies"><a href="/terms.html">Terms &amp; Conditions</a><a href="/refunds.html">Refund &amp; Cancellation</a><a href="/privacy.html">Privacy Policy</a><a href="mailto:support@signaltoscript.com">support@signaltoscript.com</a></nav></footer>
+<script defer src="/site.js"></script>
+</body></html>
