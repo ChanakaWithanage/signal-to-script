@@ -26,7 +26,7 @@ for line in headers.splitlines():
         rules[current][name.lower()] = value.strip()
 
 revalidate = "public, max-age=0, must-revalidate"
-for path in ["/", "/index.html", "/articles/*", "/404.html", "/join.html", "/privacy.html", "/styles.css", "/site.js", "/join.js", "/ads.txt", "/robots.txt", "/sitemap.xml"]:
+for path in ["/", "/index.html", "/articles/*", "/404.html", "/join.html", "/privacy.html", "/terms.html", "/refunds.html", "/styles.css", "/site.js", "/join.js", "/ads.txt", "/robots.txt", "/sitemap.xml"]:
     assert rules[path]["cache-control"] == revalidate, path
 assert rules["/images/*"]["cache-control"] == "public, max-age=3600, must-revalidate"
 assert rules["/favicon.svg"]["cache-control"] == "public, max-age=86400, must-revalidate"
