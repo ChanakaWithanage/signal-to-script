@@ -6,7 +6,7 @@ import re
 root=Path(__file__).resolve().parents[1]
 public=root/"public"
 slugs={p.stem for p in (public/"scripts").glob("*.pine")}
-assert len(slugs)>=4, "Expected all four published Pine Scripts"
+assert len(slugs)>=5, "Expected all five published Pine Scripts"
 for page in public.rglob("*.html"):
     if page.name=="404.html":
         continue
@@ -61,3 +61,10 @@ assert "Gmail" in site and "Google Drive" in (public/"privacy.html").read_text(e
 assert 'href="/privacy.html"' in (public/"index.html").read_text(encoding="utf-8")
 assert "410" in (root/"functions/api/join.js").read_text(encoding="utf-8")
 print("Google sign-in required on API and direct assets; guest download removed.")
+
+# Gold strategy conversion placement and source wiring.
+gold = (public/"articles/gold-breakout-15m-strategy.html").read_text(encoding="utf-8")
+assert gold.index('class="gold-lead-image"') < gold.index('id="download"') < gold.index("What makes this breakout"), "Early download CTA should immediately follow hero chart"
+assert gold.count("/api/download?script=gold-breakout-15m") >= 2
+assert "2026" in gold and "59.7%" in gold and "1.893" in gold
+assert "gold-breakout-15m" in site
