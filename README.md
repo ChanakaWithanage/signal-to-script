@@ -51,7 +51,7 @@ D1 is required for Google-authenticated downloads. Without D1, sign-in and downl
 
 ## Contact link
 
-Support currently points to GitHub issues in this new repository. Update the URL to your preferred Fiverr contact/profile or verified email if desired.
+Public customer support uses support@signaltoscript.com. Cloudflare Email Routing forwards incoming mail to the configured private destination inbox. GitHub repository links are retained only for project source and downloads.
 
 ## Attribution and publishing rights
 
@@ -222,11 +222,17 @@ The following user-facing policies are published with canonical URLs on the prod
 
 All content pages, including the 404 page, contain a shared policy footer linking to all three documents and the existing support section. Policy and sign-in pages do not load Google AdSense; the Stage 1/2 download modal, Google sign-in, retry/fallback UX and optional R2 delivery are unchanged. The sitemap lists all policy URLs and CI verifies canonical links, policy footers, ad placement and cache headers.
 
-**Still required for PayHere merchant review:** publish accurate, working merchant contact information that matches the PayHere application (legal/registered business or freelance name, email, phone and postal/business address). Do not invent these details in code. PayHere may also expect the actual paid offering, pricing, ordering/checkout process and proof of business; the present site focuses on free script downloads, and PayHere checkout has not yet been integrated. Approval is decided by PayHere and its bank partners.
+**Still required for PayHere merchant review:** publish accurate merchant identity details that match the PayHere application (legal/registered business or freelance name, phone and postal/business address); support@signaltoscript.com is now publicly linked. Do not invent these details in code. PayHere may also expect the actual paid offering, pricing, ordering/checkout process and proof of business; the present site focuses on free script downloads, and PayHere checkout has not yet been integrated. Approval is decided by PayHere and its bank partners.
 
-Review the written policy terms and refund/cancellation commitments before accepting payments. For private payment or data deletion requests, the existing public GitHub support issue is not sufficient as a confidential customer contact channel. Establish an actual monitored business email or private contact form first.
+Review the written policy terms and refund/cancellation commitments before accepting payments. Private support, refund and account deletion requests now use support@signaltoscript.com rather than public GitHub Issues. Cloudflare Email Routing forwards incoming messages; sending replies from this branded address needs a separate outgoing mail provider or SMTP setup.
 
 Official guidance:
 - https://support.payhere.lk/policy-samples
 - https://support.payhere.lk/application-process
 - https://blog.payhere.lk/attention-spiders-here-are-the-must-haves-of-your-payhere-affiliated-website/
+
+## Public business support address
+
+The website displays `support@signaltoscript.com` as the customer support contact in the footer, homepage support section, every published article, and Terms, Refund and Privacy policies. The email uses a `mailto:` link.
+
+Cloudflare Email Routing receives and forwards email but does not host an outgoing mailbox. Configure an outgoing mail service if customer replies must come from `support@signaltoscript.com`. Never put account credentials or payment card details into public GitHub Issues or website copy. Do not claim the business phone or physical address has been verified or added; those may still be needed for PayHere merchant approval.
