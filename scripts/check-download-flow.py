@@ -13,10 +13,10 @@ for page in public.rglob("*.html"):
     html=page.read_text(encoding="utf-8")
     assert "—" not in html, f"Em dash in {page}"
     assert 'href="/join.html"' in html, f"Sign-in navigation missing in {page}"
-    if page.name not in {"join.html", "privacy.html"}:
+    if page.name not in {"join.html", "privacy.html", "terms.html", "refunds.html"}:
         assert "ca-pub-9855777255503695" in html, f"AdSense missing in {page}"
     else:
-        assert "googlesyndication.com" not in html, f"Ads should not load on sign-in or privacy pages: {page}"
+        assert "googlesyndication.com" not in html, f"Ads should not load on sign-in or policy pages: {page}"
     assert "download one script as a guest" not in html.lower(), page
     for slug in re.findall(r"/api/download\?script=([a-z0-9-]+)",html):
         assert slug in slugs, (page,slug)
