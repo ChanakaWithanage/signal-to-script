@@ -8,7 +8,8 @@ const scripts={
   'supertrend-dema-reversal':'Supertrend + DEMA Reversal Strategy',
   '1r-bear-breakout-achievements':'1R Bear Breakout Achievements',
   'goat-trap-pinbar-3ls-combo':'Goat Trap Pinbar + 3LS',
-  'supertrend-visual-bridge':'Supertrend Visual Bridge'
+  'supertrend-visual-bridge':'Supertrend Visual Bridge',
+  'gold-breakout-15m':'Gold Breakout 15M Strategy'
 };
 const GOOGLE_CLIENT_ID='121639481880-4lrf81h9me5o35tdv3p9jjb4gmr9983b.apps.googleusercontent.com';
 async function refreshCounts(){
