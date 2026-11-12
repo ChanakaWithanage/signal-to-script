@@ -36,7 +36,7 @@ window.addEventListener('signal-signin-error',event=>{
     const response=await fetch('/api/access',{credentials:'same-origin',cache:'no-store'});
     if(!response.ok)throw Error('Sign-in service is temporarily unavailable.');
     const state=await response.json();
-    if(state.member){joined();return}
+    if(state.member){joined();if(valid)downloadSelected();return}
     if(!state.registrationAvailable)throw Error('Free sign-in is temporarily unavailable.');
     await window.SignalDownloads.mountGoogleButton(document.getElementById('google-button'));
   }catch(error){status.textContent=error.message}
