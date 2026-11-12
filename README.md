@@ -210,3 +210,23 @@ To switch to R2:
 6. Only after successful R2 rollout, remove the Pine files from the public static build and consider moving the repository to private hosting. Public Git history still contains prior copies, and making the repository private does not revoke previously copied source.
 
 If an object is missing from R2, the API returns 503 rather than falling back to a public asset. No migration is activated simply by merging this code; the Cloudflare bucket and binding must be configured separately. Keep the required D1 binding DB and avoid caching authenticated download routes.
+
+
+## PayHere business policies (November 2026)
+
+The following user-facing policies are published with canonical URLs on the production domain:
+
+- `https://signaltoscript.com/terms.html`: Terms & Conditions for free website content and separately agreed custom digital development.
+- `https://signaltoscript.com/refunds.html`: Refund & Cancellation Policy covering free downloads, paid custom work, cancellations, digital delivery and refunds.
+- `https://signaltoscript.com/privacy.html`: Privacy Policy for Google sign-in, D1 sessions, analytics, ads on content pages and conditional payment processing.
+
+All content pages, including the 404 page, contain a shared policy footer linking to all three documents and the existing support section. Policy and sign-in pages do not load Google AdSense; the Stage 1/2 download modal, Google sign-in, retry/fallback UX and optional R2 delivery are unchanged. The sitemap lists all policy URLs and CI verifies canonical links, policy footers, ad placement and cache headers.
+
+**Still required for PayHere merchant review:** publish accurate, working merchant contact information that matches the PayHere application (legal/registered business or freelance name, email, phone and postal/business address). Do not invent these details in code. PayHere may also expect the actual paid offering, pricing, ordering/checkout process and proof of business; the present site focuses on free script downloads, and PayHere checkout has not yet been integrated. Approval is decided by PayHere and its bank partners.
+
+Review the written policy terms and refund/cancellation commitments before accepting payments. For private payment or data deletion requests, the existing public GitHub support issue is not sufficient as a confidential customer contact channel. Establish an actual monitored business email or private contact form first.
+
+Official guidance:
+- https://support.payhere.lk/policy-samples
+- https://support.payhere.lk/application-process
+- https://blog.payhere.lk/attention-spiders-here-are-the-must-haves-of-your-payhere-affiliated-website/
