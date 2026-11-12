@@ -28,16 +28,21 @@ refreshCounts();
 const dialog=document.createElement('dialog');
 dialog.className='download-gate';
 dialog.setAttribute('aria-labelledby','gate-title');
-dialog.innerHTML='<div class="gate-head"><span class="eyebrow">Free Pine Script v6</span><button type="button" class="gate-close" aria-label="Close">×</button></div>'+
-  '<h2 id="gate-title">Your free script is one sign-in away</h2>'+
-  '<p>Continue with Google to get the complete Pine Script and help with setup. No payment or password to create.</p>'+
-  '<p class="gate-selected"></p>'+
-  '<div class="gate-google-button" id="gate-google-button"></div>'+
+dialog.setAttribute('aria-describedby','gate-description');
+dialog.innerHTML='<div class="gate-head"><span class="eyebrow">Free Pine Script v6 download</span><button type="button" class="gate-close" aria-label="Close download dialog">×</button></div>'+
+  '<h2 id="gate-title">Your free script is ready</h2>'+
+  '<p id="gate-description">Continue with Google once. Your selected script will download automatically after sign-in.</p>'+
+  '<div class="gate-selected" role="group" aria-label="Selected script"><strong class="gate-script-name"></strong><span>Pine Script v6 · Full source code · .pine file</span></div>'+
+  '<div class="gate-google-button" id="gate-google-button" aria-label="Official Google sign-in button"></div>'+
   '<p class="gate-feedback" role="status" aria-live="polite"></p>'+
-  '<small>By continuing, you agree to our <a href="/privacy.html">privacy notice</a>.</small>';
+  '<button type="button" class="btn gate-retry" hidden>Retry download</button>'+
+  '<div class="gate-trust"><span>✓ Free, no credit card</span><span>✓ No marketing signup</span></div>'+
+  '<div class="gate-privacy"><strong>Only your Google account ID and email are used for sign-in.</strong> We do not request access to Gmail, Google Drive, or trading accounts. <a href="/privacy.html">How we handle your data</a>.</div>'+
+  '<p class="gate-help">Google button not loading? <a class="gate-full" href="/join.html">Open the sign-in page</a>.</p>';
 document.body.append(dialog);
 dialog.querySelector('.gate-close').addEventListener('click',()=>dialog.close());
 dialog.addEventListener('click',event=>{if(event.target===dialog)dialog.close()});
+dialog.querySelector('.gate-retry').addEventListener('click',async()=>{if(!selected)return;feedback('Preparing your download...');dialog.querySelector('.gate-retry').hidden=true;try{await fileDownload(selected);dialog.close()}catch(error){feedback(error.message);dialog.querySelector('.gate-retry').hidden=false}});
 let selected=null,busy=false;
 const feedback=message=>{dialog.querySelector('.gate-feedback').textContent=message};
 let googleLoader=null,googleInitialized=false;
@@ -82,11 +87,13 @@ async function fileDownload(slug){
 }
 async function onGoogleCredential(result){
   if(!result?.credential){
-    window.dispatchEvent(new CustomEvent('signal-signin-error',{detail:'Please choose a Google account to continue.'}));
+    const message='Choose a Google account to continue.';
+    if(dialog.open)feedback(message);
+    window.dispatchEvent(new CustomEvent('signal-signin-error',{detail:message}));
     return;
   }
   try{
-    if(dialog.open)feedback('Signing you in...');
+    if(dialog.open)feedback('Signing you in securely...');
     const response=await fetch('/api/google-login',{
       method:'POST',credentials:'same-origin',
       headers:{'Content-Type':'application/json'},
@@ -96,9 +103,14 @@ async function onGoogleCredential(result){
     if(!response.ok)throw Error(data.error||'Google sign-in could not be completed.');
     window.dispatchEvent(new Event('signal-signed-in'));
     if(dialog.open&&selected){
-      feedback('Preparing your script...');
-      await fileDownload(selected);
-      dialog.close();
+      feedback('Preparing your download...');
+      try{
+        await fileDownload(selected);
+        dialog.close();
+      }catch(error){
+        feedback(error.message||'Download did not complete. Try again.');
+        dialog.querySelector('.gate-retry').hidden=false;
+      }
     }
   }catch(error){
     if(dialog.open)feedback(error.message);
@@ -126,7 +138,9 @@ async function mountGoogleButton(element){
 }
 function showSignIn(slug,message=''){
   selected=slug;
-  dialog.querySelector('.gate-selected').textContent=scripts[slug];
+  dialog.querySelector('.gate-script-name').textContent=scripts[slug];
+  dialog.querySelector('.gate-full').href='/join.html?script='+encodeURIComponent(slug);
+  dialog.querySelector('.gate-retry').hidden=true;
   feedback(message);
   if(!dialog.open)dialog.showModal();
   mountGoogleButton(dialog.querySelector('#gate-google-button')).catch(error=>feedback(error.message));
@@ -139,7 +153,7 @@ async function choose(slug){
     const state=await response.json();
     if(state.member){
       try{await fileDownload(slug)}
-      catch(error){showSignIn(slug,error.status===401?'Your session ended. Sign in to continue.':error.message)}
+      catch(error){showSignIn(slug,error.status===401?'Your session ended. Sign in to continue.':error.message);if(error.status!==401)dialog.querySelector('.gate-retry').hidden=false}
     }else{
       showSignIn(slug);
     }
