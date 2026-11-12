@@ -1,6 +1,6 @@
 # Signal to Script | by CW
 
-A simple publication for free TradingView scripts, strategy breakdowns and Pine Script development notes. Static HTML/CSS/JS on **Cloudflare Pages** with optional Pages Functions + D1 download tracking.
+A simple publication for free TradingView scripts, strategy breakdowns and Pine Script development notes. Static HTML/CSS/JS on **Cloudflare Pages** with Pages Functions, required D1 membership sessions, and download tracking.
 
 ## Deployment (GitHub + Cloudflare Pages)
 
@@ -22,7 +22,7 @@ A simple publication for free TradingView scripts, strategy breakdowns and Pine 
 
 ## Enable accurate download counts
 
-Without D1, the file download still works, but the count stays hidden (`Download count available after launch`). To show the true number:
+D1 is required for Google-authenticated downloads. Without D1, sign-in and downloads are unavailable. To enable download tracking and member sessions:
 
 1. Cloudflare dashboard → **D1** → **Create Database** → name it `signal-to-script-downloads`.
 2. Open the database **Console** and execute the SQL in `schema.sql`:
@@ -169,3 +169,44 @@ The primary website address is `https://signaltoscript.com`. Cloudflare dashboar
 After deployment, verify `https://signaltoscript.com/sitemap.xml` and `https://signaltoscript.com/robots.txt` are accessible, add `signaltoscript.com` as a Domain property in Google Search Console, and submit `sitemap.xml`. For Google authentication, make sure `https://signaltoscript.com` is in Authorized JavaScript origins on the existing OAuth client before using the new domain. No new Client ID is needed.
 
 Do not add guessed sitemap `lastmod` dates or redirect every old article to the homepage. The Cloudflare redirect should preserve each original article path.
+
+
+## Free-download UX and private storage rollout (November 2026)
+
+The download dialog now displays the selected script, explains exactly why Google sign-in is needed, names the limited Google identity data stored, and starts the download automatically. It includes a retry action if the download fails and a dedicated sign-in page fallback if the Google button does not load. The sign-in page also immediately downloads a selected script for an existing member.
+
+The join and privacy pages deliberately do not load AdSense. The homepage now links to the privacy notice and explains that Google sign-in is needed before downloading.
+
+### Google authentication branding: action required in Google Cloud
+
+Google Identity Services authenticates using a signed Google ID token; the site does not request Gmail or Google Drive API access. The repository cannot verify or publish the OAuth branding.
+
+In the Google Cloud Console for the existing OAuth web client:
+1. Under Google Auth Platform > Branding, confirm the public app name Signal to Script, homepage https://signaltoscript.com/, privacy policy https://signaltoscript.com/privacy.html, and a working support contact.
+2. Verify domain ownership and make sure https://signaltoscript.com is an authorized JavaScript origin.
+3. Submit or complete Verify Branding, then Publish branding only once Google approves the application branding.
+4. Test the account chooser in a private browsing window and confirm the displayed application identity and permissions.
+
+Do not claim Google has verified the application until that is confirmed in the actual Google Cloud dashboard.
+
+Official guide: https://developers.google.com/identity/verification/authentication-verification
+
+### Optional private Cloudflare R2 migration, without forced downtime
+
+The deployed website already protects both /api/download and direct /scripts/*.pine requests with authenticated Cloudflare Pages Functions. The public GitHub repository still contains the actual Pine files; website route protection does not make those source files private on GitHub.
+
+This change adds support for a private Cloudflare R2 bucket, using the binding name SCRIPT_BUCKET. Existing authenticated static-file downloads continue to work while no R2 binding exists. When SCRIPT_BUCKET is present, the API serves ONLY R2 objects and direct static-asset downloads return 404 after the session check.
+
+To switch to R2:
+1. Create a private R2 bucket in Cloudflare, without public r2.dev or custom-domain access.
+2. Upload all published Pine files with exact object keys:
+   - supertrend-dema-reversal.pine
+   - 1r-bear-breakout-achievements.pine
+   - goat-trap-pinbar-3ls-combo.pine
+   - supertrend-visual-bridge.pine
+3. Verify the objects and their source content before changing bindings.
+4. Add the R2 bucket binding SCRIPT_BUCKET to the Cloudflare Pages project, in the intended environment; redeploy to activate.
+5. Confirm an anonymous /api/download?script=supertrend-dema-reversal request still returns 401, while an authenticated API request downloads the correct Pine file. Direct /scripts/supertrend-dema-reversal.pine must return 404 for a signed-in visitor when R2 is enabled.
+6. Only after successful R2 rollout, remove the Pine files from the public static build and consider moving the repository to private hosting. Public Git history still contains prior copies, and making the repository private does not revoke previously copied source.
+
+If an object is missing from R2, the API returns 503 rather than falling back to a public asset. No migration is activated simply by merging this code; the Cloudflare bucket and binding must be configured separately. Keep the required D1 binding DB and avoid caching authenticated download routes.
