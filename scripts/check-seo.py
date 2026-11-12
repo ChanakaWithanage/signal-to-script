@@ -38,8 +38,15 @@ assert set(urls) == expected and len(urls) == len(expected), "Unexpected sitemap
 for page in public.rglob("*.html"):
     html = page.read_text(encoding="utf-8")
     assert 'class="policy-links"' in html, f"Policy footer missing: {page}"
+    assert 'href="mailto:support@signaltoscript.com"' in html, f"Support email link missing: {page}"
+    assert "github.com/signal2chart/tradingview-binance-bridge/issues/new" not in html, f"Stale GitHub support link: {page}"
+    assert 'href="/#support">Contact</a>' not in html, f"Stale contact footer: {page}"
     for policy in ("/terms.html", "/refunds.html", "/privacy.html"):
         assert f'href="{policy}"' in html, f"Missing {policy} link in {page}"
+
+for policy_page in ("privacy.html", "terms.html", "refunds.html"):
+    html = (public / policy_page).read_text(encoding="utf-8")
+    assert "support@signaltoscript.com" in html, f"Merchant contact missing in {policy_page}"
 
 robots = (public / "robots.txt").read_text(encoding="utf-8")
 assert f"Sitemap: {domain}/sitemap.xml" in robots
