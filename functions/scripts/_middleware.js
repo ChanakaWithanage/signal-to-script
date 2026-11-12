@@ -21,6 +21,8 @@ export async function onRequest({request,env,next}){
     console.error('Direct script access check failed',error);
     return new Response('Downloads are temporarily unavailable.',{status:503,headers});
   }
+  // When private R2 is enabled, never serve a fallback static asset.
+  if(env.SCRIPT_BUCKET)return new Response('Use the website download button.',{status:404,headers});
   const response=await next();
   const resultHeaders=new Headers(response.headers);
   resultHeaders.set('Cache-Control','no-store');
