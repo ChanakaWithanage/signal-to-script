@@ -1,4 +1,4 @@
-const AVAILABLE = new Set(['supertrend-dema-reversal','1r-bear-breakout-achievements','goat-trap-pinbar-3ls-combo','supertrend-visual-bridge']);
+const AVAILABLE = new Set(['supertrend-dema-reversal','1r-bear-breakout-achievements','goat-trap-pinbar-3ls-combo','supertrend-visual-bridge','gold-breakout-15m']);
 export async function onRequestGet({ request, env }) {
   const slug = new URL(request.url).searchParams.get('script');
   if (!AVAILABLE.has(slug)) return Response.json({ error: 'Unknown script' }, { status: 404, headers: { 'Cache-Control': 'no-store' } });
