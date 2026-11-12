@@ -1,6 +1,6 @@
 import {ensureAccessSchema,isMember} from '../_lib/download-access.js';
 
-const AVAILABLE = new Set(['supertrend-dema-reversal','1r-bear-breakout-achievements','goat-trap-pinbar-3ls-combo','supertrend-visual-bridge']);
+const AVAILABLE = new Set(['supertrend-dema-reversal','1r-bear-breakout-achievements','goat-trap-pinbar-3ls-combo','supertrend-visual-bridge','gold-breakout-15m']);
 const HEADERS = {'Cache-Control':'no-store'};
 
 export async function onRequestGet({request,env}) {
