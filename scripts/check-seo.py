@@ -13,7 +13,9 @@ pages = {
     "articles/pinbar-3-line-strike-combo-alerts.html": "/articles/pinbar-3-line-strike-combo-alerts.html",
     "articles/automate-tradingview-strategies-chrome-extension.html": "/articles/automate-tradingview-strategies-chrome-extension.html",
     "join.html": "/join.html",
-    "privacy.html": "/privacy.html"
+    "privacy.html": "/privacy.html",
+    "terms.html": "/terms.html",
+    "refunds.html": "/refunds.html"
 }
 for filename, path in pages.items():
     html = (public / filename).read_text(encoding="utf-8")
@@ -31,8 +33,14 @@ for filename, path in pages.items():
 ns = {"s": "http://www.sitemaps.org/schemas/sitemap/0.9"}
 xml = ET.parse(public / "sitemap.xml")
 urls = [n.text for n in xml.findall(".//s:loc", ns)]
-expected = {domain + path for filename, path in pages.items() if filename != "privacy.html"}
+expected = {domain + path for path in pages.values()}
 assert set(urls) == expected and len(urls) == len(expected), "Unexpected sitemap URLs"
+for page in public.rglob("*.html"):
+    html = page.read_text(encoding="utf-8")
+    assert 'class="policy-links"' in html, f"Policy footer missing: {page}"
+    for policy in ("/terms.html", "/refunds.html", "/privacy.html"):
+        assert f'href="{policy}"' in html, f"Missing {policy} link in {page}"
+
 robots = (public / "robots.txt").read_text(encoding="utf-8")
 assert f"Sitemap: {domain}/sitemap.xml" in robots
 assert "Disallow: /" not in robots
