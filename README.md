@@ -236,3 +236,17 @@ Official guidance:
 The website displays `support@signaltoscript.com` as the customer support contact in the footer, homepage support section, every published article, and Terms, Refund and Privacy policies. The email uses a `mailto:` link.
 
 Cloudflare Email Routing receives and forwards email but does not host an outgoing mailbox. Configure an outgoing mail service if customer replies must come from `support@signaltoscript.com`. Never put account credentials or payment card details into public GitHub Issues or website copy. Do not claim the business phone or physical address has been verified or added; those may still be needed for PayHere merchant approval.
+
+## Gold Breakout 15M Strategy article (November 12, 2026)
+
+- Article: `public/articles/gold-breakout-15m-strategy.html`
+- Source: `public/scripts/gold-breakout-15m.pine` (Pine Script v6, supplied v1.1.0).
+- Download slug: `gold-breakout-15m`, registered in download and count endpoints and the sign-in popup.
+- Actual TradingView screenshots extracted from the supplied five-page strategy overview are published as nine descriptive WebP files under `public/images/gold-breakout-15m-*.webp`.
+- The article's primary download CTA is immediately beneath the hero image. A second CTA near the bottom follows the testing explanation. Both use the existing Google sign-in and automatic download.
+- The documented snapshot is from TVC:GOLD, 15-minute chart, August 3 to November 11, 2026. The PDF reports 67 closed trades, 59.7% win rate, +1,783.94 USD net profit and 1.893 profit factor with zero slippage and no spread modeling. It is not evidence of performance on MGC or other gold instruments.
+- SEO: unique title and description, real chart Open Graph image, descriptive image alt text, article schema, internal links and sitemap entry.
+
+**R2 note:** If a Cloudflare Pages environment has `SCRIPT_BUCKET` configured, upload `gold-breakout-15m.pine` under the identical R2 object key before publishing that environment. The private-storage path intentionally does not fall back to the public static asset, so a missing object returns HTTP 503. Without that binding, the existing signed-in static download route works.
+
+**Pine validation note:** The automated repository check verifies the `//@version=6` header, not Pine compilation or the Strategy Tester result. Compile and visually verify the script in TradingView before treating its historical results as reproducible. Publish only if you have redistribution rights to the supplied strategy code and screenshots.
