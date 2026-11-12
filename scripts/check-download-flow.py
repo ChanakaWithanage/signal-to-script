@@ -13,7 +13,10 @@ for page in public.rglob("*.html"):
     html=page.read_text(encoding="utf-8")
     assert "—" not in html, f"Em dash in {page}"
     assert 'href="/join.html"' in html, f"Sign-in navigation missing in {page}"
-    assert "ca-pub-9855777255503695" in html, f"AdSense missing in {page}"
+    if page.name not in {"join.html", "privacy.html"}:
+        assert "ca-pub-9855777255503695" in html, f"AdSense missing in {page}"
+    else:
+        assert "googlesyndication.com" not in html, f"Ads should not load on sign-in or privacy pages: {page}"
     assert "download one script as a guest" not in html.lower(), page
     for slug in re.findall(r"/api/download\?script=([a-z0-9-]+)",html):
         assert slug in slugs, (page,slug)
@@ -51,5 +54,10 @@ assert "if(!env.DB)" in download, "Downloads must fail closed without D1"
 assert "await isMember(env.DB,request)" in guard
 assert "await next()" in guard and "SIGN_IN_REQUIRED" in guard
 assert "status:401" in guard and "Cache-Control" in guard
+assert "SCRIPT_BUCKET" in download and "SCRIPT_BUCKET" in guard, "Private R2 source must fail closed when enabled"
+assert "gate-retry" in site and "gate-privacy" in site and "gate-full" in site
+assert "if(valid)downloadSelected();return" in join
+assert "Gmail" in site and "Google Drive" in (public/"privacy.html").read_text(encoding="utf-8")
+assert 'href="/privacy.html"' in (public/"index.html").read_text(encoding="utf-8")
 assert "410" in (root/"functions/api/join.js").read_text(encoding="utf-8")
 print("Google sign-in required on API and direct assets; guest download removed.")
