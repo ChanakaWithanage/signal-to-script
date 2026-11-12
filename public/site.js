@@ -159,6 +159,15 @@ async function choose(slug){
     }
   }catch(error){showSignIn(slug,error.message)}
 }
+// Make the sign-in requirement visible on article download buttons too.
+document.querySelectorAll('a[href^="/api/download?"]').forEach(a=>{
+  if(!a.nextElementSibling?.classList.contains('download-requirement')){
+    const note=document.createElement('span');
+    note.className='download-requirement';
+    note.textContent='Free · Google sign-in required';
+    a.insertAdjacentElement('afterend',note);
+  }
+});
 document.querySelectorAll('a[href^="/api/download?"]').forEach(a=>a.addEventListener('click',event=>{
   event.preventDefault();
   const slug=new URL(a.href).searchParams.get('script');
