@@ -240,3 +240,5 @@
  .gold-quick-facts strong{font-size:18px}
  .gold-image-pair{grid-template-columns:1fr;gap:0}
 }
+
+.gold-home-disclaimer{margin:13px 0 0;color:var(--muted);font-size:12px;line-height:1.65}
