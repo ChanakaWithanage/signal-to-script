@@ -180,3 +180,13 @@
  .download-gate .gate-trust{gap:8px}
  .download-requirement{max-width:100%}
 }
+
+/* Public merchant policies. Keep legal links available without distracting from downloads. */
+.policy-links{display:flex;justify-content:center;flex-wrap:wrap;gap:9px 23px;max-width:1120px;margin:20px auto 0;padding:17px 18px 0;border-top:1px solid var(--line);font-size:12px;line-height:1.6}
+.policy-links a{color:var(--muted);text-decoration:none}
+.policy-links a:hover,.policy-links a:focus-visible{color:var(--green);text-decoration:underline}
+.policy-updated{font-size:12px;color:var(--muted);margin:0}
+.policy-content{max-width:760px}
+.policy-content h2:first-child{margin-top:0}
+.policy-content p{overflow-wrap:anywhere}
+@media(max-width:580px){.policy-links{justify-content:flex-start;gap:10px 18px;margin-top:18px;padding-top:15px}}
