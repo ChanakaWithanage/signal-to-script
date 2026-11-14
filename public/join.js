@@ -1,4 +1,4 @@
-// Minimal sign-in page. Site.js loads Google and exchanges the signed ID token.
+// Free guest download or Google sign-in. Site.js provides the shared download handler.
 const params=new URLSearchParams(location.search);
 const slug=params.get('script');
 const valid=Object.hasOwn(window.SignalDownloads.scripts,slug);
@@ -23,6 +23,28 @@ async function downloadSelected(){
   }catch(error){output.textContent=error.message}
 }
 document.getElementById('join-get').addEventListener('click',downloadSelected);
+const guestButton=document.getElementById('join-guest');
+guestButton.hidden=!valid;
+guestButton.addEventListener('click',async()=>{
+  if(!valid||guestButton.disabled)return;
+  guestButton.disabled=true;
+  const output=document.getElementById('join-guest-status');
+  output.textContent='Preparing your guest download...';
+  try{
+    await window.SignalDownloads.fileDownload(slug);
+    output.textContent='Your free script has been downloaded. Continue with Google for unlimited downloads.';
+    guestButton.textContent='Guest download already used';
+  }catch(error){
+    if(error.status===403){
+      guestButton.textContent='Guest download already used';
+      output.textContent='Your guest download is used. Continue with Google to download more.';
+    }else{
+      guestButton.disabled=false;
+      output.textContent=error.message;
+    }
+  }
+});
+
 window.addEventListener('signal-signed-in',()=>{
   status.textContent='';
   joined();
@@ -37,6 +59,8 @@ window.addEventListener('signal-signin-error',event=>{
     if(!response.ok)throw Error('Sign-in service is temporarily unavailable.');
     const state=await response.json();
     if(state.member){joined();if(valid)downloadSelected();return}
+    guestButton.disabled=!!state.guestUsed;
+    if(state.guestUsed)guestButton.textContent='Guest download already used';
     if(!state.registrationAvailable)throw Error('Free sign-in is temporarily unavailable.');
     await window.SignalDownloads.mountGoogleButton(document.getElementById('google-button'));
   }catch(error){status.textContent=error.message}
