@@ -45,6 +45,12 @@ assert "a[data-download-script]" in site and "a.dataset.downloadScript" in site
 assert "google-login" in site, "Google login must work from download dialog"
 assert "signal-signed-in" in join and "downloadSelected()" in join
 assert "gate-guest" in site and "join-guest" in join, "Guest download buttons must exist"
+assert site.index('gate-google-primary') < site.index('class="gate-guest"'), "Sign-in must appear before guest option in popup"
+join_html=(public/"join.html").read_text(encoding="utf-8")
+assert join_html.index('class="join-google-primary"') < join_html.index('id="join-guest"'), "Sign-in must appear before guest option on join page"
+css=(public/"styles.css").read_text(encoding="utf-8")
+assert ".gate-google-primary" in css and ".join-google-primary" in css, "Primary Google sign-in styling missing"
+assert "claimGuestDownload" in download, "Keep one-download guest quota"
 assert 'id="google-button"' in (public/"join.html").read_text(encoding="utf-8")
 assert "free_google_sessions" in (root/"functions/api/google-login.js").read_text(encoding="utf-8")
 assert "verifyGoogleCredential" in (root/"functions/api/google-login.js").read_text(encoding="utf-8")
