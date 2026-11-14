@@ -32,8 +32,11 @@ dialog.setAttribute('aria-labelledby','gate-title');
 dialog.setAttribute('aria-describedby','gate-description');
 dialog.innerHTML='<div class="gate-head"><span class="eyebrow">Free Pine Script v6 download</span><button type="button" class="gate-close" aria-label="Close download dialog">×</button></div>'+
   '<h2 id="gate-title">Your free script is ready</h2>'+
-  '<p id="gate-description">Continue with Google once. Your selected script will download automatically after sign-in.</p>'+
+  '<p id="gate-description">Download one script as a guest, or continue with Google for unlimited free downloads.</p>'+
   '<div class="gate-selected" role="group" aria-label="Selected script"><strong class="gate-script-name"></strong><span>Pine Script v6 · Full source code · .pine file</span></div>'+
+  '<button type="button" class="gate-guest">Download once as guest</button>'+
+  '<p class="gate-guest-note">1 free guest download per browser. No account needed.</p>'+
+  '<div class="gate-separator"><span>Or sign in for unlimited free downloads</span></div>'+
   '<div class="gate-google-button" id="gate-google-button" aria-label="Official Google sign-in button"></div>'+
   '<p class="gate-feedback" role="status" aria-live="polite"></p>'+
   '<button type="button" class="btn gate-retry" hidden>Retry download</button>'+
@@ -42,6 +45,24 @@ dialog.innerHTML='<div class="gate-head"><span class="eyebrow">Free Pine Script 
   '<p class="gate-help">Google button not loading? <a class="gate-full" href="/join.html">Open the sign-in page</a>.</p>';
 document.body.append(dialog);
 dialog.querySelector('.gate-close').addEventListener('click',()=>dialog.close());
+dialog.querySelector('.gate-guest').addEventListener('click',async()=>{
+  if(!selected||busy)return;
+  const button=dialog.querySelector('.gate-guest');
+  button.disabled=true;
+  feedback('Preparing your guest download...');
+  try{
+    await fileDownload(selected);
+    dialog.close();
+  }catch(error){
+    if(error.status===403){
+      button.textContent='Guest download already used';
+      feedback('Your guest download is already used. Continue with Google for unlimited free scripts.');
+    }else{
+      button.disabled=false;
+      feedback(error.message);
+    }
+  }
+});
 dialog.addEventListener('click',event=>{if(event.target===dialog)dialog.close()});
 dialog.querySelector('.gate-retry').addEventListener('click',async()=>{if(!selected)return;feedback('Preparing your download...');dialog.querySelector('.gate-retry').hidden=true;try{await fileDownload(selected);dialog.close()}catch(error){feedback(error.message);dialog.querySelector('.gate-retry').hidden=false}});
 let selected=null,busy=false;
@@ -137,8 +158,11 @@ async function mountGoogleButton(element){
     logo_alignment:'left',width:300
   });
 }
-function showSignIn(slug,message=''){
+function showSignIn(slug,message='',state={}){
   selected=slug;
+  const guestButton=dialog.querySelector('.gate-guest');
+  guestButton.disabled=!!state.guestUsed||state.registrationAvailable===false;
+  guestButton.textContent=state.guestUsed?'Guest download already used':'Download once as guest';
   dialog.querySelector('.gate-script-name').textContent=scripts[slug];
   dialog.querySelector('.gate-full').href='/join.html?script='+encodeURIComponent(slug);
   dialog.querySelector('.gate-retry').hidden=true;
@@ -154,18 +178,21 @@ async function choose(slug){
     const state=await response.json();
     if(state.member){
       try{await fileDownload(slug)}
-      catch(error){showSignIn(slug,error.status===401?'Your session ended. Sign in to continue.':error.message);if(error.status!==401)dialog.querySelector('.gate-retry').hidden=false}
+      catch(error){
+        showSignIn(slug,error.status===401?'Your session ended. Sign in to continue.':error.message,state);
+        if(error.status!==401)dialog.querySelector('.gate-retry').hidden=false;
+      }
     }else{
-      showSignIn(slug);
+      showSignIn(slug,state.guestUsed?'Your guest download is used. Google sign-in unlocks the rest.':'',state);
     }
-  }catch(error){showSignIn(slug,error.message)}
+  }catch(error){showSignIn(slug,error.message,{registrationAvailable:false})}
 }
 // Make the sign-in requirement visible on article download buttons too.
 document.querySelectorAll('a[data-download-script]').forEach(a=>{
   if(!a.nextElementSibling?.classList.contains('download-requirement')){
     const note=document.createElement('span');
     note.className='download-requirement';
-    note.textContent='Free · Google sign-in required';
+    note.textContent='1 free guest download · Sign in for unlimited';
     a.insertAdjacentElement('afterend',note);
   }
 });
