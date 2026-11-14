@@ -24,3 +24,4 @@ jobs:
       - run: node --check functions/api/google-login.js
       - run: node --check functions/_lib/google-verify.mjs
       - run: node scripts/test-google-auth.mjs
+      - run: node scripts/test-guest-access.mjs
