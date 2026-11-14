@@ -32,12 +32,17 @@ dialog.setAttribute('aria-labelledby','gate-title');
 dialog.setAttribute('aria-describedby','gate-description');
 dialog.innerHTML='<div class="gate-head"><span class="eyebrow">Free Pine Script v6 download</span><button type="button" class="gate-close" aria-label="Close download dialog">×</button></div>'+
   '<h2 id="gate-title">Your free script is ready</h2>'+
-  '<p id="gate-description">Download one script as a guest, or continue with Google for unlimited free downloads.</p>'+
+  '<p id="gate-description">Sign in with Google for unlimited free scripts. Your selected download starts automatically.</p>'+
   '<div class="gate-selected" role="group" aria-label="Selected script"><strong class="gate-script-name"></strong><span>Pine Script v6 · Full source code · .pine file</span></div>'+
-  '<button type="button" class="gate-guest">Download once as guest</button>'+
-  '<p class="gate-guest-note">1 free guest download per browser. No account needed.</p>'+
-  '<div class="gate-separator"><span>Or sign in for unlimited free downloads</span></div>'+
+  '<section class="gate-google-primary" aria-label="Recommended free sign-in">'+
+  '<span class="gate-recommended">Recommended · Unlimited downloads</span>'+
+  '<h3>Continue with Google</h3>'+
+  '<p>Free access to every script. No extra password or payment.</p>'+
   '<div class="gate-google-button" id="gate-google-button" aria-label="Official Google sign-in button"></div>'+
+  '</section>'+
+  '<div class="gate-separator"><span>Just want one script?</span></div>'+
+  '<button type="button" class="gate-guest">Download once as guest</button>'+
+  '<p class="gate-guest-note">One free guest download per browser. No sign-in needed.</p>'+
   '<p class="gate-feedback" role="status" aria-live="polite"></p>'+
   '<button type="button" class="btn gate-retry" hidden>Retry download</button>'+
   '<div class="gate-trust"><span>✓ Free, no credit card</span><span>✓ No marketing signup</span></div>'+
