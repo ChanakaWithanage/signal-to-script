@@ -161,7 +161,7 @@ async function choose(slug){
   }catch(error){showSignIn(slug,error.message)}
 }
 // Make the sign-in requirement visible on article download buttons too.
-document.querySelectorAll('a[href^="/api/download?"]').forEach(a=>{
+document.querySelectorAll('a[data-download-script]').forEach(a=>{
   if(!a.nextElementSibling?.classList.contains('download-requirement')){
     const note=document.createElement('span');
     note.className='download-requirement';
@@ -169,9 +169,9 @@ document.querySelectorAll('a[href^="/api/download?"]').forEach(a=>{
     a.insertAdjacentElement('afterend',note);
   }
 });
-document.querySelectorAll('a[href^="/api/download?"]').forEach(a=>a.addEventListener('click',event=>{
+document.querySelectorAll('a[data-download-script]').forEach(a=>a.addEventListener('click',event=>{
   event.preventDefault();
-  const slug=new URL(a.href).searchParams.get('script');
+  const slug=a.dataset.downloadScript;
   if(slug)choose(slug);
 }));
 window.SignalDownloads={fileDownload,scripts,refreshCounts,mountGoogleButton};
