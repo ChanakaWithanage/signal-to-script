@@ -242,3 +242,14 @@
 }
 
 .gold-home-disclaimer{margin:13px 0 0;color:var(--muted);font-size:12px;line-height:1.65}
+
+/* One free guest download without creating an account. */
+.gate-guest{display:block;width:100%;margin:15px 0 5px;padding:13px 15px;background:var(--white);border:1px solid var(--green);border-radius:6px;color:var(--green);font:700 14px var(--sans);cursor:pointer}
+.gate-guest:hover:not(:disabled){background:var(--wash)}
+.gate-guest:disabled,.join-guest-button:disabled{opacity:.55;cursor:not-allowed}
+.download-gate .gate-guest-note{margin:0 0 9px;text-align:center;font-size:11px}
+.gate-separator,.join-separator{display:flex;align-items:center;gap:11px;color:var(--muted);font-size:12px;text-align:center;margin:16px 0}
+.gate-separator:before,.gate-separator:after{content:"";height:1px;background:var(--line);flex:1}
+.join-guest-button{display:block;width:100%;padding:13px 16px;border:1px solid var(--green);background:var(--white);color:var(--green);border-radius:6px;font:700 14px var(--sans);cursor:pointer}
+.join-guest-button:hover:not(:disabled){background:var(--wash)}
+.join-guest-note,.join-guest-status{font-size:12px;line-height:1.6;color:var(--muted);margin:9px 0}
