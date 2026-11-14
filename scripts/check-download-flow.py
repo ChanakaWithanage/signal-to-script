@@ -18,8 +18,11 @@ for page in public.rglob("*.html"):
     else:
         assert "googlesyndication.com" not in html, f"Ads should not load on sign-in or policy pages: {page}"
     assert "download one script as a guest" not in html.lower(), page
-    for slug in re.findall(r"/api/download\?script=([a-z0-9-]+)",html):
-        assert slug in slugs, (page,slug)
+    assert 'href="/api/download?script=' not in html, f"Direct API URL exposed as download link: {page}"
+    downloads = re.findall(r'<a\\b[^>]*href="/join\\.html\\?script=([a-z0-9-]+)"[^>]*>', html)
+    for slug in downloads:
+        assert slug in slugs, (page, slug)
+    assert len(downloads) == html.count('data-download-script='), f"Each download link needs a working JS hook: {page}"
 
 for slug in slugs:
     for name in ("download","count"):
@@ -38,6 +41,7 @@ download=(root/"functions/api/download.js").read_text(encoding="utf-8")
 access=(root/"functions/api/access.js").read_text(encoding="utf-8")
 guard=(root/"functions/scripts/_middleware.js").read_text(encoding="utf-8")
 assert "showModal()" in site and "mountGoogleButton" in site
+assert "a[data-download-script]" in site and "a.dataset.downloadScript" in site
 assert "google-login" in site, "Google login must work from download dialog"
 assert "signal-signed-in" in join and "downloadSelected()" in join
 assert "gate-guest" not in site and "guest" not in join.lower(), "Old guest flow remains"
@@ -65,6 +69,6 @@ print("Google sign-in required on API and direct assets; guest download removed.
 # Gold strategy conversion placement and source wiring.
 gold = (public/"articles/gold-breakout-15m-strategy.html").read_text(encoding="utf-8")
 assert gold.index('class="gold-lead-image"') < gold.index('id="download"') < gold.index("What makes this breakout"), "Early download CTA should immediately follow hero chart"
-assert gold.count("/api/download?script=gold-breakout-15m") >= 2
+assert gold.count('data-download-script="gold-breakout-15m"') >= 2
 assert "2026" in gold and "59.7%" in gold and "1.893" in gold
 assert "gold-breakout-15m" in site
