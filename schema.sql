@@ -31,3 +31,10 @@ CREATE TABLE IF NOT EXISTS free_google_sessions (
   expires_at TEXT NOT NULL,
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+ 
+-- Browser-scoped one-time guest downloads. The cookie value itself is never stored.
+CREATE TABLE IF NOT EXISTS free_guest_downloads (
+  token_hash TEXT PRIMARY KEY,
+  script_slug TEXT NOT NULL,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
