@@ -19,7 +19,7 @@ for page in public.rglob("*.html"):
         assert "googlesyndication.com" not in html, f"Ads should not load on sign-in or policy pages: {page}"
     assert "download one script as a guest" not in html.lower(), page
     assert 'href="/api/download?script=' not in html, f"Direct API URL exposed as download link: {page}"
-    downloads = re.findall(r'<a\\b[^>]*href="/join\\.html\\?script=([a-z0-9-]+)"[^>]*>', html)
+    downloads = re.findall(r'<a\b[^>]*href="/join\.html\?script=([a-z0-9-]+)"[^>]*>', html)
     for slug in downloads:
         assert slug in slugs, (page, slug)
     assert len(downloads) == html.count('data-download-script='), f"Each download link needs a working JS hook: {page}"
