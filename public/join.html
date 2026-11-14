@@ -4,10 +4,10 @@
 <main id="main"><div class="wrap join-layout">
 <section class="join-copy">
   <span class="eyebrow">Free Pine Script v6 downloads</span>
-  <h1>One sign-in. All the free scripts.</h1>
-  <p>Get the full source code for our free TradingView indicators and strategies. No payment, separate password, or newsletter signup.</p>
+  <h1>Try a script free. Sign in for more.</h1>
+  <p>Download one Pine Script as a guest without signing in, or continue with Google for unlimited free scripts. No payment needed.</p>
   <div class="join-benefit"><b>01</b><div><strong>Download the actual Pine Script code</strong><p>Use the published scripts on your own TradingView charts.</p></div></div>
-  <div class="join-benefit"><b>02</b><div><strong>Automatic downloads</strong><p>Choose a script and sign in. The file starts downloading right away.</p></div></div>
+  <div class="join-benefit"><b>02</b><div><strong>Automatic downloads</strong><p>Choose a script and download as a guest, or sign in for automatic unlimited downloads.</p></div></div>
   <div class="join-benefit"><b>03</b><div><strong>Access whenever you return</strong><p>Sign in once and download any other free script during your session.</p></div></div>
 </section>
 <section class="join-card" aria-labelledby="join-title">
@@ -15,8 +15,12 @@
   <h2 id="join-title">Get your free script</h2>
   <p id="join-script" class="join-picked"></p>
   <div id="join-panel">
-    <p class="join-google-intro">Continue securely with Google to unlock free downloads.</p>
+    <p class="join-google-intro">Continue with Google for unlimited free scripts, or download one selected script as a guest.</p>
     <div id="google-button" class="join-google-button" aria-label="Official Google sign-in button"></div>
+    <div class="join-separator">Or download once without an account</div>
+    <button type="button" class="join-guest-button" id="join-guest" hidden>Download selected script as guest</button>
+    <p class="join-guest-note">One free guest download per browser. Sign in for unlimited access.</p>
+    <p id="join-guest-status" class="join-guest-status" role="status" aria-live="polite"></p>
     <p class="join-caption">Free access. No credit card or marketing emails required.</p>
     <div class="join-privacy-note"><strong>Your account stays private.</strong> We use your Google account ID and email to sign you in. We do not request Gmail, Google Drive, or trading account access. <a href="/privacy.html">Read our privacy notice</a>.</div>
   </div>
