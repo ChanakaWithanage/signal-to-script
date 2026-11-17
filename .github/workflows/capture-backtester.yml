@@ -1,0 +1,96 @@
+name: Capture Pine Backtest Studio screenshots
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - .github/workflows/capture-backtester.yml
+
+permissions:
+  contents: write
+
+jobs:
+  screenshot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: ChanakaWithanage/pine-backtest-studio
+          ref: main
+          path: .backtester
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: npm install --no-audit --no-fund
+        working-directory: .backtester
+      - name: Start backtester locally
+        run: |
+          (cd .backtester && npm run dev -- --host 127.0.0.1 --port 4173 > ../backtester-vite.log 2>&1 &)
+          for i in $(seq 1 90); do
+            if curl -fsS http://127.0.0.1:4173/ >/dev/null; then exit 0; fi
+            sleep 2
+          done
+          cat backtester-vite.log
+          exit 1
+      - name: Install browser screenshot tools
+        run: |
+          python -m pip install --disable-pip-version-check playwright pillow
+          python -m playwright install --with-deps chromium
+      - name: Capture actual dashboard and advanced-analysis panels
+        run: |
+          python - <<'PY'
+          import re
+          from pathlib import Path
+          from io import BytesIO
+          from PIL import Image
+          from playwright.sync_api import sync_playwright
+
+          out = Path("public/images")
+          out.mkdir(parents=True, exist_ok=True)
+
+          def webp(src, name, max_height=None, max_width=1540):
+              im = Image.open(BytesIO(src)).convert("RGB")
+              if max_height:
+                  im = im.crop((0, 0, im.width, min(im.height, max_height)))
+              if im.width > max_width:
+                  im.thumbnail((max_width, 4000), Image.Resampling.LANCZOS)
+              im.save(out / name, "WEBP", quality=80, method=6)
+              print(name, im.size, (out / name).stat().st_size)
+
+          with sync_playwright() as p:
+              browser = p.chromium.launch(headless=True, args=["--no-sandbox"])
+              page = browser.new_page(viewport={"width": 1840, "height": 1100}, device_scale_factor=1)
+              page.goto("http://127.0.0.1:4173/", wait_until="networkidle", timeout=90000)
+              page.get_by_role("button", name=re.compile("Run Backtest")).first.click(timeout=30000)
+              page.locator(".db-run-state.is-ready").wait_for(timeout=120000)
+              # Real app screenshots from its clearly labeled *synthetic demo*,
+              # never represented as historical market trading performance.
+              dashboard = page.locator("#dashboard")
+              dashboard.scroll_into_view_if_needed()
+              shot = dashboard.screenshot(timeout=60000, animations="disabled")
+              webp(shot, "pine-backtest-dashboard-hero.webp", max_height=850)
+              webp(shot, "pine-backtest-dashboard-full.webp")
+              panel = page.locator(".insight-section")
+              panel.scroll_into_view_if_needed()
+              webp(panel.screenshot(animations="disabled"), "pine-backtest-advanced-risk.webp", max_height=925)
+              page.get_by_role("tab", name="Monthly / weekly").click()
+              webp(panel.screenshot(animations="disabled"), "pine-backtest-advanced-weekly.webp", max_height=925)
+              page.get_by_role("tab", name="Trades & streaks").click()
+              webp(panel.screenshot(animations="disabled"), "pine-backtest-advanced-trades.webp", max_height=1000)
+              browser.close()
+          PY
+      - name: Commit generated screenshot assets
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/images/pine-backtest-dashboard-hero.webp \
+                  public/images/pine-backtest-dashboard-full.webp \
+                  public/images/pine-backtest-advanced-risk.webp \
+                  public/images/pine-backtest-advanced-weekly.webp \
+                  public/images/pine-backtest-advanced-trades.webp
+          if ! git diff --cached --quiet; then
+            git commit -m "Add current V2 dashboard screenshots for Pine Backtest Studio launch"
+            git push origin HEAD:main
+          fi
