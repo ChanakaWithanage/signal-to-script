@@ -13,7 +13,7 @@
 <meta property="og:title" content="I Built a Free Pine Script Backtester with Unlimited Runs">
 <meta property="og:description" content="Backtest Pine Script strategies for free. Import historical candles, run unlimited tests and explore advanced trading analytics.">
 <meta property="og:url" content="https://signaltoscript.com/articles/free-pine-script-backtester-tradingview-alternative.html">
-<meta property="og:image" content="https://signaltoscript.com/images/pine-backtest-studio-performance-preview.svg">
+<meta property="og:image" content="https://signaltoscript.com/images/pine-backtest-demo-overview.webp">
 <meta name="twitter:card" content="summary_large_image">
 <script type="application/ld+json">
 {
@@ -26,7 +26,7 @@
   "author": {"@type":"Person","name":"CW"},
   "publisher": {"@type":"Organization","name":"Signal to Script","url":"https://signaltoscript.com/"},
   "mainEntityOfPage": "https://signaltoscript.com/articles/free-pine-script-backtester-tradingview-alternative.html",
-  "image": "https://signaltoscript.com/images/pine-backtest-studio-performance-preview.svg"
+  "image": "https://signaltoscript.com/images/pine-backtest-demo-overview.webp"
 }
 </script>
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9855777255503695" crossorigin="anonymous"></script>
@@ -47,6 +47,12 @@
   <p class="lead">A strategy can look great on a chart until you start asking the uncomfortable questions. How did it perform last year? What happened during its worst losing streak? Did one lucky month account for most of the profit? I wanted a better way to find those answers, so I built <strong>Pine Backtest Studio</strong>.</p>
   <p class="lead">It is a free, browser-based Pine Script backtester. Bring your historical candles, add a strategy, run as many tests as you want, and explore the results without leaving your browser.</p>
   <div class="article-meta">By CW · November 17, 2026 · Free Pine Script backtesting tool</div>
+  <figure class="btst-hero-shot">
+    <a href="/images/pine-backtest-demo-overview.webp" target="_blank" rel="noopener noreferrer" aria-label="Open the full backtester overview screenshot">
+      <img src="/images/pine-backtest-demo-overview.webp" width="1400" height="618" fetchpriority="high" decoding="async" alt="Real Pine Backtest Studio screenshot showing gold demonstration price chart and five performance tiles including net profit, win rate, profit factor, drawdown, and commissions">
+    </a>
+    <figcaption>A screenshot from the backtester with synthetic example price data. It demonstrates the chart and performance tiles, not verified historical trading profits. <a href="/images/pine-backtest-demo-overview.webp" target="_blank" rel="noopener noreferrer">Open full screenshot</a>.</figcaption>
+  </figure>
   <div class="btst-launch">
     <div class="btst-launch-copy">
       <span class="release-label">Pine Backtest Studio · Free public release</span>
@@ -78,13 +84,13 @@
   <p>The result is <a href="https://pine-backtest-studio.pages.dev/" target="_blank" rel="noopener noreferrer">Pine Backtest Studio</a>. It's the tool I wanted for my own research, and now anyone can use it for free.</p>
 
   <h2>A proper dashboard, not just a green profit number</h2>
-  <p>The first thing you'll notice is the dashboard. It gives you an immediate view of how the strategy behaved: total trades, win rate, net profit or loss, profit factor, maximum drawdown, Sharpe ratio, average win and loss, and expectancy per trade.</p>
+  <p>The first thing you'll notice is the dashboard. It gives you an immediate view of how the strategy behaved: net profit or loss, win rate, profit factor, expectancy per trade, total trades, maximum drawdown, average win and loss, and Sharpe ratio.</p>
   <p>Then come the charts. The balance curve tells the story of the account over time. Monthly returns make it easier to spot strong and weak periods. The win/loss split, long-versus-short results and weekday performance help you see where the strategy's edge might actually be coming from.</p>
-  <figure class="gold-figure gold-figure-wide">
-    <a href="/images/pine-backtest-studio-performance-preview.svg" target="_blank" rel="noopener noreferrer">
-      <img src="/images/pine-backtest-studio-performance-preview.svg" width="1200" height="620" fetchpriority="high" alt="Pine Backtest Studio dark dashboard preview showing strategy profit, win rate, profit factor, drawdown and balance curve">
+  <figure class="btst-screen-shot btst-screen-shot-wide">
+    <a href="/images/pine-backtest-dashboard-full.webp" target="_blank" rel="noopener noreferrer">
+      <img src="/images/pine-backtest-dashboard-full.webp" width="1540" height="954" loading="lazy" decoding="async" alt="Current V2 Pine Backtest Studio dashboard layout with Net Profit or Loss as the first summary tile, equity curve area, monthly results and directional analysis panels">
     </a>
-    <figcaption>The new Pine Backtest Studio performance dashboard. This visual uses example figures to demonstrate the interface.</figcaption>
+    <figcaption>The redesigned V2 dashboard layout. This capture shows its empty state before a backtest, so the performance values are intentionally blank.</figcaption>
   </figure>
 
   <h2>Advanced analytics are where it gets interesting</h2>
@@ -98,12 +104,25 @@
     <div><span>LOSING STREAKS</span><strong>Longest win/loss sequences</strong><p>Get a clearer feel for the stretches you'd need to sit through.</p></div>
     <div><span>TRADE BREAKDOWN</span><strong>Longs, shorts and weekdays</strong><p>Discover which trade direction and entry days contributed most to the outcome.</p></div>
   </div>
-  <figure class="gold-figure gold-figure-wide">
-    <a href="/images/pine-backtest-studio-analytics-preview.svg" target="_blank" rel="noopener noreferrer">
-      <img src="/images/pine-backtest-studio-analytics-preview.svg" width="1200" height="670" loading="lazy" alt="Pine Backtest Studio advanced analysis dashboard showing Sharpe, Sortino, realized drawdown, weekly profit and loss and trading streaks">
-    </a>
-    <figcaption>Risk metrics, weekly performance and winning or losing streaks are part of the built-in deep-dive report.</figcaption>
-  </figure>
+  <div class="btst-shot-grid" aria-label="Screenshots of Pine Backtest Studio advanced analytics">
+    <figure class="btst-screen-shot">
+      <a href="/images/pine-backtest-demo-advanced-metrics.webp" target="_blank" rel="noopener noreferrer"><img src="/images/pine-backtest-demo-advanced-metrics.webp" width="1400" height="688" loading="lazy" decoding="async" alt="Advanced performance analysis screenshot showing Sharpe ratio, Sortino ratio, realized drawdown, expectancy per trade and average win-loss ratio"></a>
+      <figcaption>Advanced risk and return metrics, including Sharpe, Sortino, drawdown and expectancy. <a href="/images/pine-backtest-demo-advanced-metrics.webp" target="_blank" rel="noopener noreferrer">View full image</a>.</figcaption>
+    </figure>
+    <figure class="btst-screen-shot">
+      <a href="/images/pine-backtest-demo-drawdown.webp" target="_blank" rel="noopener noreferrer"><img src="/images/pine-backtest-demo-drawdown.webp" width="1400" height="684" loading="lazy" decoding="async" alt="Realized equity drawdown timeline with dollar loss and the closed trade history table"></a>
+      <figcaption>A separate realized-equity drawdown chart and individual trade log. <a href="/images/pine-backtest-demo-drawdown.webp" target="_blank" rel="noopener noreferrer">View full image</a>.</figcaption>
+    </figure>
+    <figure class="btst-screen-shot">
+      <a href="/images/pine-backtest-demo-weekly.webp" target="_blank" rel="noopener noreferrer"><img src="/images/pine-backtest-demo-weekly.webp" width="1400" height="686" loading="lazy" decoding="async" alt="Weekly strategy performance chart with profitable periods, best week, worst week and downloadable period ledger"></a>
+      <figcaption>Weekly P&amp;L breakdown, with profitable periods and best/worst weeks. <a href="/images/pine-backtest-demo-weekly.webp" target="_blank" rel="noopener noreferrer">View full image</a>.</figcaption>
+    </figure>
+    <figure class="btst-screen-shot">
+      <a href="/images/pine-backtest-demo-trades.webp" target="_blank" rel="noopener noreferrer"><img src="/images/pine-backtest-demo-trades.webp" width="1400" height="693" loading="lazy" decoding="async" alt="Winning and losing streak dashboard with trade quality, long versus short profit and loss and largest winner and loser"></a>
+      <figcaption>Winning and losing streaks, payoff quality and long/short breakdown. <a href="/images/pine-backtest-demo-trades.webp" target="_blank" rel="noopener noreferrer">View full image</a>.</figcaption>
+    </figure>
+  </div>
+  <p class="btst-demo-caption">These advanced-report screenshots use synthetic demonstration candles, not actual historical market data or evidence of a profitable trading strategy. The V2 interface may differ slightly from the captured views.</p>
   <p>And if you prefer working with the raw numbers, you can export individual trades and period performance to CSV. I still use spreadsheets for some comparisons, but now I don't need one just to answer a basic question about the strategy.</p>
 
   <h2>How to backtest a Pine Script strategy for free</h2>
