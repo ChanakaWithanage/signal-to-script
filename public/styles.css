@@ -311,3 +311,34 @@
 .btst-home-promo-actions a+ a{background:transparent;color:#c0e9d0;border:1px solid #749c82}
 @media(max-width:800px){.btst-launch{grid-template-columns:1fr}.btst-home-promo{flex-direction:column;align-items:stretch}.btst-home-promo-actions{flex-direction:row;flex-wrap:wrap}.btst-home-promo-actions a{flex:1;min-width:145px}}
 @media(max-width:580px){.btst-launch{padding:16px}.btst-example-results,.article-body .btst-feature-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.btst-example-results strong{font-size:17px}.btst-steps{grid-template-columns:1fr}.btst-home-promo{padding:19px}}
+
+
+/* Actual Pine Backtest Studio screenshots and mobile-first article presentation. */
+.btst-hero-shot{margin:23px 0 26px;border:1px solid #d2ded6;border-radius:9px;background:#111d2a;overflow:hidden}
+.btst-hero-shot>a,.btst-screen-shot>a{display:block;line-height:0;outline-offset:-4px}
+.btst-hero-shot img,.btst-screen-shot img{display:block;width:100%;max-width:100%;height:auto;object-fit:contain}
+.btst-hero-shot figcaption,.btst-screen-shot figcaption{padding:12px 15px;background:#f5f8f4;border-top:1px solid #d4ded6;color:#58695e;font-size:12px;line-height:1.7}
+.btst-hero-shot figcaption a,.btst-screen-shot figcaption a{color:#24684b;font-weight:650}
+.btst-shot-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin:23px 0}
+.btst-shot-grid .btst-screen-shot{min-width:0;margin:0}
+.btst-screen-shot{margin:25px 0;border:1px solid #d7e2db;border-radius:8px;background:#121d2b;overflow:hidden}
+.article-body .btst-demo-caption{font-size:12px;line-height:1.7;color:#627669;margin:10px 0 26px}
+.article-body .btst-shot-grid figcaption{font-size:12px}
+.article-body .btst-screen-shot-wide{margin:25px 0}
+@media(max-width:800px){
+  .btst-hero-shot{margin:18px 0 23px}
+  .btst-shot-grid{gap:12px}
+  .btst-launch-links{gap:11px}
+}
+@media(max-width:620px){
+  .article-body .btst-feature-grid,.btst-shot-grid,.btst-steps{grid-template-columns:1fr}
+  .btst-hero-shot figcaption,.btst-screen-shot figcaption{padding:11px 12px;font-size:11px}
+  .btst-shot-grid{gap:14px}
+  .btst-launch-links{display:flex;flex-direction:column;align-items:stretch;width:100%}
+  .btst-launch-links .btn,.btst-cta-bottom .btn{display:block;width:100%;max-width:100%;text-align:center;white-space:normal}
+  .btst-launch-links .btst-source-link{text-align:center}
+  .btst-preview{width:100%;min-width:0}
+  .btst-feature-grid>div{padding:16px}
+  .btst-home-promo-actions{flex-direction:column}
+  .btst-home-promo-actions a{width:100%}
+}
