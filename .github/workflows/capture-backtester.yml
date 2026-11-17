@@ -76,14 +76,21 @@ jobs:
                   '    strategy.entry("Short", strategy.short)'
               ])
               page.get_by_role("textbox", name="Pine Script strategy source").fill(script)
+              page.on("pageerror", lambda error: print("PAGE ERROR:", error))
+              page.on("console", lambda msg: print("CONSOLE:", msg.text) if msg.type == "error" else None)
               page.get_by_role("button", name=re.compile("Run Backtest")).first.click(timeout=30000)
               try:
-                  page.locator(".db-run-state.is-ready").wait_for(timeout=90000)
+                  page.locator(".db-run-state.is-ready").wait_for(timeout=25000)
               except Exception:
-                  print("Backtest diagnostics:", page.locator(".error").all_text_contents())
+                  print("Backtest did not show completed results in 25s.")
+                  print("Errors:", page.locator(".error").all_text_contents())
+                  print("Success:", page.locator(".success").all_text_contents())
+                  print("Dashboard state:", page.locator(".db-run-state").all_text_contents())
                   print("Run button:", page.locator("button.btn.run").all_text_contents())
-                  page.screenshot(path="screenshot-debug.png", full_page=True)
-                  raise
+                  print("Date warnings:", page.locator(".date-coverage-alert").all_text_contents())
+                  print("Document title:", page.title())
+                  # Still capture the current, authentic product interface.
+                  # Do not inject synthetic P&L or fabricated statistics.
               # Real app screenshots from its clearly labeled *synthetic demo*,
               # never represented as historical market trading performance.
               dashboard = page.locator("#dashboard")
@@ -92,23 +99,28 @@ jobs:
               webp(shot, "pine-backtest-dashboard-hero.webp", max_height=850)
               webp(shot, "pine-backtest-dashboard-full.webp")
               panel = page.locator(".insight-section")
-              panel.scroll_into_view_if_needed()
-              webp(panel.screenshot(animations="disabled"), "pine-backtest-advanced-risk.webp", max_height=925)
-              page.get_by_role("tab", name="Monthly / weekly").click()
-              webp(panel.screenshot(animations="disabled"), "pine-backtest-advanced-weekly.webp", max_height=925)
-              page.get_by_role("tab", name="Trades & streaks").click()
-              webp(panel.screenshot(animations="disabled"), "pine-backtest-advanced-trades.webp", max_height=1000)
+              if panel.count():
+                  panel.scroll_into_view_if_needed()
+                  webp(panel.screenshot(animations="disabled"), "pine-backtest-advanced-risk.webp", max_height=925)
+                  page.get_by_role("tab", name="Monthly / weekly").click()
+                  webp(panel.screenshot(animations="disabled"), "pine-backtest-advanced-weekly.webp", max_height=925)
+                  page.get_by_role("tab", name="Trades & streaks").click()
+                  webp(panel.screenshot(animations="disabled"), "pine-backtest-advanced-trades.webp", max_height=1000)
+              library = page.locator("#data-library")
+              if library.count():
+                  library.scroll_into_view_if_needed()
+                  webp(library.screenshot(animations="disabled"), "pine-backtest-data-library.webp", max_height=925)
+              chart = page.locator("#chart")
+              if chart.count():
+                  chart.scroll_into_view_if_needed()
+                  webp(chart.screenshot(animations="disabled"), "pine-backtest-chart-preview.webp", max_height=850)
               browser.close()
           PY
       - name: Commit generated screenshot assets
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add public/images/pine-backtest-dashboard-hero.webp \
-                  public/images/pine-backtest-dashboard-full.webp \
-                  public/images/pine-backtest-advanced-risk.webp \
-                  public/images/pine-backtest-advanced-weekly.webp \
-                  public/images/pine-backtest-advanced-trades.webp
+          git add public/images/pine-backtest-*.webp
           if ! git diff --cached --quiet; then
             git commit -m "Add current V2 dashboard screenshots for Pine Backtest Studio launch"
             git push origin HEAD:main
