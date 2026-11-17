@@ -65,7 +65,7 @@ jobs:
               page.goto("http://127.0.0.1:4173/", wait_until="networkidle", timeout=90000)
               # A deliberately small EMA crossover test avoids depending on
               # a particular broker/session setup in the bundled gold strategy.
-              script = "\\n".join([
+              script = "\n".join([
                   '//@version=6',
                   'strategy("EMA Crossover Screenshot Example", overlay=true, initial_capital=10000, default_qty_type=strategy.fixed, default_qty_value=1)',
                   'fast = ta.ema(close, 12)',
