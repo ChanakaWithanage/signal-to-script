@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Free Pine Script Backtester: Unlimited Runs & Advanced Analytics | Signal to Script</title>
+<meta name="description" content="Try Pine Backtest Studio, a free TradingView Strategy Tester alternative for Pine Script. Unlimited browser-based strategy runs, CSV market data, drawdown, Sharpe, Sortino, trade logs and more.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://signaltoscript.com/articles/free-pine-script-backtester-tradingview-alternative.html">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="stylesheet" href="/styles.css">
+<meta property="og:type" content="article">
+<meta property="og:title" content="I Built a Free Pine Script Backtester with Unlimited Runs and Advanced Analytics">
+<meta property="og:description" content="Backtest Pine v5/v6 strategies in your browser with your own historical CSVs. No paid plan or backtest-run quota. Explore the free tool.">
+<meta property="og:url" content="https://signaltoscript.com/articles/free-pine-script-backtester-tradingview-alternative.html">
+<meta property="og:image" content="https://signaltoscript.com/images/gold-breakout-15m-chart.webp">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "A Free Pine Script Backtester with Unlimited Runs and Advanced Strategy Analytics",
+  "description": "A practical walkthrough of Pine Backtest Studio, a free browser-based Pine Script backtester with user-imported CSV data and advanced performance analytics.",
+  "datePublished": "2026-11-17",
+  "dateModified": "2026-11-17",
+  "author": {"@type":"Person","name":"CW"},
+  "publisher": {"@type":"Organization","name":"Signal to Script","url":"https://signaltoscript.com/"},
+  "mainEntityOfPage": "https://signaltoscript.com/articles/free-pine-script-backtester-tradingview-alternative.html",
+  "image": "https://signaltoscript.com/images/gold-breakout-15m-chart.webp"
+}
+</script>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9855777255503695" crossorigin="anonymous"></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header"><div class="wrap head">
+<a class="brand" href="/"><span class="brand-mark">CW.</span><span class="brand-wordmark"><span class="brand-name">Signal to Script</span><span class="brand-by">by CW</span></span></a>
+<button aria-expanded="false" aria-label="Open menu" class="menu-toggle" id="menu" type="button">☰</button>
+<nav aria-label="Main navigation" class="nav" id="nav">
+<a href="/#free-scripts">Free scripts</a><a href="/#articles">Articles</a><a href="/#about">About CW</a><a href="/#support">Get help</a><a href="/join.html">Join free</a>
+</nav></div></header>
+<main id="main">
+<div class="read-wrap article-top">
+<div class="breadcrumb"><a href="/">Home</a> / <a href="/#articles">Articles</a> / Free Pine Script Backtester</div>
+<div class="eyebrow">Free tool · Pine Script v5/v6 · No subscription required</div>
+<h1>I Built a Free Pine Script Backtester. You Can Run as Many Tests as You Want.</h1>
+<p class="lead">I like TradingView's charts, but I wanted a separate place to test Pine Script strategies without constantly working around the chart's available history or paying just to run another experiment. So I built <strong>Pine Backtest Studio</strong>, a free browser-based backtester that can run a strategy on historical candles you import yourself. And I added more detail to the results than just a net-profit number.</p>
+<div class="article-meta">By CW · November 17, 2026 · Free online Pine Script backtesting tool</div>
+<div class="btst-launch">
+  <div class="btst-launch-copy"><span class="release-label">Pine Backtest Studio · V2 public beta</span>
+    <h2>Have a Pine Script strategy you want to test?</h2>
+    <p>Import your historical price data, paste your script and run your test. No sign-up, no credit card, and no limit on how many backtest runs you can start. Everything executes in your browser.</p>
+    <div class="btst-launch-links"><a class="btn" href="https://pine-backtest-studio.pages.dev/" target="_blank" rel="noopener noreferrer">Open the free backtester ↗</a><a class="btst-source-link" href="https://github.com/ChanakaWithanage/pine-backtest-studio" target="_blank" rel="noopener noreferrer">View source code ↗</a></div>
+  </div>
+  <div class="btst-preview" aria-label="Features included in Pine Backtest Studio">
+    <div class="btst-preview-title"><span class="btst-preview-dot"></span> Pine Backtest Studio <span>V2</span></div>
+    <div class="btst-preview-kicker">BACKTESTING WORKSPACE</div>
+    <div class="btst-preview-headline">Chart. Test. Understand the trade.</div>
+    <div class="btst-preview-grid"><div><small>TRADING LOG</small><strong>Entry / exit / P&amp;L</strong></div><div><small>RISK METRICS</small><strong>Sharpe · Sortino</strong></div><div><small>PERFORMANCE</small><strong>Weekly · Monthly</strong></div><div><small>CSV DATA</small><strong>Import &amp; export</strong></div></div>
+  </div>
+</div>
+<p class="btst-note">Unlimited means no fixed quota on backtest <em>runs</em>. It does not mean unlimited market data or guaranteed TradingView compatibility. You bring the candles, and your browser's memory and performance still matter.</p>
+</div>
+<section class="article"><div class="read-wrap article-body">
+<h2>Why I built another backtester</h2>
+<p>When I started testing the <a href="/articles/gold-breakout-15m-strategy.html">Gold Breakout 15M strategy</a>, I kept running into the same problem. A result looks interesting on a few months of data, but what happens over five years? What about ten? Does the strategy make money consistently, or does one unusually good year carry everything?</p>
+<p>I wanted to answer those questions without building a new spreadsheet every time. Upload the candles, run the Pine Script, check the trades, then dig into the numbers. That was the starting point for Pine Backtest Studio.</p>
+<p>The tool is now public and free to use. It is also <a href="https://github.com/ChanakaWithanage/pine-backtest-studio" target="_blank" rel="noopener noreferrer">open source on GitHub</a>, so the way it works is not hidden behind a subscription page.</p>
+
+<h2>More than just net profit and win rate</h2>
+<p>Two strategies can have the same net profit and very different risks. One might grow steadily. Another might spend months losing money before a few large winners rescue the result. If you only look at the final number, you miss the part that matters.</p>
+<div class="btst-feature-grid">
+  <div><span>01 / PERFORMANCE</span><strong>Net profit, win rate &amp; profit factor</strong><p>Start with the familiar numbers and see how many closed trades produced them.</p></div>
+  <div><span>02 / DOWNSIDE RISK</span><strong>Drawdown &amp; recovery to peak</strong><p>Measure the biggest decline in closed-trade equity and how far the account remains below its previous high.</p></div>
+  <div><span>03 / RISK ADJUSTED</span><strong>Sharpe, Sortino &amp; Calmar</strong><p>Look beyond returns alone. These measures help compare reward, variability and downside risk, where enough data exists.</p></div>
+  <div><span>04 / TRADE QUALITY</span><strong>Expectancy &amp; average win/loss</strong><p>Find the typical result per trade, payoff ratio and biggest winning and losing positions.</p></div>
+  <div><span>05 / CONSISTENCY</span><strong>Monthly &amp; weekly P&amp;L</strong><p>See which periods helped or hurt performance instead of looking at one cumulative total.</p></div>
+  <div><span>06 / BEHAVIOR</span><strong>Streaks, trade duration &amp; direction</strong><p>Compare long and short trades, winning and losing streaks, and average holding time.</p></div>
+</div>
+<p>You can also export the trade log to CSV, including entries, exits, position sizes, net P&amp;L and modeled fees. That is particularly useful when you want to check unusual trades rather than trust a summary chart.</p>
+
+<h2>A closer look at the advanced analysis</h2>
+<p>Here is the kind of detail available after a backtest completes. The example below comes from the tool's built-in <strong>synthetic demonstration</strong>. These are interface examples, not verified historical gold trades or investment returns.</p>
+<div class="btst-example-results" role="group" aria-label="Illustrative results from synthetic demonstration data">
+  <div><span>NET PROFIT</span><strong>$1,389.01</strong><small>Simulated demo</small></div>
+  <div><span>WIN RATE</span><strong>47.4%</strong><small>19 closed trades</small></div>
+  <div><span>PROFIT FACTOR</span><strong>2.67</strong><small>Gross profit / loss</small></div>
+  <div><span>MAX DRAWDOWN</span><strong>$309.45</strong><small>PineTS calculation</small></div>
+</div>
+<p>One of my favorite additions is the difference between <em>realized equity drawdown</em> and the drawdown reported by the backtest engine. The realized calculation tracks the account after trades have closed. The engine can measure equity differently during a position. Seeing both helps explain why risk numbers don't always match.</p>
+<p>The analysis also breaks results into weekly and monthly periods, shows longest winning and losing streaks, and separates long-trade results from short-trade results. On the demo screenshot, for example, the latest closed-trade streak is two losses, while the longest winning streak is five trades. Those are the details you can miss when an equity curve looks good at first glance.</p>
+<p>Sharpe, Sortino, Calmar and annualized growth may display <strong>N/A</strong> when the selected period is too short or the underlying calculation is not meaningful. I'd rather show that than make up a precise-looking ratio.</p>
+
+<h2>Bring your own historical data, then reuse it</h2>
+<p>You do not need a special data subscription from us. The backtester accepts ordinary OHLCV CSV files with a timestamp, open, high, low and close. Volume is optional. You can drag and drop multiple files from the same instrument and timeframe, and the app sorts the candles and checks for overlapping data.</p>
+<p>In V2, I added a Data Library to make the first step less confusing. There are shortcuts for popular markets including <strong>Gold (XAUUSD), Silver (XAGUSD), GBPUSD, EURUSD and NAS100</strong>. You can pin favorites, open a provider's data-export page and import your file. The shortcut itself does not download the market history.</p>
+<p>You can also save imported candles locally in your browser and load them again in another session. If you prefer to keep a permanent backup, use the built-in CSV export.</p>
+<div class="btst-steps" aria-label="How to use the backtester">
+<div><b>1</b><strong>Get market data</strong><p>Choose a data source and import an OHLCV CSV, or use the clearly labeled synthetic demo to explore the interface.</p></div>
+<div><b>2</b><strong>Load your Pine strategy</strong><p>Paste your strategy or open a <code>.pine</code> file. Pine v5 and v6 strategy code is supported within the PineTS runtime's limits.</p></div>
+<div><b>3</b><strong>Run and inspect</strong><p>Set timeframe, date range, contract details and costs. Run the backtest, inspect trades and compare the advanced metrics.</p></div>
+</div>
+<p>The current browser import limit is 400,000 candles. That's enough for a substantial amount of 15-minute historical data, but it is not infinite. Very long tests or complex strategies can take longer depending on your device.</p>
+
+<h2>What about TradingView? Is this a free alternative?</h2>
+<p>Yes, if what you need is a <strong>free place to run repeated Pine strategy tests on your own historical data</strong>. It is useful alongside TradingView, especially for studying periods that are not available in the chart you currently have loaded.</p>
+<p>But I don't want to pretend it is a perfect drop-in replacement. TradingView has its own calculation engine, exchange feeds and broker emulator. This project uses the independent <strong>PineTS</strong> runtime to process the imported candles. Some Pine features are not supported, and simulated order fills or indicator values can differ from TradingView.</p>
+<p>There is also an important distinction between the built-in TVC:GOLD reference chart and the backtest feed. The reference chart is display-only. It does not supply its candles to our backtesting engine. If you import Dukascopy XAUUSD data, you are testing Dukascopy XAUUSD candles, not TradingView's calculated TVC:GOLD series.</p>
+<p>So I'd describe it as a <strong>free TradingView Strategy Tester alternative for independent research</strong>, not as an exact reproduction of TradingView's results. Before relying on an unfamiliar script, compare several trades with a trusted reference.</p>
+
+<h2>Backtesting costs and position sizing matter too</h2>
+<p>The setup panel includes instrument point value, minimum quantity, tick size and commission assumptions. There is also an optional <strong>Bybit TradFi Gold CFD cost model</strong> where you can estimate spread, commission and swap costs using configurable inputs.</p>
+<p>This model is for what-if calculations, not a live broker quote. Changing the spread or order size can change your results significantly, especially on small accounts or strategies with many trades.</p>
+<p>And no, you do not need to create an account or connect an exchange to use the backtester. It runs in your browser. It does not execute real trades.</p>
+
+<h2>Can you really run unlimited backtests for free?</h2>
+<p>Yes, there is <strong>no paid tier, sign-in requirement or built-in quota on the number of runs</strong> in this release. You can adjust the script, change the historical range, and run it again as often as your browser allows. Historical data availability and local device resources are the practical limits.</p>
+<p>You can also inspect the <a href="https://github.com/ChanakaWithanage/pine-backtest-studio" target="_blank" rel="noopener noreferrer">source code</a> if you want to see what the application does behind the interface.</p>
+
+<div class="btst-cta-bottom">
+<span class="release-label">Free Pine Script strategy backtesting</span>
+<h2>Have a strategy you've been meaning to test?</h2>
+<p>Open Pine Backtest Studio, load some historical candles and give it a proper run. Check the bad weeks and the losing streaks too, not only the best trades.</p>
+<a class="btn" href="https://pine-backtest-studio.pages.dev/" target="_blank" rel="noopener noreferrer">Try Pine Backtest Studio free ↗</a>
+<small>No account required · Unlimited strategy runs · CSV import · Advanced analytics</small>
+</div>
+<h2>Frequently asked questions</h2>
+<h3>Does Pine Backtest Studio support Pine Script v6?</h3>
+<p>Yes. It accepts Pine Script v5 and v6 strategy files supported by PineTS. Indicator-only scripts need strategy order logic to produce simulated trades, and not every TradingView feature works in PineTS.</p>
+<h3>Can I backtest ten years of gold data?</h3>
+<p>You can test long historical periods if you import suitable, permitted 15-minute gold candles within the 400,000-candle limit. The public site does not bundle a ten-year dataset, and changing the date picker cannot create missing historical candles.</p>
+<h3>Does the app show Sharpe, Sortino and maximum drawdown?</h3>
+<p>Yes. It provides risk-adjusted metrics, realized-equity drawdown and the backtest engine's drawdown, along with weekly and monthly performance and trade-by-trade analysis. Some statistics may be unavailable on short samples.</p>
+<h3>Is it completely free, and do I need TradingView Premium?</h3>
+<p>Using the backtester is free, with no separate paid plan or backtest-run cap. You do not need TradingView Premium to use this independent application. You do need price data you are permitted to process.</p>
+<h3>Can I use the results for live trades?</h3>
+<p>It is a research tool rather than a trading platform. Validate symbol data, contract value, commissions, strategy compatibility and sample trades before making any decisions. Historical and synthetic backtests are not guarantees.</p>
+
+<p class="support-note">If you run into an issue importing CSV data, loading a Pine Script, or configuring the backtester, email <a href="mailto:support@signaltoscript.com">support@signaltoscript.com</a>. Screenshots of the error and a sample of the CSV format make troubleshooting easier.</p>
+<p>If you are looking for a strategy to try, start with the <a href="/articles/gold-breakout-15m-strategy.html">free Gold Breakout 15M Pine Script</a>. I also wrote about a separate <a href="/articles/automate-tradingview-strategies-chrome-extension.html">TradingView visual bridge experiment</a> for Binance signals. Those are different projects, but both grew out of wanting to test ideas rather than just talk about them.</p>
+<div class="author-card"><div class="author-monogram">CW.</div><div><strong>Written by CW</strong><p>Free Pine Script tools, TradingView strategy experiments and practical development notes.</p></div></div>
+</div></section>
+</main>
+<footer class="footer"><div class="wrap foot"><div>© 2026 Signal to Script · by CW. Independent Pine Script guides and examples.</div><div>TradingView and broker names are trademarks of their respective owners. Research only, not financial advice.</div></div><nav class="policy-links" aria-label="Legal and business policies"><a href="/terms.html">Terms &amp; Conditions</a><a href="/refunds.html">Refund &amp; Cancellation</a><a href="/privacy.html">Privacy Policy</a><a href="mailto:support@signaltoscript.com">support@signaltoscript.com</a></nav></footer>
+<script defer src="/site.js"></script>
+</body></html>
