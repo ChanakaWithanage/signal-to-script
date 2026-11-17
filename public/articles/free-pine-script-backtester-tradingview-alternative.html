@@ -13,7 +13,7 @@
 <meta property="og:title" content="I Built a Free Pine Script Backtester with Unlimited Runs and Advanced Analytics">
 <meta property="og:description" content="Backtest Pine v5/v6 strategies in your browser with your own historical CSVs. No paid plan or backtest-run quota. Explore the free tool.">
 <meta property="og:url" content="https://signaltoscript.com/articles/free-pine-script-backtester-tradingview-alternative.html">
-<meta property="og:image" content="https://signaltoscript.com/images/gold-breakout-15m-chart.webp">
+<meta property="og:image" content="https://signaltoscript.com/images/pine-backtest-studio-performance-preview.svg">
 <meta name="twitter:card" content="summary_large_image">
 <script type="application/ld+json">
 {
@@ -26,7 +26,7 @@
   "author": {"@type":"Person","name":"CW"},
   "publisher": {"@type":"Organization","name":"Signal to Script","url":"https://signaltoscript.com/"},
   "mainEntityOfPage": "https://signaltoscript.com/articles/free-pine-script-backtester-tradingview-alternative.html",
-  "image": "https://signaltoscript.com/images/gold-breakout-15m-chart.webp"
+  "image": "https://signaltoscript.com/images/pine-backtest-studio-performance-preview.svg"
 }
 </script>
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9855777255503695" crossorigin="anonymous"></script>
@@ -71,6 +71,10 @@
 <figcaption>One of the real TradingView gold charts that prompted this project. The backtester itself works with separately imported OHLCV data. <a href="/articles/gold-breakout-15m-strategy.html">Read the strategy breakdown</a>.</figcaption>
 </figure>
 
+<figure class="gold-figure gold-figure-wide">
+<a href="/images/pine-backtest-studio-performance-preview.svg" target="_blank" rel="noopener noreferrer"><img src="/images/pine-backtest-studio-performance-preview.svg" width="1200" height="620" loading="lazy" alt="Pine Backtest Studio sample results showing net profit, win rate, profit factor, maximum drawdown and an equity curve"></a>
+<figcaption>Performance dashboard preview recreated from the supplied Pine Backtest Studio screenshot. Figures are from the synthetic demo dataset, not real historical gold performance.</figcaption>
+</figure>
 <h2>More than just net profit and win rate</h2>
 <p>Two strategies can have the same net profit and very different risks. One might grow steadily. Another might spend months losing money before a few large winners rescue the result. If you only look at the final number, you miss the part that matters.</p>
 <div class="btst-feature-grid">
@@ -95,6 +99,10 @@
 <p>The analysis also breaks results into weekly and monthly periods, shows longest winning and losing streaks, and separates long-trade results from short-trade results. On the demo screenshot, for example, the latest closed-trade streak is two losses, while the longest winning streak is five trades. Those are the details you can miss when an equity curve looks good at first glance.</p>
 <p>Sharpe, Sortino, Calmar and annualized growth may display <strong>N/A</strong> when the selected period is too short or the underlying calculation is not meaningful. I'd rather show that than make up a precise-looking ratio.</p>
 
+<figure class="gold-figure gold-figure-wide">
+<a href="/images/pine-backtest-studio-analytics-preview.svg" target="_blank" rel="noopener noreferrer"><img src="/images/pine-backtest-studio-analytics-preview.svg" width="1200" height="670" loading="lazy" alt="Advanced analytics preview showing Sharpe and Sortino ratios, realized maximum drawdown, weekly returns and trade streaks"></a>
+<figcaption>Advanced analytics view, recreated from the supplied synthetic demo screenshots. Risk ratios are shown as unavailable when the short sample does not support a meaningful result.</figcaption>
+</figure>
 <h2>Bring your own historical data, then reuse it</h2>
 <p>You do not need a special data subscription from us. The backtester accepts ordinary OHLCV CSV files with a timestamp, open, high, low and close. Volume is optional. You can drag and drop multiple files from the same instrument and timeframe, and the app sorts the candles and checks for overlapping data.</p>
 <p>In V2, I added a Data Library to make the first step less confusing. There are shortcuts for popular markets including <strong>Gold (XAUUSD), Silver (XAGUSD), GBPUSD, EURUSD and NAS100</strong>. You can pin favorites, open a provider's data-export page and import your file. The shortcut itself does not download the market history.</p>
