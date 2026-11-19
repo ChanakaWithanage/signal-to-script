@@ -8,9 +8,10 @@ const fail=(error,status=400,code='ERROR')=>Response.json({error,code},{status,h
 const sameOrigin=req=>req.headers.get('Origin')===new URL(req.url).origin;
 
 export async function onRequestGet({env}){
+ const enabled=env.PREMIUM_CHECKOUT_ENABLED==='true';
  const ready={};
  for(const slug of Object.keys(PRODUCTS)){
-  try{ready[slug]=await storageAvailable(env,slug)}catch{ready[slug]=false}
+  try{ready[slug]=enabled&&await storageAvailable(env,slug)}catch{ready[slug]=false}
  }
  return Response.json({
   products:PRODUCTS,
@@ -35,6 +36,7 @@ export async function onRequestPost({request,env}){
   if(action==='create'){
    const slug=body.slug;
    if(!isPremium(slug))return fail('Unknown product.',404);
+   if(env.PREMIUM_CHECKOUT_ENABLED!=='true')return fail('Checkout is not yet enabled. Do not send payment.',503,'NOT_READY');
    if(!(await storageAvailable(env,slug)))
     return fail('Checkout is not open yet. The private premium file needs to be configured first. Do not send a payment.',503,'NOT_READY');
    const result=await createOrder(env.DB,slug);
