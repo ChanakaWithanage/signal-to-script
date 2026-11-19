@@ -8,7 +8,7 @@
 <meta name="description" content="Buy your premium Pine Script v6 source with an embedded NOWPayments crypto checkout.">
 <link rel="canonical" href="https://signaltoscript.com/checkout.html">
 <link rel="icon" href="/favicon.svg">
-<link rel="stylesheet" href="/styles.css?v=20261119-home-sale">
+<link rel="stylesheet" href="/styles.css?v=20261119-qr-payment-guide">
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
@@ -49,13 +49,21 @@
  <div id="premium-order" hidden>
   <div class="premium-order-amount"><span>Order total</span><strong id="premium-exact-amount">$12.49 USD</strong><small id="premium-pay-coin"></small></div>
   <div class="premium-order-wallet"><span>Your order reference</span><code id="premium-order-id"></code></div>
-  <div class="premium-fee-tip"><strong>💡 Lower-fee tip:</strong> Choose <strong>USDT on BNB Smart Chain (BEP20)</strong> in the payment widget for typically lower network transfer fees.</div>
+  <section class="premium-payment-guide" aria-labelledby="payment-guide-heading">
+    <div class="premium-guide-heading"><div><span>YOUR 3-STEP CHECKOUT</span><h3 id="payment-guide-heading">How to complete your payment</h3></div><span class="premium-guide-count">3 easy steps</span></div>
+    <ol class="premium-guide-steps">
+      <li><span class="premium-guide-step-num" aria-hidden="true">1</span><div><strong>Scan the QR code</strong><p>Open your crypto wallet and scan the QR code shown below. On the same phone? Copy the payment address instead.</p></div></li>
+      <li><span class="premium-guide-step-num" aria-hidden="true">2</span><div><strong>Send the exact crypto amount</strong><p>Send the amount shown in NOWPayments using the same network. For USDT BSC, select <b>BNB Smart Chain (BEP20)</b> in your wallet.</p></div></li>
+      <li><span class="premium-guide-step-num" aria-hidden="true">3</span><div><strong>Get your download</strong><p>Keep this page open. After the transaction is verified, your Pine Script download button appears here automatically.</p></div></li>
+    </ol>
+  </section>
+  <div class="premium-fee-tip"><span class="premium-fee-tip-icon" aria-hidden="true">✦</span><div><strong>Recommended: USDT on BNB Smart Chain</strong><span>BEP20 typically has lower network transfer fees. Make sure your wallet uses the network shown in NOWPayments.</span></div></div>
+  <div class="premium-widget-heading"><strong>Complete your payment</strong><span>Secure payment by NOWPayments</span></div>
   <div id="premium-widget-container" class="premium-widget-container" hidden>
    <iframe id="premium-payment-widget" title="NOWPayments secure payment widget" width="410" height="696" frameborder="0" scrolling="no" loading="eager" referrerpolicy="strict-origin-when-cross-origin" style="overflow-y:hidden"></iframe>
   </div>
   <a id="premium-pay-link" class="premium-widget-fallback" href="https://nowpayments.io/" target="_blank" rel="noopener noreferrer" hidden>Open payment in a new tab instead</a>
-  <div class="premium-qr-steps" aria-label="How to complete your crypto payment"><span>1. Scan QR or copy the address</span><span>2. Send the shown amount on the selected network</span><span>3. Download unlocks after confirmation</span></div>
-  <p class="premium-order-note">Complete your payment above. This page checks the payment status automatically every 20 seconds and unlocks your download when NOWPayments confirms completion.</p>
+  <div class="premium-confirmation-note" role="note"><span class="premium-confirmation-dot" aria-hidden="true"></span><div><strong>We check payment status for you</strong><p>Your order is checked automatically every 20 seconds. Once NOWPayments confirms that your payment is complete, the download button appears here. No extra payment confirmation step is needed.</p></div></div>
   <button type="button" id="premium-check" class="premium-copy-button">Check payment status</button>
   <button type="button" id="premium-restart" class="premium-copy-button" hidden>Start a new checkout</button>
   <button type="button" id="premium-download" class="btn premium-primary-button" hidden>Download purchased Pine Script</button>
