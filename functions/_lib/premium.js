@@ -33,7 +33,7 @@ export async function ensurePremiumSchema(db){
 }
 export function ready(env){
  return env.PREMIUM_CHECKOUT_ENABLED==='true'&&!!env.DB&&
-  !!env.NOWPAYMENTS_API_KEY&&!!env.NOWPAYMENTS_IPN_SECRET&&!!env.PREMIUM_BUCKET;
+  !!env.NOWPAYMENTS_API_KEY&&!!env.NOWPAYMENTS_IPN_SECRET&&!!env.PREMIUM_BUCKET&&!!env.NOWPAYMENTS_PAYOUT_CURRENCY;
 }
 export async function storageAvailable(env,slug){
  if(!env.PREMIUM_BUCKET||typeof env.PREMIUM_BUCKET.head!=='function')return false;
@@ -71,7 +71,8 @@ export async function checkMinimum(env,currency){
  if(!CURRENCIES.includes(currency))return {ok:false,error:'Unsupported currency.'};
  // Compare the provider's real-time fiat-equivalent minimum before issuing an invoice.
  // Payout currency is configured in the merchant account; this must match its settings.
- const payout=String(env.NOWPAYMENTS_PAYOUT_CURRENCY||'usdttrc20').toLowerCase();
+ const payout=String(env.NOWPAYMENTS_PAYOUT_CURRENCY||'').toLowerCase();
+ if(!payout)return {ok:false,error:'Merchant payout currency has not been configured.'};
  const data=await provider(env,'min-amount?currency_from='+encodeURIComponent(currency)+
   '&currency_to='+encodeURIComponent(payout)+'&fiat_equivalent=usd');
  const minimum=Number(data.fiat_equivalent);
