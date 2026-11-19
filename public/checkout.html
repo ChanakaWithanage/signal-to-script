@@ -24,23 +24,25 @@
  <span class="deal-eyebrow">EARLY BLACK FRIDAY · LIMITED-TIME LAUNCH</span>
  <h1 id="premium-product-name">Premium Pine Script</h1>
  <p>Get the complete TradingView Pine Script v6 source and installation guidance. Pay through NOWPayments and unlock the digital file once your payment is finished.</p>
- <div class="premium-pricing"><strong class="premium-price">$1.99 <small>USD</small></strong><span class="deal-discount">Black Friday launch price</span></div>
- <p class="premium-price-clarity">Launch offer ends November 30, 2026 (UTC). Get the complete Pine Script v6 source today.</p>
+ <div class="premium-pricing"><span class="premium-old-price"><s>$4.99</s><small> Regular price</small></span><strong class="premium-price">$1.99 <small>USD</small></strong><span class="deal-discount">SAVE 60%</span></div>
+ <p class="premium-price-clarity">Black Friday deal through November 30, 2026 (UTC). One payment. Yours to download.</p><div class="premium-trust-row"><span>✓ Complete Pine Script v6 source</span><span>✓ No account required</span><span>✓ Verified order-based delivery</span></div>
  <div class="premium-deliverables"><strong>What you receive</strong><p>The full source-code file, strategy settings documented in the article, and installation support if needed.</p></div>
  <p class="premium-terms">Choose your preferred crypto, complete the secure payment and download your script once confirmed.</p>
 </section>
 <section class="premium-checkout-card" aria-labelledby="checkout-title">
- <div class="premium-provider-brand"><span class="premium-provider-dot">●</span><span>Crypto checkout powered by <strong>NOWPayments</strong></span></div>
+ <div class="premium-provider-brand"><span class="premium-provider-dot">●</span><span>Payments processed by <strong>NOWPayments</strong></span></div><div class="premium-checkout-badges"><span>🔒 Secure hosted payment</span><span>✓ Payment verified before delivery</span></div>
  <h2 id="checkout-title">Get your premium script</h2>
- <p>No login or card details required. Each purchase gets its own payment invoice, not a shared widget.</p>
+ <p>Select your script and payment network. You will receive a unique NOWPayments checkout link for this purchase.</p>
  <p id="premium-availability" role="status" aria-live="polite">Checking checkout availability...</p>
  <div id="premium-new-order">
+  <label class="premium-tx-label" for="premium-script">Choose your Pine Script</label>
+  <select id="premium-script" class="premium-currency-select"><option value="gold-breakout-15m">Gold Breakout 15M Strategy</option><option value="supertrend-dema-reversal">Supertrend + DEMA Reversal Strategy</option></select>
   <label class="premium-tx-label" for="premium-coin">Choose how to pay</label>
   <select id="premium-coin" class="premium-currency-select">
-   <option value="trx">TRX · TRON</option>
-   <option value="ltc">LTC · Litecoin</option>
    <option value="usdttrc20">USDT · TRON (TRC20)</option>
    <option value="usdtbsc">USDT · BNB Smart Chain (BEP20)</option>
+   <option value="trx">TRX · TRON</option>
+   <option value="ltc">LTC · Litecoin</option>
   </select>
   <p class="premium-check-info">Choose your preferred payment network to continue.</p>
   <button type="button" id="premium-reserve" class="btn premium-primary-button" disabled>Continue to secure payment</button>
@@ -48,7 +50,7 @@
  <div id="premium-order" hidden>
   <div class="premium-order-amount"><span>Order total</span><strong id="premium-exact-amount">$1.99 USD</strong><small id="premium-pay-coin"></small></div>
   <div class="premium-order-wallet"><span>Your order reference</span><code id="premium-order-id"></code></div>
-  <a id="premium-pay-link" class="btn premium-primary-button" href="https://nowpayments.io/" target="_blank" rel="noopener noreferrer" hidden>Continue securely to NOWPayments</a>
+  <a id="premium-pay-link" class="btn premium-primary-button" href="https://nowpayments.io/" target="_blank" rel="noopener noreferrer" hidden><span>Continue to secure payment</span><img class="premium-nowpayments-button" src="https://nowpayments.io/images/embeds/payments-button-black.svg" alt="Pay with NOWPayments"></a>
   <p class="premium-order-note">The payment opens in a separate tab. Complete it there, then return here. This page checks for a verified finished payment.</p>
   <button type="button" id="premium-check" class="premium-copy-button">Check payment status</button>
   <button type="button" id="premium-download" class="btn premium-primary-button" hidden>Download purchased Pine Script</button>
