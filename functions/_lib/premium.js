@@ -1,4 +1,4 @@
-// Premium downloads with per-order NOWPayments hosted crypto invoices.
+// Premium downloads via a NOWPayments widget, with a distinct invoice for each buyer.
 import {randomToken,hashToken} from './download-access.js';
 
 export const OFFER_END=Date.parse('2026-12-01T00:00:00Z');
@@ -49,10 +49,10 @@ export function publicOrder(row){
  return {id:row.id,slug:row.slug,product:PRODUCTS[row.slug],
   amountUsd:row.amount_usd,currency:row.currency,
   status:row.status==='paid'?'paid':row.status==='failed'?'failed':'pending',
-  createdAt:row.created_ms,invoiceUrl:row.invoice_url||null};
+  createdAt:row.created_ms,invoiceId:row.invoice_id||null,invoiceUrl:row.invoice_url||null};
 }
 export function createCredentials(slug,currency){
- if(!isPremium(slug)||!CURRENCIES.includes(currency))throw Error('Unknown premium product or coin');
+ if(!isPremium(slug)||(currency!=='auto'&&!CURRENCIES.includes(currency)))throw Error('Unknown premium product or coin');
  return {id:randomToken().slice(0,24),secret:randomToken(),slug,currency,
   amountUsd:PRICE_USD,createdAt:Date.now()};
 }
@@ -109,7 +109,8 @@ export function matchesPayment(row,p){
   String(p.invoice_id||'')===String(row.invoice_id||'')&&
   String(p.price_currency||'').toLowerCase()==='usd'&&
   Math.abs(Number(p.price_amount)-Number(row.amount_usd))<0.000001&&
-  String(p.pay_currency||'').toLowerCase()===row.currency;
+  /^[a-z0-9]{2,30}$/i.test(String(p.pay_currency||''))&&
+  (row.currency==='auto'||String(p.pay_currency||'').toLowerCase()===row.currency);
 }
 export async function settlePayment(db,row,p){
  if(!matchesPayment(row,p))return false;
