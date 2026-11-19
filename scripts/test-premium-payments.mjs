@@ -57,7 +57,7 @@ const db={
  }
 };
 const file='//@version=6\nstrategy("Premium test")';
-const env={DB:db,PREMIUM_BUCKET:{
+const env={DB:db,PREMIUM_CHECKOUT_ENABLED:'true',PREMIUM_BUCKET:{
  head:async name=>name.endsWith('.pine')?{size:file.length}:null,
  get:async name=>name.endsWith('.pine')?{body:file}:null
 }};
@@ -72,7 +72,9 @@ const post=(action,more={},e=env)=>onRequestPost({request:request(action,more),e
 
 const metadata=await onRequestGet({env:{}});
 assert.equal((await metadata.json()).ready['gold-breakout-15m'],false,'no R2 means checkout unready');
-const blocked=await post('create',{slug:'gold-breakout-15m'},{DB:db});
+const disabled=await post('create',{slug:'gold-breakout-15m'},{...env,PREMIUM_CHECKOUT_ENABLED:'false'});
+assert.equal(disabled.status,503,'new checkout must require explicit enablement');
+const blocked=await post('create',{slug:'gold-breakout-15m'},{DB:db,PREMIUM_CHECKOUT_ENABLED:'true'});
 assert.equal(blocked.status,503,'no payment reservation without private R2');
 
 const slugs=['gold-breakout-15m','supertrend-dema-reversal','gold-breakout-15m'];
