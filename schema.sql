@@ -38,3 +38,31 @@ CREATE TABLE IF NOT EXISTS free_guest_downloads (
   script_slug TEXT NOT NULL,
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+
+-- Premium TRC20 checkout: three active amount lanes (1.990, 1.991, 1.992 USDT).
+-- Private Pine source files are stored in R2, not in the D1 database.
+CREATE TABLE IF NOT EXISTS premium_orders (
+ id TEXT PRIMARY KEY,
+ secret_hash TEXT NOT NULL UNIQUE,
+ slug TEXT NOT NULL,
+ amount_micro INTEGER NOT NULL,
+ lane INTEGER NOT NULL,
+ created_ms INTEGER NOT NULL,
+ expires_ms INTEGER NOT NULL,
+ paid_ms INTEGER,
+ status TEXT NOT NULL DEFAULT 'pending' CHECK(status IN ('pending','paid')),
+ tx_hash TEXT UNIQUE
+);
+CREATE INDEX IF NOT EXISTS idx_premium_orders_status ON premium_orders(status,expires_ms);
+CREATE TABLE IF NOT EXISTS premium_slots (
+ lane INTEGER PRIMARY KEY CHECK(lane IN (0,1,2)),
+ order_id TEXT,
+ hold_until_ms INTEGER NOT NULL DEFAULT 0
+);
+CREATE TABLE IF NOT EXISTS premium_engagement (
+ date_utc TEXT NOT NULL,
+ slug TEXT NOT NULL,
+ event TEXT NOT NULL,
+ count INTEGER NOT NULL DEFAULT 0,
+ PRIMARY KEY(date_utc,slug,event)
+);
