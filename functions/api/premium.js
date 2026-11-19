@@ -34,8 +34,10 @@ export async function onRequestPost({request,env}){
   if(body.action==='create'){
    const slug=String(body.slug||'').trim().toLowerCase();
    const currency=String(body.currency||'').trim().toLowerCase();
-   if(!Object.hasOwn(PRODUCTS,slug)||!CURRENCIES.includes(currency))
-    return failure('Please select a valid Pine Script and payment network.',400,'INVALID_PRODUCT');
+   if(!Object.hasOwn(PRODUCTS,slug))
+    return failure('Selected script is unavailable. Please choose a script again.',400,'INVALID_PRODUCT');
+   if(!CURRENCIES.includes(currency))
+    return failure('Selected payment network is unavailable. Please choose USDT TRC20 or BEP20.',400,'INVALID_CURRENCY');
    if(!configured(env))return failure('Crypto checkout is not enabled yet. Do not send payment.',503,'NOT_READY');
    if(Date.now()>=OFFER_END)return failure('The Black Friday offer has ended. New purchases are paused.',409,'OFFER_ENDED');
    if(!(await storageAvailable(env,slug)))
