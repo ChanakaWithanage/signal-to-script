@@ -417,3 +417,12 @@
 
 /* Ensure hidden checkout stages never become visible because of button display rules. */
 .premium-checkout [hidden]{display:none!important}
+
+/* Embedded NOWPayments per-purchase widget, fully responsive. */
+.premium-widget-container{display:flex;justify-content:center;width:100%;margin:16px auto 8px;background:#fff;border:1px solid #e3e8e0;border-radius:10px;overflow:hidden}
+.premium-widget-container iframe{display:block;width:100%;max-width:410px;height:696px;min-height:696px;border:0;background:#fff}
+.premium-fee-tip{border:1px solid #cfe3d2;background:#eff8f0;border-radius:7px;padding:12px 14px;font-size:12px;line-height:1.65;color:#244934;margin:12px 0}
+.premium-fee-tip strong{color:#1b5237}
+.premium-widget-fallback{display:block;text-align:center;font-weight:650;font-size:12px;margin:10px auto 18px;text-underline-offset:3px}
+#premium-download{margin-top:20px}
+@media(max-width:490px){.premium-checkout-card{padding:16px}.premium-widget-container{border-radius:6px}.premium-widget-container iframe{width:100%;height:696px}}
