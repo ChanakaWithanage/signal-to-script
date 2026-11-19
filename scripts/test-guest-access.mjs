@@ -36,7 +36,7 @@ const db={
 };
 const env={DB:db,ASSETS:{fetch:async()=>new Response('//@version=6\nstrategy("demo")',{status:200})}};
 const request=(endpoint,cookie='')=>new Request('https://signaltoscript.com'+endpoint,{headers:cookie?{Cookie:cookie}:{}});
-const script='supertrend-dema-reversal';
+const script='supertrend-visual-bridge';
 const url='/api/download?script='+script;
 
 const first=await download({request:request(url),env});
