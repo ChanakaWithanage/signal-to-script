@@ -2,7 +2,7 @@
 import {randomToken,hashToken} from './download-access.js';
 
 export const OFFER_END=Date.parse('2026-12-01T00:00:00Z');
-export const PRICE_USD='1.99';
+export const PRICE_USD='12.49';
 export const PRODUCTS=Object.freeze({
  'gold-breakout-15m':'Gold Breakout 15M Strategy',
  'supertrend-dema-reversal':'Supertrend + DEMA Reversal Strategy'
@@ -80,7 +80,7 @@ export async function checkMinimum(env,currency){
   return {ok:false,error:'NOWPayments did not return a reliable USD minimum. Checkout is unavailable for this currency.'};
  if(minimum>Number(PRICE_USD))
   return {ok:false,error:'NOWPayments currently requires approximately $'+minimum.toFixed(2)+
-   ' for '+currency.toUpperCase()+'. The $1.99 launch price is below that minimum. Choose another coin.'};
+   ' for '+currency.toUpperCase()+'. The $12.49 launch price is below that minimum. Choose another coin.'};
  return {ok:true,minimumUsd:minimum};
 }
 export function validInvoiceUrl(value){
