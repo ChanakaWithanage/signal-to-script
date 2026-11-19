@@ -1,4 +1,4 @@
-// Buyer checkout: invoice links come from the server, never from a shared payment widget.
+// Each buyer receives an embedded NOWPayments widget for their own tracked invoice.
 const NAMES={
  'gold-breakout-15m':'Gold Breakout 15M Strategy',
  'supertrend-dema-reversal':'Supertrend + DEMA Reversal Strategy'
@@ -13,7 +13,8 @@ const availability=document.getElementById('premium-availability');
 const reserve=document.getElementById('premium-reserve');
 const newOrder=document.getElementById('premium-new-order');
 const orderPanel=document.getElementById('premium-order');
-const coin=document.getElementById('premium-coin');
+const widgetContainer=document.getElementById('premium-widget-container');
+const paymentWidget=document.getElementById('premium-payment-widget');
 const message=document.getElementById('premium-message');
 const check=document.getElementById('premium-check');
 const payLink=document.getElementById('premium-pay-link');
@@ -51,24 +52,30 @@ function restoreOrder(){
 function display(){
  if(!order)return;
  document.getElementById('premium-exact-amount').textContent='$'+order.amountUsd+' USD';
- document.getElementById('premium-pay-coin').textContent='Pay with '+String(order.currency).toUpperCase();
+ document.getElementById('premium-pay-coin').textContent='Select your coin and network below';
  document.getElementById('premium-order-id').textContent=order.id;
  newOrder.hidden=true;orderPanel.hidden=false;
  if(order.status==='paid'){
-  payLink.hidden=true;check.hidden=true;download.hidden=false;
-  availability.textContent='Payment finished. Your source-code download is unlocked.';
-  setMessage('Thanks for your purchase. You can download your script now.');
+  widgetContainer.hidden=true;payLink.hidden=true;check.hidden=true;download.hidden=false;
+  availability.textContent='Payment confirmed! Your premium source is ready.';
+  setMessage('Thank you for your purchase. Download your Pine Script below.');
  }else if(order.status==='failed'){
-  payLink.hidden=true;check.hidden=true;download.hidden=true;
-  availability.textContent='Invoice could not be created. Please contact support.';
+  widgetContainer.hidden=true;payLink.hidden=true;check.hidden=true;download.hidden=true;
+  availability.textContent='This checkout could not be completed. Please contact support.';
  }else{
+  const invoiceId=String(order.invoiceId||'');
+  if(/^[0-9]{3,25}$/.test(invoiceId)){
+   const widgetUrl='https://nowpayments.io/embeds/payment-widget?iid='+invoiceId;
+   if(paymentWidget.getAttribute('src')!==widgetUrl)paymentWidget.setAttribute('src',widgetUrl);
+   widgetContainer.hidden=false;
+  }else{widgetContainer.hidden=true;}
   if(order.invoiceUrl){
    payLink.href=order.invoiceUrl;
    payLink.hidden=false;
-  }
+  }else{payLink.hidden=true;}
   download.hidden=true;check.hidden=false;
-  availability.textContent='Your NOWPayments invoice is ready. Open it to pay securely.';
-  setMessage('After paying, return here. Your download unlocks after NOWPayments confirms completion.');
+  availability.textContent='Your secure NOWPayments checkout is ready.';
+  setMessage('Choose your payment option in the widget. Your download will unlock here after confirmation.');
  }
 }
 productSelect.addEventListener('change',()=>{
@@ -90,7 +97,11 @@ async function refresh(silent=false){
   if(updated?.status==='paid'){
    saveOrder({...order,...updated});
    display();
+   download.focus();
   }else if(updated?.status==='failed'){
+   saveOrder({...order,...updated});
+   display();
+  }else if(updated?.invoiceId&&!order.invoiceId){
    saveOrder({...order,...updated});
    display();
   }else if(!silent){
@@ -100,14 +111,14 @@ async function refresh(silent=false){
  finally{checking=false;check.disabled=false}
 }
 reserve.addEventListener('click',async()=>{
- slug=productSelect.value;
- if(!Object.hasOwn(NAMES,slug)||!['usdttrc20','usdtbsc','trx','ltc'].includes(coin.value)){
-  setMessage('Please select a script and payment network.');return;
+ slug=String(productSelect.value||'').trim().toLowerCase();
+ if(!Object.hasOwn(NAMES,slug)){
+  setMessage('Please choose a Pine Script.');return;
  }
  reserve.disabled=true;
- setMessage('Checking the current minimum and creating your secure invoice...');
+ setMessage('Preparing your secure NOWPayments widget...');
  try{
-  const result=await api('create',{slug:String(productSelect.value).trim().toLowerCase(),currency:String(coin.value).trim().toLowerCase()});
+  const result=await api('create',{slug,currency:'auto'});
   saveOrder(result.order);
   display();
  }catch(error){
@@ -158,7 +169,7 @@ async function loadAvailability(){
    availability.textContent='Crypto checkout is being configured. Do not send a payment yet.';
    return;
   }
-  availability.textContent='Ready to create your personal NOWPayments invoice. No sign-in needed.';
+  availability.textContent='Ready for secure payment with NOWPayments. No sign-in needed.';
   reserve.disabled=false;
  }catch(error){
   availability.textContent='Checkout is temporarily unavailable. Do not send a payment.';
