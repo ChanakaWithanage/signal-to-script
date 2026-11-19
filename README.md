@@ -253,58 +253,62 @@ Cloudflare Email Routing receives and forwards email but does not host an outgoi
 **Pine validation note:** The automated repository check verifies the `//@version=6` header, not Pine compilation or the Strategy Tester result. Compile and visually verify the script in TradingView before treating its historical results as reproducible. Publish only if you have redistribution rights to the supplied strategy code and screenshots.
 
 
-## Premium launch: 1.99 USDT TRC20 Black Friday offer (November 2026)
+## Premium Pine Script launch through NOWPayments (November 2026)
 
-Two existing articles are premium: `gold-breakout-15m` and `supertrend-dema-reversal`. They are featured before the three free scripts on the homepage. All existing free guest and Google access rules apply **only** to the three free scripts. The paid product articles remain publicly readable.
+The homepage features two premium scripts before the three free scripts:
+- `gold-breakout-15m` (Gold Breakout 15M Strategy)
+- `supertrend-dema-reversal` (Supertrend + DEMA Reversal Strategy)
 
-**Pricing disclosure:** Early Black Friday launch price is 1.99 USDT, compared with a **planned**, not previously charged, regular price of 4.99 USDT. This represents approximately 60% off the intended regular price. The launch offer ends at **2026-12-01 00:00 UTC**; the backend then stops new orders until the promotion is updated. Do not imply the scripts were previously sold at 4.99.
+The early Black Friday launch price is **$1.99 USD equivalent in cryptocurrency**, with a **planned**, not historically charged, regular price of **$4.99 USD**. This is approximately 60% below the planned price. The promotion expires **December 1, 2026 at 00:00 UTC**; afterward new orders are paused pending a new price configuration. The USD-denominated price remains fixed within our catalog; NOWPayments provides the exact crypto payment quote at invoice checkout.
 
-### Critical activation steps: checkout is OFF by default
+### Why the provided payment widget was not embedded
 
-The repository intentionally cannot accept money without configuring secure delivery. The buyer's public receiving address is `TYemkXWco4P6h1UCVgvneiMhiVaDpqVBwq` on **TRON (TRC20)**. Only the canonical Tether USDT contract `TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t` is accepted. Never put a wallet seed phrase or private key in Cloudflare.
+The NOWPayments button at `https://nowpayments.io/payment/?iid=4299592142&source=button` points to a reusable pre-created invoice. It does not securely identify each buyer and their specific purchased script. We instead create **a unique hosted NOWPayments invoice per customer order** from our own server, with an unguessable `order_id`, signed status callback and private order receipt. This allows multiple buyers to pay exactly the same price without any artificial fractional offsets. It also supports different crypto payment networks if NOWPayments permits small payments through those networks.
 
-1. Create a **private** Cloudflare R2 bucket, for example `signal-to-script-premium`. Do not enable public `r2.dev` or custom-domain file access.
-2. Before uploading, recover the two files from repository history at commit `19841e92aad249008cc4147fa4f80133c596eaf3`:
-   - `https://github.com/ChanakaWithanage/signal-to-script/blob/19841e92aad249008cc4147fa4f80133c596eaf3/public/scripts/gold-breakout-15m.pine`
-   - `https://github.com/ChanakaWithanage/signal-to-script/blob/19841e92aad249008cc4147fa4f80133c596eaf3/public/scripts/supertrend-dema-reversal.pine`
-   Upload both source files to R2 as the exact object keys `gold-breakout-15m.pine` and `supertrend-dema-reversal.pine`.
-3. Cloudflare > Workers & Pages > `signal-to-script` > Settings > Bindings > Add > **R2 bucket**. Bind the private bucket as `PREMIUM_BUCKET` in the production environment. Keep the existing D1 binding `DB`. Redeploy.
-4. Optionally add `TRONGRID_API_KEY` as a Cloudflare environment secret for reliable TRON API usage; never add the key to Git.
-5. Verify `GET https://signaltoscript.com/api/premium` returns `ready` values of `false` until you deliberately enable checkout. Test both object keys and ensure a mismatched or missing key returns no payment address or order.
-6. After private delivery and regulatory eligibility are verified, add a production environment variable `PREMIUM_CHECKOUT_ENABLED` with exact value `true`, then redeploy. This is the **explicit go-live switch**. Only then should `ready` become `true` for a product with an uploaded R2 object.
+### Activation checklist: checkout stays OFF until configured
 
-The two premium `.pine` files have been **removed from the current public build** and the free download allowlist, and direct static URL access is blocked even for Google members. **Important limitation:** the files remain available in the public Git history. This is not source-code secrecy. Publish materially updated premium versions in private storage if exclusive content is important, and confirm your right to sell previously client-created code. The Supertrend source has MPL 2.0 attribution and redistribution obligations.
+No real payments should be sent until the entire setup has been tested and the payment provider approves the product category and merchant.
 
-### Checkout and verification
+1. **Private source files.** Create a private R2 bucket without `r2.dev` or public custom-domain access. Upload:
+   - `gold-breakout-15m.pine` (recover from [previous git version](https://github.com/ChanakaWithanage/signal-to-script/blob/19841e92aad249008cc4147fa4f80133c596eaf3/public/scripts/gold-breakout-15m.pine))
+   - `supertrend-dema-reversal.pine` (recover from [previous git version](https://github.com/ChanakaWithanage/signal-to-script/blob/19841e92aad249008cc4147fa4f80133c596eaf3/public/scripts/supertrend-dema-reversal.pine))
+   Bind the R2 bucket to Cloudflare Pages as `PREMIUM_BUCKET`. Keep your D1 binding `DB`. Never enable a public R2 object URL for paid scripts.
+2. **NOWPayments dashboard.** Add and verify a payout wallet and choose the **actual payout cryptocurrency** you intend to receive in your merchant account. Generate an API key and the **IPN secret** from NOWPayments account/payment settings. Do not put either value in git or public client JavaScript.
+3. **Cloudflare Pages configuration.** In production, create encrypted secrets:
+   - `NOWPAYMENTS_API_KEY` (NOWPayments API key)
+   - `NOWPAYMENTS_IPN_SECRET` (NOWPayments IPN secret)
+   Set an environment variable `NOWPAYMENTS_PAYOUT_CURRENCY` matching your actual dashboard payout selection, such as `trx` or `usdttrc20`. This must not be guessed; the provider's minimum calculator uses the pay-in/payout pair.
+4. **Webhook.** Configure the NOWPayments instant payment notification callback as `https://signaltoscript.com/api/nowpayments-ipn`. Ensure Cloudflare bot/WAF rules allow genuine NOWPayments POST callbacks. The endpoint is intentionally public but requires a valid `x-nowpayments-sig` HMAC-SHA512 signature. For a `finished` event it also calls the authenticated `GET /v1/payment/{payment_id}` API and checks product order ID, invoice ID, currency, amount and terminal status before marking an order paid.
+5. **Network minimums.** NOWPayments published an illustrative USDTTRC20 to USDTTRC20 minimum near **$9**, above $1.99, but provider minimums change. This integration checks `GET /v1/min-amount` before creating any invoice. If $1.99 is below the real-time minimum for the customer's chosen pay currency and your configured payout coin, checkout rejects the order and asks the buyer to select another. If all coins are too expensive, consider changing the price or merchant payout coin rather than circumventing provider minimums.
+6. **Enable only after readiness tests.** When R2 delivery, customer payments, minimums, wallet, IPN status verification and applicable merchant rules have been confirmed, set `PREMIUM_CHECKOUT_ENABLED=true` in the Cloudflare Pages production environment and redeploy. By default it is disabled and no invoice can be created.
 
-- A visitor needs **no Google login**. A random capability is saved in browser localStorage and its SHA-256 hash in Cloudflare D1. Losing the browser storage can make automatic order recovery impossible. Order ID and TXID should be kept for support.
-- Up to **three** simultaneous order amounts: `1.990`, `1.991`, `1.992` USDT. The tiny fractional difference is an identification marker, not a hidden charge. Each order holds one lane for 30 minutes plus a 90-minute reuse cooldown; if all lanes are reserved, no fourth order is taken.
-- The buyer must send the **exact displayed amount** with sufficient TRON resources to cover network fees separately. Network fees can exceed the $1.99 sale price.
-- The `/api/premium` endpoint checks confirmed incoming Tether TRC20 history and the solidified transaction receipt. It checks recipient, official token contract, six decimals, exact amount, time window and execution success, then atomically binds a **unique transaction ID** to the order. One confirmed transfer cannot be credited to two orders.
-- A payment after expiry, a wrong-chain/token transfer, an amount mismatch, a third-party exchange withdrawal shortfall, or an ambiguous match requires manual support and is **not** automatically unlocked. The three-amount system is a low-volume pilot rather than strong buyer identity verification.
-- Paid source files are served only from `PREMIUM_BUCKET` after a confirmed order. File responses are private and `no-store`. Free guest downloads never grant premium access.
-- Existing tests `scripts/test-premium-payments.mjs` mock D1, R2 and TronGrid. Passing tests does **not** prove the real wallet, live network, production binding or customer's transfer fee. Verify real transfer handling carefully before commercial use.
+The site offers a small coin list of `trx`, `ltc` and `usdttrc20` for the pilot. Other coins can be added after checking merchant payout compatibility and minimums. NOWPayments hosts the actual payment flow and generates deposit address/payment instructions. The website never touches a wallet private key.
 
-### Track interest and purchases in D1
+### Order lifecycle, security and delivery
 
-The site's small first-party `/api/engagement` function increments aggregate daily event counts for these two scripts only: `article_click` (visitor clicks an internal link to the article), `article_view` (browser loads the article), and `buy_click` (visitor clicks Buy). No IP addresses, email addresses or visitor IDs are stored in these counters. Automated or repeated traffic may inflate them.
+- Browser creates a new order through `POST /api/premium`. The server validates selected script, discounted period, private R2 object, environment switch, and live minimum before asking NOWPayments `POST /v1/invoice` to generate a **per-order** hosted invoice URL.
+- An order identifier and random 64-character access secret are saved in the buyer's browser localStorage. Only its SHA-256 hash is stored in D1. The checkout does not require Google sign-in. Retain the order ID and provider receipt if the browser's localStorage is lost.
+- NOWPayments sends payment events to `functions/api/nowpayments-ipn.js`. The server verifies the sorted JSON HMAC-SHA512 signature; **only `finished`** qualifies for delivery, never `waiting`, `confirming`, `confirmed` or `partially_paid`.
+- The server uses the NOWPayments API key to verify the final payment record, including matching the specific `order_id`, `invoice_id`, requested USD amount and chosen pay currency. D1 marks the order paid once and ensures a provider payment ID cannot unlock multiple purchases. Frontend redirects or a screenshot are **not** proof of payment.
+- On a paid order the buyer can download only the purchased source file from `PREMIUM_BUCKET`. The free download API and direct `/scripts/*.pine` paths reject both premium files, even for members.
+- All paid file URLs are private. Premium source code can still be recovered from earlier **public Git commit history**, so exclusive source distribution requires new private versions and appropriate licensing/redistribution permissions.
+- Existing free guest download and Google unlimited download behavior continues for the three free scripts.
 
-In Cloudflare's D1 console for the existing `DB`, run:
+### Monitoring and engagement
+
+Daily aggregate event counts live in D1 table `premium_engagement`: `article_click`, `article_view`, and `buy_click`, for each of the two premium products. No visitor fingerprint or email address is collected for those counters.
 
 ```sql
-SELECT date_utc, slug, event, count
-FROM premium_engagement
+SELECT date_utc, slug, event, count FROM premium_engagement
 ORDER BY date_utc DESC, slug, event;
 ```
 
-For paid orders after launch:
+Successful invoices and pending orders are stored in a **new** `premium_nowpayments_orders` D1 table. Older unused `premium_orders` / `premium_slots` tables can be left in D1 for historical traceability.
 
 ```sql
-SELECT slug, status, COUNT(*) AS orders
-FROM premium_orders
-GROUP BY slug, status
-ORDER BY slug, status;
+SELECT slug, currency, status, COUNT(*) AS orders
+FROM premium_nowpayments_orders GROUP BY slug, currency, status
+ORDER BY slug, currency, status;
 ```
 
-Do not expose buyer order tokens, full D1 order rows or private object keys in a public analytics API.
-
+CI runs mocked NOWPayments invoice/minimum/payment-status/webhook tests. Passing these tests does **not** confirm real credentials, incoming IPN delivery through Cloudflare, the payout wallet configuration or a live $1.99 payment. Perform a real end-to-end purchase with a supported amount and verify refund/support processes before launch.
