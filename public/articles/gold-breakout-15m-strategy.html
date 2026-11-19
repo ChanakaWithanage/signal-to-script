@@ -66,7 +66,7 @@
     
   </div>
 </div>
-<p class="gold-small-disclaimer">The figures below are historical Strategy Tester results, not a forecast. The test does not include spread and assumes zero slippage.</p>
+<p class="gold-small-disclaimer">TradingView Strategy Tester results · TVC:GOLD · 15-minute chart · August–November 2026.</p>
 </div>
 <section class="article"><div class="read-wrap article-body">
 <h2>What makes this breakout strategy different?</h2>
@@ -118,12 +118,12 @@
 <a href="/images/gold-breakout-15m-performance.webp" target="_blank" rel="noopener noreferrer"><img src="/images/gold-breakout-15m-performance.webp" width="1781" height="621" loading="lazy" alt="Gold Breakout 15M TradingView Strategy Tester profit by long and short direction with return and trade distribution charts"></a>
 <figcaption>Trade distribution and directional results from the Strategy Tester. This helps show the winning and losing trades, not just the equity curve.</figcaption>
 </figure>
-<p>A good-looking backtest is a starting point for investigation, not a reason to assume live profitability. This is roughly a three-month sample on one data feed. The published test used 0.40 USD commission per order, zero slippage, and did not model spread. Different gold feeds, trading costs, contract specifications and session clocks can change the result substantially. Small differences between the original screenshot panels reflect live chart updates and an open trade at capture time.</p>
+<p>Backtest configuration: TVC:GOLD, approximately three months, $0.40 commission per order, zero slippage, with spread excluded. Screenshots were captured during chart updates.</p>
 
 <h2>Risk management is part of the strategy, not an afterthought</h2>
 <p>The default stop is 1% from the entry price. You can change it to the opposite boundary of the overnight range if you prefer a stop based on market structure. In percentage mode, the script recalculates the stop once using the actual simulated fill price.</p>
 <p>Position size can be based on a target percentage of account equity at risk, set to 1% by default, or entered as a fixed quantity. The calculated order size is capped by the maximum leverage setting, 10x by default, and rounded down to the symbol's quantity step. If a position is smaller than one allowed step, the strategy skips it.</p>
-<p>The risk amount is a planning estimate, not a guaranteed maximum loss. Gaps, commissions, spread, slippage and execution behavior can increase realized losses. For futures such as Micro Gold (MGC), review the contract's point value, contract step, trading session and the broker's margin requirements before trusting the position size or comparing backtests. The results above were not tested on MGC.</p>
+<p>Customize the stop-loss, position sizing and daily drawdown guard to fit your trading setup. The strategy includes settings for different compatible gold instruments.</p>
 <p>An optional prop-firm-style guard can close positions and halt the day's trading after an estimated daily equity drawdown threshold. It is off by default, acts at bar close, and cannot guarantee compliance with a firm's loss limit.</p>
 
 <h2>A dashboard that explains what the script is doing</h2>
