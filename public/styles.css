@@ -342,3 +342,54 @@
   .btst-home-promo-actions{flex-direction:column}
   .btst-home-promo-actions a{width:100%}
 }
+
+
+/* Black Friday launch pricing: transparent planned regular pricing, not historical pricing. */
+.premium-home-section{padding-top:40px}
+.premium-home-section .feature{border-color:#d9cfb6}
+.deal-eyebrow{display:inline-block;letter-spacing:.055em;font-weight:750;color:#975a1c;font-size:11px}
+.premium-inline-price,.premium-price-line,.premium-article-price{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin:13px 0}
+.premium-inline-price strong,.premium-price-line strong,.premium-article-price strong{font-size:24px;color:#214c38}
+.premium-inline-price s,.premium-price-line s,.premium-article-price s{color:#7b817e;font-size:12px}
+.premium-inline-price small,.premium-price-line span,.premium-article-price span{font-size:11px;font-weight:750;color:#8a521b}
+.premium-sales-note,.premium-fineprint{font-size:11px;color:var(--muted);line-height:1.6}
+.premium-home-section .eyebrow{color:#8d5a20}
+.premium-home-section .btn:not(.btn-outline),.premium-article-offer .btn{background:#234b37;border-color:#234b37;color:#fff}
+.premium-article-offer{border-color:#decda7;background:#faf8f1}
+.premium-article-price{padding:6px 0}
+.gold-early-download .premium-article-price{margin:8px 0 12px}
+.gold-download-action .premium-article-price{flex-direction:column;gap:2px;align-items:flex-start}
+.gold-download-action .premium-article-price strong{font-size:26px}
+.premium-checkout{padding-top:38px;padding-bottom:100px}
+.premium-checkout-top{display:flex;justify-content:space-between;flex-wrap:wrap;gap:14px;color:var(--muted);font-size:12px;margin:0 0 30px}
+.premium-checkout-top a{color:var(--green)}
+.premium-checkout-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(320px,.88fr);gap:55px;align-items:start}
+.premium-checkout-product h1{font:600 clamp(32px,4vw,48px)/1.14 var(--serif);letter-spacing:-.04em;margin:12px 0 15px}
+.premium-checkout-product>p,.premium-checkout-card>p{font-size:14px;line-height:1.8;color:var(--muted)}
+.premium-pricing{display:flex;align-items:baseline;gap:13px;flex-wrap:wrap;margin:25px 0 12px}
+.premium-price{font-size:42px;color:#1c5539;letter-spacing:-.04em}
+.premium-price small{font-size:16px;letter-spacing:0}
+.premium-pricing s{font-size:13px;color:var(--muted)}
+.deal-discount{font-size:11px;font-weight:800;color:#9a591b;background:#fcf0dc;padding:5px 7px;border-radius:4px}
+.premium-checkout-product .premium-price-clarity{font-size:11px;line-height:1.7}
+.premium-deliverables{padding:18px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);margin:25px 0}
+.premium-deliverables strong{font-size:15px}
+.premium-deliverables p{font-size:13px;color:var(--muted);margin:7px 0 0;line-height:1.65}
+.premium-checkout-product .premium-terms{font-size:12px}
+.premium-checkout-card{background:var(--white);border:1px solid var(--line);border-radius:9px;padding:27px}
+.premium-checkout-card h2{font:600 28px/1.25 var(--serif);margin:0 0 10px}
+.premium-checkout-card .premium-primary-button{width:100%;display:block;text-align:center;cursor:pointer;margin:15px 0}
+.premium-primary-button:disabled{opacity:.55;cursor:not-allowed}
+.premium-checkout-card #premium-availability{padding:10px 12px;background:var(--wash);font-size:12px;line-height:1.6;border-radius:4px}
+.premium-order-amount,.premium-order-wallet{display:flex;flex-direction:column;gap:6px;border:1px solid var(--line);padding:16px;margin:15px 0;border-radius:6px;background:#fafbf9}
+.premium-order-amount>span,.premium-order-wallet>span{font-size:11px;color:var(--muted)}
+.premium-order-amount strong{font-size:30px;color:var(--green);font-variant-numeric:tabular-nums}
+.premium-order-wallet code{word-break:break-all;white-space:normal;user-select:all;font-size:12px;line-height:1.5}
+.premium-copy-button{align-self:flex-start;padding:6px 0;color:var(--green);background:none;border:0;text-decoration:underline;font-size:12px;cursor:pointer}
+.premium-order-note,.premium-order-expiry,.premium-check-info,.premium-help{font-size:11px!important;color:var(--muted);line-height:1.65}
+.premium-tx-label{display:block;font-size:12px;font-weight:700;margin-top:19px}
+#premium-tx{width:100%;box-sizing:border-box;min-width:0;margin-top:7px;padding:11px 12px;border:1px solid var(--line);border-radius:4px;font:12px var(--sans)}
+.premium-message:not(:empty){padding:11px;background:#f5f8ef;color:#31563d;font-size:12px;line-height:1.7;border-radius:4px;margin:15px 0}
+.premium-checkout-card .premium-help{border-top:1px solid var(--line);padding-top:15px}
+@media(max-width:830px){.premium-checkout-grid{grid-template-columns:1fr;gap:30px}.premium-checkout-card{max-width:680px}}
+@media(max-width:580px){.premium-checkout{padding-top:25px}.premium-checkout-card{padding:20px}.premium-price{font-size:36px}.premium-home-section{padding-top:20px}}
