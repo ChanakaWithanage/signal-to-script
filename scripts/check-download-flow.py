@@ -6,14 +6,14 @@ import re
 root=Path(__file__).resolve().parents[1]
 public=root/"public"
 slugs={p.stem for p in (public/"scripts").glob("*.pine")}
-assert len(slugs)>=5, "Expected all five published Pine Scripts"
+assert slugs == {"1r-bear-breakout-achievements", "goat-trap-pinbar-3ls-combo", "supertrend-visual-bridge"}, "Only three free script files should be in public/scripts"
 for page in public.rglob("*.html"):
     if page.name=="404.html":
         continue
     html=page.read_text(encoding="utf-8")
     assert "—" not in html, f"Em dash in {page}"
     assert 'href="/join.html"' in html, f"Sign-in navigation missing in {page}"
-    if page.name not in {"join.html", "privacy.html", "terms.html", "refunds.html"}:
+    if page.name not in {"join.html", "privacy.html", "terms.html", "refunds.html", "checkout.html"}:
         assert "ca-pub-9855777255503695" in html, f"AdSense missing in {page}"
     else:
         assert "googlesyndication.com" not in html, f"Ads should not load on sign-in or policy pages: {page}"
@@ -51,6 +51,7 @@ assert join_html.index('class="join-google-primary"') < join_html.index('id="joi
 css=(public/"styles.css").read_text(encoding="utf-8")
 assert ".gate-google-primary" in css and ".join-google-primary" in css, "Primary Google sign-in styling missing"
 assert "claimGuestDownload" in download, "Keep one-download guest quota"
+assert "'gold-breakout-15m'" not in download and "'supertrend-dema-reversal'" not in download, "Premium scripts must never use free downloads"
 assert 'id="google-button"' in (public/"join.html").read_text(encoding="utf-8")
 assert "free_google_sessions" in (root/"functions/api/google-login.js").read_text(encoding="utf-8")
 assert "verifyGoogleCredential" in (root/"functions/api/google-login.js").read_text(encoding="utf-8")
@@ -71,11 +72,13 @@ assert "if(valid)downloadSelected();return" in join
 assert "Gmail" in site and "Google Drive" in (public/"privacy.html").read_text(encoding="utf-8")
 assert 'href="/privacy.html"' in (public/"index.html").read_text(encoding="utf-8")
 assert "410" in (root/"functions/api/join.js").read_text(encoding="utf-8")
-print("One guest download and unlimited Google access wired to all 5 script routes.")
+print("One guest download and unlimited Google access remain for the three free script routes.")
 
 # Gold strategy conversion placement and source wiring.
 gold = (public/"articles/gold-breakout-15m-strategy.html").read_text(encoding="utf-8")
 assert gold.index('class="gold-lead-image"') < gold.index('id="download"') < gold.index("What makes this breakout"), "Early download CTA should immediately follow hero chart"
-assert gold.count('data-download-script="gold-breakout-15m"') >= 2
+assert gold.count('data-buy-script="gold-breakout-15m"') >= 2
 assert "2026" in gold and "59.7%" in gold and "1.893" in gold
-assert "gold-breakout-15m" in site
+assert "'gold-breakout-15m':'Gold Breakout 15M Strategy'" not in site
+assert 'href="/checkout.html?script=gold-breakout-15m"' in gold
+assert 'data-buy-script="supertrend-dema-reversal"' in (public/"articles/supertrend-dema-reversal-strategy.html").read_text(encoding="utf-8")
