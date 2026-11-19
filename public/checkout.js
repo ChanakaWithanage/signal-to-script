@@ -3,7 +3,11 @@ const NAMES={
  'gold-breakout-15m':'Gold Breakout 15M Strategy',
  'supertrend-dema-reversal':'Supertrend + DEMA Reversal Strategy'
 };
-const slug=new URLSearchParams(location.search).get('script');
+const params=new URLSearchParams(location.search);
+const initialSlug=String(params.get('script')||'').trim().toLowerCase();
+const productSelect=document.getElementById('premium-script');
+let slug=Object.hasOwn(NAMES,initialSlug)?initialSlug:'gold-breakout-15m';
+productSelect.value=slug;
 const title=document.getElementById('premium-product-name');
 const availability=document.getElementById('premium-availability');
 const reserve=document.getElementById('premium-reserve');
@@ -14,7 +18,7 @@ const message=document.getElementById('premium-message');
 const check=document.getElementById('premium-check');
 const payLink=document.getElementById('premium-pay-link');
 const download=document.getElementById('premium-download');
-const storageKey='sts_nowpayments_order_'+slug;
+const storageKey=()=> 'sts_nowpayments_order_'+slug;
 let order=null,checking=false;
 const setMessage=value=>{message.textContent=value};
 async function api(action,extra={}){
@@ -34,11 +38,11 @@ async function api(action,extra={}){
 }
 function saveOrder(next){
  order=next;
- try{localStorage.setItem(storageKey,JSON.stringify(next))}catch{}
+ try{localStorage.setItem(storageKey(),JSON.stringify(next))}catch{}
 }
 function restoreOrder(){
  try{
-  const saved=JSON.parse(localStorage.getItem(storageKey)||'null');
+  const saved=JSON.parse(localStorage.getItem(storageKey())||'null');
   if(saved?.slug===slug&&/^[a-f0-9]{24}$/.test(saved.id)&&/^[a-f0-9]{64}$/.test(saved.secret))
    return saved;
  }catch{}
@@ -67,6 +71,15 @@ function display(){
   setMessage('After paying, return here. Your download unlocks after NOWPayments confirms completion.');
  }
 }
+productSelect.addEventListener('change',()=>{
+ if(!Object.hasOwn(NAMES,productSelect.value))return;
+ slug=productSelect.value;
+ history.replaceState(null,'','/checkout.html?script='+encodeURIComponent(slug));
+ title.textContent=NAMES[slug];
+ order=restoreOrder();
+ newOrder.hidden=!!order;orderPanel.hidden=!order;
+ if(order){display();refresh(true)}else{setMessage('');loadAvailability()}
+});
 async function refresh(silent=false){
  if(!order||checking||order.status==='paid')return;
  checking=true;check.disabled=true;
@@ -87,11 +100,14 @@ async function refresh(silent=false){
  finally{checking=false;check.disabled=false}
 }
 reserve.addEventListener('click',async()=>{
- if(!Object.hasOwn(NAMES,slug))return;
+ slug=productSelect.value;
+ if(!Object.hasOwn(NAMES,slug)||!['usdttrc20','usdtbsc','trx','ltc'].includes(coin.value)){
+  setMessage('Please select a script and payment network.');return;
+ }
  reserve.disabled=true;
  setMessage('Checking the current minimum and creating your secure invoice...');
  try{
-  const result=await api('create',{slug,currency:coin.value});
+  const result=await api('create',{slug:String(productSelect.value).trim().toLowerCase(),currency:String(coin.value).trim().toLowerCase()});
   saveOrder(result.order);
   display();
  }catch(error){
@@ -117,14 +133,9 @@ download.addEventListener('click',async()=>{
 });
 setInterval(()=>{if(order&&order.status==='pending')refresh(true)},20000);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&order)refresh(true)});
-(async()=>{
- if(!Object.hasOwn(NAMES,slug)){
-  title.textContent='Product not found';
-  availability.textContent='Choose a strategy from the homepage.';
-  newOrder.hidden=true;
-  return;
- }
+async function loadAvailability(){
  title.textContent=NAMES[slug];
+ reserve.disabled=true;
  try{
   const response=await fetch('/api/premium',{cache:'no-store'});
   if(!response.ok)throw Error('Checkout availability cannot be verified.');
@@ -136,6 +147,7 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden&&order)ref
    await refresh(true);
    return;
   }
+  newOrder.hidden=false;orderPanel.hidden=true;
   if(!state.offerActive){
    newOrder.hidden=true;
    availability.textContent='The early Black Friday promotion ended. New orders are paused.';
@@ -151,4 +163,5 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden&&order)ref
  }catch(error){
   availability.textContent='Checkout is temporarily unavailable. Do not send a payment.';
  }
-})();
+}
+loadAvailability();
