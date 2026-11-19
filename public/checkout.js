@@ -6,6 +6,8 @@ const NAMES={
 const params=new URLSearchParams(location.search);
 const initialSlug=String(params.get('script')||'').trim().toLowerCase();
 const productSelect=document.getElementById('premium-script');
+const coinSelect=document.getElementById('premium-payment-choice');
+const NEW_PRICE_USD='12.49';
 let slug=Object.hasOwn(NAMES,initialSlug)?initialSlug:'gold-breakout-15m';
 productSelect.value=slug;
 const title=document.getElementById('premium-product-name');
@@ -53,9 +55,16 @@ function restoreOrder(){
 function display(){
  if(!order)return;
  document.getElementById('premium-exact-amount').textContent='$'+order.amountUsd+' USD';
+ const oldPending=order.status!=='paid'&&Number(order.amountUsd)!==Number(NEW_PRICE_USD);
  document.getElementById('premium-pay-coin').textContent='Select your coin and network below';
  document.getElementById('premium-order-id').textContent=order.id;
  newOrder.hidden=true;orderPanel.hidden=false;
+ if(oldPending){
+  widgetContainer.hidden=true;payLink.hidden=true;check.hidden=false;restart.hidden=false;download.hidden=true;
+  availability.textContent='This order uses an earlier price. Start a new checkout for the current $12.49 offer.';
+  setMessage('If you already paid for this order, you can still check its payment status here.');
+  return;
+ }
  if(order.status==='paid'){
   widgetContainer.hidden=true;payLink.hidden=true;check.hidden=true;restart.hidden=true;download.hidden=false;
   availability.textContent='Payment confirmed! Your premium source is ready.';
@@ -119,9 +128,13 @@ reserve.addEventListener('click',async()=>{
   setMessage('Please choose a Pine Script.');return;
  }
  reserve.disabled=true;
+ const preferredCurrency=String(coinSelect.value||'usdtbsc').trim().toLowerCase();
+ if(!['usdtbsc','usdttrc20','auto'].includes(preferredCurrency)){
+  setMessage('Please select a supported payment option.');return;
+ }
  setMessage('Preparing your secure NOWPayments widget...');
  try{
-  const result=await api('create',{slug,currency:'auto'});
+  const result=await api('create',{slug,currency:preferredCurrency});
   saveOrder(result.order);
   display();
  }catch(error){
@@ -189,7 +202,7 @@ async function loadAvailability(){
    availability.textContent='Crypto checkout is being configured. Do not send a payment yet.';
    return;
   }
-  availability.textContent='Ready for secure payment with NOWPayments. No sign-in needed.';
+  availability.textContent='Ready for secure payment. USDT on BNB Smart Chain is recommended.';
   reserve.disabled=false;
  }catch(error){
   availability.textContent='Checkout is temporarily unavailable. Do not send a payment.';
