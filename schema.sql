@@ -66,3 +66,20 @@ CREATE TABLE IF NOT EXISTS premium_engagement (
  count INTEGER NOT NULL DEFAULT 0,
  PRIMARY KEY(date_utc,slug,event)
 );
+
+-- Unique NOWPayments hosted invoices and signed completed-payment unlocks.
+-- Older premium_orders/premium_slots are historical only and not used by this checkout.
+CREATE TABLE IF NOT EXISTS premium_nowpayments_orders (
+ id TEXT PRIMARY KEY,
+ secret_hash TEXT NOT NULL UNIQUE,
+ slug TEXT NOT NULL,
+ currency TEXT NOT NULL,
+ amount_usd TEXT NOT NULL,
+ invoice_id TEXT UNIQUE,
+ invoice_url TEXT,
+ status TEXT NOT NULL DEFAULT 'creating' CHECK(status IN ('creating','waiting','paid','failed')),
+ created_ms INTEGER NOT NULL,
+ paid_ms INTEGER,
+ payment_id TEXT UNIQUE
+);
+CREATE INDEX IF NOT EXISTS idx_np_invoice ON premium_nowpayments_orders(invoice_id);
