@@ -33,17 +33,19 @@ export async function onRequestPost({request,env}){
  try{
   if(body.action==='create'){
    const slug=String(body.slug||'').trim().toLowerCase();
-   const currency=String(body.currency||'').trim().toLowerCase();
+   const currency=String(body.currency||'auto').trim().toLowerCase();
    if(!Object.hasOwn(PRODUCTS,slug))
     return failure('Selected script is unavailable. Please choose a script again.',400,'INVALID_PRODUCT');
-   if(!CURRENCIES.includes(currency))
+   if(currency!=='auto'&&!CURRENCIES.includes(currency))
     return failure('Selected payment network is unavailable. Please choose USDT TRC20 or BEP20.',400,'INVALID_CURRENCY');
    if(!configured(env))return failure('Crypto checkout is not enabled yet. Do not send payment.',503,'NOT_READY');
    if(Date.now()>=OFFER_END)return failure('The Black Friday offer has ended. New purchases are paused.',409,'OFFER_ENDED');
    if(!(await storageAvailable(env,slug)))
     return failure('Private file delivery is not ready. Do not send payment.',503,'NOT_READY');
-   const min=await checkMinimum(env,currency);
-   if(!min.ok)return failure(min.error,409,'MINIMUM_TOO_HIGH');
+   if(currency!=='auto'){
+    const min=await checkMinimum(env,currency);
+    if(!min.ok)return failure(min.error,409,'MINIMUM_TOO_HIGH');
+   }
    await ensurePremiumSchema(env.DB);
    const o=createCredentials(slug,currency);
    await env.DB.prepare(
@@ -52,13 +54,15 @@ export async function onRequestPost({request,env}){
    let invoice;
    try{
     invoice=await provider(env,'invoice',{method:'POST',body:{
-     price_amount:PRICE_USD,price_currency:'usd',pay_currency:currency,
+     price_amount:Number(PRICE_USD),price_currency:'usd',
+     ...(currency==='auto'?{}:{pay_currency:currency}),
      order_id:o.id,order_description:PRODUCTS[slug]+' | Pine Script v6 source',
      ipn_callback_url:'https://signaltoscript.com/api/nowpayments-ipn',
      success_url:'https://signaltoscript.com/checkout.html?script='+encodeURIComponent(slug),
      cancel_url:'https://signaltoscript.com/checkout.html?script='+encodeURIComponent(slug)
     }});
-    if(!invoice?.id||!validInvoiceUrl(invoice?.invoice_url))throw Error('Provider returned invalid invoice link');
+    if(!/^[0-9]{3,25}$/.test(String(invoice?.id||''))||!validInvoiceUrl(invoice?.invoice_url))
+     throw Error('Provider returned invalid invoice details');
     await env.DB.prepare(
      "UPDATE premium_nowpayments_orders SET status='waiting',invoice_id=?,invoice_url=? WHERE id=? AND status='creating'"
     ).bind(String(invoice.id),invoice.invoice_url,o.id).run();
