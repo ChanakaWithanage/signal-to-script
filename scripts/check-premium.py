@@ -38,7 +38,7 @@ assert "invoice" in premium and "invoice_url" in provider
 assert "validInvoiceUrl" in premium, "Invoice URL host must be validated"
 assert "validateSignature" in ipn and "x-nowpayments-sig" in ipn
 assert "crypto.subtle.verify" in provider, "IPN must have cryptographic HMAC verification"
-assert "payment_status)!=='finished'" in ipn and "matchesPayment(row,payment)" in ipn
+assert "event.payment_status!=='finished'" in ipn and "matchesPayment(row,payment)" in ipn
 assert "provider(env,'payment/'+paymentId" in ipn, "Webhook must verify status through provider API"
 assert "payment_id TEXT UNIQUE" in provider, "No payment reuse across orders"
 assert "localStorage" in frontend and "api('download'" in frontend, "Keep order access in the purchasing browser"
