@@ -414,3 +414,6 @@
 .premium-inline-price s,.premium-price-line s,.premium-article-price s{font-size:16px;font-weight:600;color:#7a807a;text-decoration-thickness:2px}
 .premium-price-line .deal-discount,.premium-inline-price .deal-discount,.premium-article-price .deal-discount{background:#e8f5e8;color:#226a3d;border-radius:5px;padding:4px 7px;font-size:11px;font-weight:800}
 @media(max-width:580px){.premium-checkout-badges,.premium-trust-row{gap:6px}.premium-checkout-badges span,.premium-trust-row span{font-size:10px}}
+
+/* Ensure hidden checkout stages never become visible because of button display rules. */
+.premium-checkout [hidden]{display:none!important}
