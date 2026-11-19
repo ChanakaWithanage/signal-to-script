@@ -426,3 +426,6 @@
 .premium-widget-fallback{display:block;text-align:center;font-weight:650;font-size:12px;margin:10px auto 18px;text-underline-offset:3px}
 #premium-download{margin-top:20px}
 @media(max-width:490px){.premium-checkout-card{padding:16px}.premium-widget-container{border-radius:6px}.premium-widget-container iframe{width:100%;height:696px}}
+
+/* A visible way to replace an old or unwanted invoice without leaving checkout. */
+.premium-checkout-card #premium-restart{display:block;margin:2px auto 14px;opacity:.87}
