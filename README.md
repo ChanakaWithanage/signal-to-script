@@ -251,3 +251,60 @@ Cloudflare Email Routing receives and forwards email but does not host an outgoi
 **R2 note:** If a Cloudflare Pages environment has `SCRIPT_BUCKET` configured, upload `gold-breakout-15m.pine` under the identical R2 object key before publishing that environment. The private-storage path intentionally does not fall back to the public static asset, so a missing object returns HTTP 503. Without that binding, the existing signed-in static download route works.
 
 **Pine validation note:** The automated repository check verifies the `//@version=6` header, not Pine compilation or the Strategy Tester result. Compile and visually verify the script in TradingView before treating its historical results as reproducible. Publish only if you have redistribution rights to the supplied strategy code and screenshots.
+
+
+## Premium launch: 1.99 USDT TRC20 Black Friday offer (November 2026)
+
+Two existing articles are premium: `gold-breakout-15m` and `supertrend-dema-reversal`. They are featured before the three free scripts on the homepage. All existing free guest and Google access rules apply **only** to the three free scripts. The paid product articles remain publicly readable.
+
+**Pricing disclosure:** Early Black Friday launch price is 1.99 USDT, compared with a **planned**, not previously charged, regular price of 4.99 USDT. This represents approximately 60% off the intended regular price. The launch offer ends at **2026-12-01 00:00 UTC**; the backend then stops new orders until the promotion is updated. Do not imply the scripts were previously sold at 4.99.
+
+### Critical activation steps: checkout is OFF by default
+
+The repository intentionally cannot accept money without configuring secure delivery. The buyer's public receiving address is `TYemkXWco4P6h1UCVgvneiMhiVaDpqVBwq` on **TRON (TRC20)**. Only the canonical Tether USDT contract `TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t` is accepted. Never put a wallet seed phrase or private key in Cloudflare.
+
+1. Create a **private** Cloudflare R2 bucket, for example `signal-to-script-premium`. Do not enable public `r2.dev` or custom-domain file access.
+2. Before uploading, recover the two files from repository history at commit `19841e92aad249008cc4147fa4f80133c596eaf3`:
+   - `https://github.com/ChanakaWithanage/signal-to-script/blob/19841e92aad249008cc4147fa4f80133c596eaf3/public/scripts/gold-breakout-15m.pine`
+   - `https://github.com/ChanakaWithanage/signal-to-script/blob/19841e92aad249008cc4147fa4f80133c596eaf3/public/scripts/supertrend-dema-reversal.pine`
+   Upload both source files to R2 as the exact object keys `gold-breakout-15m.pine` and `supertrend-dema-reversal.pine`.
+3. Cloudflare > Workers & Pages > `signal-to-script` > Settings > Bindings > Add > **R2 bucket**. Bind the private bucket as `PREMIUM_BUCKET` in the production environment. Keep the existing D1 binding `DB`. Redeploy.
+4. Optionally add `TRONGRID_API_KEY` as a Cloudflare environment secret for reliable TRON API usage; never add the key to Git.
+5. Verify `GET https://signaltoscript.com/api/premium` returns `ready` values of `false` until you deliberately enable checkout. Test both object keys and ensure a mismatched or missing key returns no payment address or order.
+6. After private delivery and regulatory eligibility are verified, add a production environment variable `PREMIUM_CHECKOUT_ENABLED` with exact value `true`, then redeploy. This is the **explicit go-live switch**. Only then should `ready` become `true` for a product with an uploaded R2 object.
+
+The two premium `.pine` files have been **removed from the current public build** and the free download allowlist, and direct static URL access is blocked even for Google members. **Important limitation:** the files remain available in the public Git history. This is not source-code secrecy. Publish materially updated premium versions in private storage if exclusive content is important, and confirm your right to sell previously client-created code. The Supertrend source has MPL 2.0 attribution and redistribution obligations.
+
+### Checkout and verification
+
+- A visitor needs **no Google login**. A random capability is saved in browser localStorage and its SHA-256 hash in Cloudflare D1. Losing the browser storage can make automatic order recovery impossible. Order ID and TXID should be kept for support.
+- Up to **three** simultaneous order amounts: `1.990`, `1.991`, `1.992` USDT. The tiny fractional difference is an identification marker, not a hidden charge. Each order holds one lane for 30 minutes plus a 90-minute reuse cooldown; if all lanes are reserved, no fourth order is taken.
+- The buyer must send the **exact displayed amount** with sufficient TRON resources to cover network fees separately. Network fees can exceed the $1.99 sale price.
+- The `/api/premium` endpoint checks confirmed incoming Tether TRC20 history and the solidified transaction receipt. It checks recipient, official token contract, six decimals, exact amount, time window and execution success, then atomically binds a **unique transaction ID** to the order. One confirmed transfer cannot be credited to two orders.
+- A payment after expiry, a wrong-chain/token transfer, an amount mismatch, a third-party exchange withdrawal shortfall, or an ambiguous match requires manual support and is **not** automatically unlocked. The three-amount system is a low-volume pilot rather than strong buyer identity verification.
+- Paid source files are served only from `PREMIUM_BUCKET` after a confirmed order. File responses are private and `no-store`. Free guest downloads never grant premium access.
+- Existing tests `scripts/test-premium-payments.mjs` mock D1, R2 and TronGrid. Passing tests does **not** prove the real wallet, live network, production binding or customer's transfer fee. Verify real transfer handling carefully before commercial use.
+
+### Track interest and purchases in D1
+
+The site's small first-party `/api/engagement` function increments aggregate daily event counts for these two scripts only: `article_click` (visitor clicks an internal link to the article), `article_view` (browser loads the article), and `buy_click` (visitor clicks Buy). No IP addresses, email addresses or visitor IDs are stored in these counters. Automated or repeated traffic may inflate them.
+
+In Cloudflare's D1 console for the existing `DB`, run:
+
+```sql
+SELECT date_utc, slug, event, count
+FROM premium_engagement
+ORDER BY date_utc DESC, slug, event;
+```
+
+For paid orders after launch:
+
+```sql
+SELECT slug, status, COUNT(*) AS orders
+FROM premium_orders
+GROUP BY slug, status
+ORDER BY slug, status;
+```
+
+Do not expose buyer order tokens, full D1 order rows or private object keys in a public analytics API.
+
