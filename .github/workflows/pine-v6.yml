@@ -13,7 +13,12 @@ jobs:
       - run: python scripts/check-cache-headers.py
       - run: python scripts/check-seo.py
       - run: python scripts/check-download-flow.py
+      - run: python scripts/check-premium.py
       - run: node --check public/site.js
+      - run: node --check public/checkout.js
+      - run: node --check functions/_lib/premium.js
+      - run: node --check functions/api/premium.js
+      - run: node --check functions/api/engagement.js
       - run: node --check public/join.js
       - run: node --check functions/_lib/download-access.js
       - run: node --check functions/api/download.js
@@ -25,3 +30,4 @@ jobs:
       - run: node --check functions/_lib/google-verify.mjs
       - run: node scripts/test-google-auth.mjs
       - run: node scripts/test-guest-access.mjs
+      - run: node scripts/test-premium-payments.mjs
