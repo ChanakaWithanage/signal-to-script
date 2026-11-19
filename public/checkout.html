@@ -8,7 +8,7 @@
 <meta name="description" content="Buy your premium Pine Script v6 source with an embedded NOWPayments crypto checkout.">
 <link rel="canonical" href="https://signaltoscript.com/checkout.html">
 <link rel="icon" href="/favicon.svg">
-<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/styles.css?v=20261119-home-sale">
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
@@ -54,7 +54,8 @@
    <iframe id="premium-payment-widget" title="NOWPayments secure payment widget" width="410" height="696" frameborder="0" scrolling="no" loading="eager" referrerpolicy="strict-origin-when-cross-origin" style="overflow-y:hidden"></iframe>
   </div>
   <a id="premium-pay-link" class="premium-widget-fallback" href="https://nowpayments.io/" target="_blank" rel="noopener noreferrer" hidden>Open payment in a new tab instead</a>
-  <p class="premium-order-note">Complete your payment above. This page checks automatically and unlocks your download after payment confirmation.</p>
+  <div class="premium-qr-steps" aria-label="How to complete your crypto payment"><span>1. Scan QR or copy the address</span><span>2. Send the shown amount on the selected network</span><span>3. Download unlocks after confirmation</span></div>
+  <p class="premium-order-note">Complete your payment above. This page checks the payment status automatically every 20 seconds and unlocks your download when NOWPayments confirms completion.</p>
   <button type="button" id="premium-check" class="premium-copy-button">Check payment status</button>
   <button type="button" id="premium-restart" class="premium-copy-button" hidden>Start a new checkout</button>
   <button type="button" id="premium-download" class="btn premium-primary-button" hidden>Download purchased Pine Script</button>
