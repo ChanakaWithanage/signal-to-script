@@ -1,21 +1,22 @@
-// Buyer-side session storage contains a random order capability, never a wallet key.
-const PREMIUM_NAMES={
+// Buyer checkout: invoice links come from the server, never from a shared payment widget.
+const NAMES={
  'gold-breakout-15m':'Gold Breakout 15M Strategy',
  'supertrend-dema-reversal':'Supertrend + DEMA Reversal Strategy'
 };
-const params=new URLSearchParams(location.search);
-const slug=params.get('script');
+const slug=new URLSearchParams(location.search).get('script');
 const title=document.getElementById('premium-product-name');
-const reserve=document.getElementById('premium-reserve');
 const availability=document.getElementById('premium-availability');
+const reserve=document.getElementById('premium-reserve');
+const newOrder=document.getElementById('premium-new-order');
 const orderPanel=document.getElementById('premium-order');
+const coin=document.getElementById('premium-coin');
 const message=document.getElementById('premium-message');
-const clock=document.getElementById('premium-clock');
 const check=document.getElementById('premium-check');
+const payLink=document.getElementById('premium-pay-link');
 const download=document.getElementById('premium-download');
+const storageKey='sts_nowpayments_order_'+slug;
 let order=null,checking=false;
-const storageKey='sts_premium_order_'+slug;
-const setMessage=text=>{message.textContent=text};
+const setMessage=value=>{message.textContent=value};
 async function api(action,extra={}){
  const response=await fetch('/api/premium',{
   method:'POST',credentials:'same-origin',cache:'no-store',
@@ -24,126 +25,130 @@ async function api(action,extra={}){
  });
  if(action==='download'){
   if(response.ok)return response;
-  let error;try{error=(await response.json()).error}catch{}
-  throw Error(error||'Download failed.');
+  const body=await response.json().catch(()=>({}));
+  throw Error(body.error||'Unable to download right now.');
  }
- const result=await response.json();
- if(!response.ok)throw Error(result.error||'Payment service is unavailable.');
- return result;
+ const body=await response.json();
+ if(!response.ok)throw Error(body.error||'Crypto checkout is temporarily unavailable.');
+ return body;
 }
-function saveOrder(o){order=o;try{localStorage.setItem(storageKey,JSON.stringify(o))}catch{}}
-function recoverOrder(){
+function saveOrder(next){
+ order=next;
+ try{localStorage.setItem(storageKey,JSON.stringify(next))}catch{}
+}
+function restoreOrder(){
  try{
   const saved=JSON.parse(localStorage.getItem(storageKey)||'null');
-  if(saved?.id&&saved?.secret&&saved.slug===slug)return saved;
+  if(saved?.slug===slug&&/^[a-f0-9]{24}$/.test(saved.id)&&/^[a-f0-9]{64}$/.test(saved.secret))
+   return saved;
  }catch{}
  return null;
 }
-function displayOrder(o){
- document.getElementById('premium-exact-amount').textContent=o.amount+' USDT';
- document.getElementById('premium-address').textContent=o.receiver;
- document.getElementById('premium-expires').textContent=new Date(o.expiresAt).toLocaleString();
- orderPanel.hidden=false;
- reserve.hidden=true;
- document.getElementById('premium-copy-amount').onclick=()=>copy(o.amount,'Amount copied.');
- document.getElementById('premium-copy-address').onclick=()=>copy(o.receiver,'Address copied.');
- updateTime();
-}
-async function copy(value,success){
- try{await navigator.clipboard.writeText(value);setMessage(success)}
- catch{setMessage('Select and copy the displayed value manually.')}
-}
-function updateTime(){
+function display(){
  if(!order)return;
- const diff=order.expiresAt-Date.now();
- if(diff<=0){
-  clock.textContent='Expired';
-  if(!download.hidden)return;
-  check.disabled=true;
-  setMessage('This order has expired. If you already sent a payment, contact support with your transaction hash.');
+ document.getElementById('premium-exact-amount').textContent='$'+order.amountUsd+' USD';
+ document.getElementById('premium-pay-coin').textContent='Pay with '+String(order.currency).toUpperCase();
+ document.getElementById('premium-order-id').textContent=order.id;
+ newOrder.hidden=true;orderPanel.hidden=false;
+ if(order.status==='paid'){
+  payLink.hidden=true;check.hidden=true;download.hidden=false;
+  availability.textContent='Payment finished. Your source-code download is unlocked.';
+  setMessage('Thanks for your purchase. You can download your script now.');
+ }else if(order.status==='failed'){
+  payLink.hidden=true;check.hidden=true;download.hidden=true;
+  availability.textContent='Invoice could not be created. Please contact support.';
  }else{
-  const minutes=Math.floor(diff/60000),secs=Math.floor(diff%60000/1000);
-  clock.textContent=minutes+'m '+String(secs).padStart(2,'0')+'s';
+  if(order.invoiceUrl){
+   payLink.href=order.invoiceUrl;
+   payLink.hidden=false;
+  }
+  download.hidden=true;check.hidden=false;
+  availability.textContent='Your NOWPayments invoice is ready. Open it to pay securely.';
+  setMessage('After paying, return here. Your download unlocks after NOWPayments confirms completion.');
  }
 }
-async function verify(silent=false){
- if(!order||checking||!download.hidden)return;
+async function refresh(silent=false){
+ if(!order||checking||order.status==='paid')return;
  checking=true;check.disabled=true;
- if(!silent)setMessage('Checking confirmed TRON USDT transfers...');
+ if(!silent)setMessage('Checking your order status...');
  try{
-  const txHash=document.getElementById('premium-tx').value.trim();
-  const result=await api('check',{id:order.id,secret:order.secret,...(txHash?{txHash}:{})});
-  if(result.order?.status==='paid'){
-   order.status='paid';saveOrder(order);
-   check.hidden=true;download.hidden=false;
-   setMessage('Payment confirmed on TRON. Your premium Pine Script is unlocked.');
-  }else if(result.order?.status==='expired'){
-   check.disabled=true;
-   setMessage(result.error||'Your reservation expired. Contact support if you sent payment.');
+  const result=await api('check',{id:order.id,secret:order.secret});
+  const updated=result.order;
+  if(updated?.status==='paid'){
+   saveOrder({...order,...updated});
+   display();
+  }else if(updated?.status==='failed'){
+   saveOrder({...order,...updated});
+   display();
   }else if(!silent){
-   setMessage(result.message||'Still waiting for a confirmed transfer of the exact amount.');
+   setMessage('No completed payment yet. NOWPayments may need additional blockchain confirmations.');
   }
  }catch(error){if(!silent)setMessage(error.message)}
- finally{checking=false;if(download.hidden&&order.expiresAt>Date.now())check.disabled=false}
+ finally{checking=false;check.disabled=false}
 }
 reserve.addEventListener('click',async()=>{
- if(!slug||!Object.hasOwn(PREMIUM_NAMES,slug))return;
+ if(!Object.hasOwn(NAMES,slug))return;
  reserve.disabled=true;
- setMessage('Reserving your exact USDT transfer amount...');
+ setMessage('Checking the current minimum and creating your secure invoice...');
  try{
-  const response=await api('create',{slug});
-  saveOrder(response.order);
-  displayOrder(order);
-  setMessage('Order reserved. Send exactly '+order.amount+' USDT on TRON (TRC20). Do not send using other networks.');
+  const result=await api('create',{slug,currency:coin.value});
+  saveOrder(result.order);
+  display();
  }catch(error){
   reserve.disabled=false;
   setMessage(error.message);
  }
 });
-check.addEventListener('click',()=>verify(false));
+check.addEventListener('click',()=>refresh(false));
 download.addEventListener('click',async()=>{
  if(!order)return;
  download.disabled=true;
- setMessage('Preparing your purchased Pine Script...');
+ setMessage('Preparing your purchased script...');
  try{
   const response=await api('download',{id:order.id,secret:order.secret});
   const blob=await response.blob(),url=URL.createObjectURL(blob);
-  const a=document.createElement('a');a.href=url;a.download=slug+'.pine';
-  document.body.append(a);a.click();a.remove();
+  const link=document.createElement('a');
+  link.href=url;link.download=slug+'.pine';
+  document.body.append(link);link.click();link.remove();
   setTimeout(()=>URL.revokeObjectURL(url),5000);
-  setMessage('Download started. Your order is saved in this browser for later downloads.');
+  setMessage('Download started. This browser remembers your purchased order.');
  }catch(error){setMessage(error.message)}
  finally{download.disabled=false}
 });
-setInterval(updateTime,1000);
-setInterval(()=>{if(order&&Date.now()<order.expiresAt)verify(true)},22000);
+setInterval(()=>{if(order&&order.status==='pending')refresh(true)},20000);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&order)refresh(true)});
 (async()=>{
- if(!Object.hasOwn(PREMIUM_NAMES,slug)){
+ if(!Object.hasOwn(NAMES,slug)){
   title.textContent='Product not found';
-  availability.textContent='Choose one of the two premium strategies from the homepage.';
+  availability.textContent='Choose a strategy from the homepage.';
+  newOrder.hidden=true;
   return;
  }
- title.textContent=PREMIUM_NAMES[slug];
+ title.textContent=NAMES[slug];
  try{
   const response=await fetch('/api/premium',{cache:'no-store'});
-  if(!response.ok)throw Error('Checkout cannot be checked.');
+  if(!response.ok)throw Error('Checkout availability cannot be verified.');
   const state=await response.json();
-  const saved=recoverOrder();
-  if(saved){
-   saveOrder(saved);displayOrder(saved);
-   availability.textContent='Saved order found in this browser. Check its status before sending any new payment.';
-   await verify(true);
+  const recovered=restoreOrder();
+  if(recovered){
+   saveOrder(recovered);
+   display();
+   await refresh(true);
    return;
   }
   if(!state.offerActive){
-   availability.textContent='The early Black Friday promotion has ended. New orders are paused.';
+   newOrder.hidden=true;
+   availability.textContent='The early Black Friday promotion ended. New orders are paused.';
    return;
   }
   if(!state.ready?.[slug]){
-   availability.textContent='Checkout is being prepared. No payment can be accepted until private file delivery is ready. Please check back or contact support.';
+   reserve.disabled=true;
+   availability.textContent='Crypto checkout is being configured. Do not send a payment yet.';
    return;
   }
-  availability.textContent='Checkout is ready. Reserve your payment amount to start. No account is required.';
+  availability.textContent='Ready to create your personal NOWPayments invoice. No sign-in needed.';
   reserve.disabled=false;
- }catch(error){availability.textContent='Checkout is temporarily unavailable. Please do not send payment.'}
+ }catch(error){
+  availability.textContent='Checkout is temporarily unavailable. Do not send a payment.';
+ }
 })();
