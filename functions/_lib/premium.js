@@ -62,7 +62,7 @@ export async function provider(env,endpoint,options={}){
   headers:{'x-api-key':env.NOWPAYMENTS_API_KEY,'Accept':'application/json',
    ...(options.body?{'Content-Type':'application/json'}:{})},
   ...(options.body?{body:JSON.stringify(options.body)}:{}),
-  signal:AbortSignal.timeout(8500)
+  signal:AbortSignal.timeout(options.timeoutMs||8500)
  });
  if(!result.ok)throw new Error('NOWPayments returned HTTP '+result.status);
  return result.json();
