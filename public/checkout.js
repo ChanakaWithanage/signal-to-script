@@ -17,6 +17,7 @@ const widgetContainer=document.getElementById('premium-widget-container');
 const paymentWidget=document.getElementById('premium-payment-widget');
 const message=document.getElementById('premium-message');
 const check=document.getElementById('premium-check');
+const restart=document.getElementById('premium-restart');
 const payLink=document.getElementById('premium-pay-link');
 const download=document.getElementById('premium-download');
 const storageKey=()=> 'sts_nowpayments_order_'+slug;
@@ -56,11 +57,11 @@ function display(){
  document.getElementById('premium-order-id').textContent=order.id;
  newOrder.hidden=true;orderPanel.hidden=false;
  if(order.status==='paid'){
-  widgetContainer.hidden=true;payLink.hidden=true;check.hidden=true;download.hidden=false;
+  widgetContainer.hidden=true;payLink.hidden=true;check.hidden=true;restart.hidden=true;download.hidden=false;
   availability.textContent='Payment confirmed! Your premium source is ready.';
   setMessage('Thank you for your purchase. Download your Pine Script below.');
  }else if(order.status==='failed'){
-  widgetContainer.hidden=true;payLink.hidden=true;check.hidden=true;download.hidden=true;
+  widgetContainer.hidden=true;payLink.hidden=true;check.hidden=true;restart.hidden=false;download.hidden=true;
   availability.textContent='This checkout could not be completed. Please contact support.';
  }else{
   const invoiceId=String(order.invoiceId||'');
@@ -73,7 +74,7 @@ function display(){
    payLink.href=order.invoiceUrl;
    payLink.hidden=false;
   }else{payLink.hidden=true;}
-  download.hidden=true;check.hidden=false;
+  download.hidden=true;check.hidden=false;restart.hidden=false;
   availability.textContent='Your secure NOWPayments checkout is ready.';
   setMessage('Choose your payment option in the widget. Your download will unlock here after confirmation.');
  }
@@ -90,9 +91,11 @@ productSelect.addEventListener('change',()=>{
 async function refresh(silent=false){
  if(!order||checking||order.status==='paid')return;
  checking=true;check.disabled=true;
+ const checkingId=order.id;
  if(!silent)setMessage('Checking your order status...');
  try{
   const result=await api('check',{id:order.id,secret:order.secret});
+  if(!order||order.id!==checkingId)return;
   const updated=result.order;
   if(updated?.status==='paid'){
    saveOrder({...order,...updated});
@@ -127,6 +130,23 @@ reserve.addEventListener('click',async()=>{
  }
 });
 check.addEventListener('click',()=>refresh(false));
+restart.addEventListener('click',()=>{
+ if(order){
+  try{
+   localStorage.setItem('sts_nowpayments_previous_'+order.id,JSON.stringify(order));
+   localStorage.removeItem(storageKey());
+  }catch{}
+ }
+ order=null;
+ paymentWidget.removeAttribute('src');
+ widgetContainer.hidden=true;
+ payLink.hidden=true;
+ restart.hidden=true;
+ orderPanel.hidden=true;
+ newOrder.hidden=false;
+ setMessage('');
+ loadAvailability();
+});
 download.addEventListener('click',async()=>{
  if(!order)return;
  download.disabled=true;
