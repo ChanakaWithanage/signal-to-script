@@ -2,12 +2,12 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
-<title>Secure USDT Checkout | Signal to Script</title>
-<meta name="description" content="Pay for a premium Pine Script using USDT TRC20 and check payment confirmation.">
+<title>Premium Pine Script Checkout | NOWPayments | Signal to Script</title>
+<meta name="description" content="Purchase original premium Pine Script source through a per-order NOWPayments crypto invoice.">
 <link rel="canonical" href="https://signaltoscript.com/checkout.html">
-<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon.svg">
 <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
@@ -17,40 +17,47 @@
 <button aria-expanded="false" aria-label="Open menu" class="menu-toggle" id="menu" type="button">☰</button>
 <nav aria-label="Main navigation" class="nav" id="nav"><a href="/#premium-scripts">Premium scripts</a><a href="/#free-scripts">Free scripts</a><a href="/#articles">Articles</a><a href="/#support">Get help</a><a href="/join.html">Join free</a></nav>
 </div></header>
-<main id="main" class="wrap premium-checkout">
- <div class="premium-checkout-top"><a href="/#premium-scripts">← Back to premium scripts</a><span>Secure checkout · No account required</span></div>
- <div class="premium-checkout-grid">
- <section class="premium-checkout-product">
-  <span class="deal-eyebrow">EARLY BLACK FRIDAY · LIMITED-TIME LAUNCH</span>
-  <h1 id="premium-product-name">Premium Pine Script</h1>
-  <p>Complete TradingView Pine Script v6 source code with strategy settings and installation guidance. Purchase once and keep access to your file from this browser.</p>
-  <div class="premium-pricing"><strong class="premium-price">1.99 <small>USDT</small></strong><s>Planned regular 4.99 USDT</s><span class="deal-discount">~60% launch saving</span></div>
-  <p class="premium-price-clarity">The 4.99 USDT figure is the intended post-launch price, not a claim that this script previously sold at that price. This offer ends November 30, 2026 (UTC).</p>
-  <div class="premium-deliverables"><strong>What's included</strong><p>Full source-code file, tested example settings described in the article, and installation help by email.</p></div>
-  <p class="premium-terms">Trading involves risk. Historical results are not guaranteed. Only pay on the TRON (TRC20) network and ensure you can pay transfer fees separately. Depending on your wallet's resources, network fees can exceed the 1.99 USDT sale price.</p>
- </section>
- <section class="premium-checkout-card" aria-labelledby="checkout-title">
-  <h2 id="checkout-title">Pay with USDT (TRC20)</h2>
-  <p>No wallet connection or Google account required. Reserve an exact payment amount, transfer USDT, and we verify the blockchain receipt.</p>
-  <p id="premium-availability" role="status" aria-live="polite">Checking whether checkout is ready...</p>
-  <button type="button" id="premium-reserve" class="btn premium-primary-button" disabled>Reserve my payment amount</button>
-  <div id="premium-order" hidden>
-    <div class="premium-order-amount"><span>Send exactly</span><strong id="premium-exact-amount"></strong><button type="button" id="premium-copy-amount" class="premium-copy-button">Copy amount</button></div>
-    <div class="premium-order-wallet"><span>Receiver · TRON (TRC20) USDT only</span><code id="premium-address"></code><button type="button" id="premium-copy-address" class="premium-copy-button">Copy address</button></div>
-    <p class="premium-order-note">The last decimal digits identify this order. Send the exact full amount. Other networks, wrong token contracts, or short transfers cannot be credited automatically.</p>
-    <p class="premium-order-expiry">Reservation expires: <strong id="premium-expires"></strong> · <span id="premium-clock"></span></p>
-    <label class="premium-tx-label" for="premium-tx">Transaction hash (optional)</label>
-    <input type="text" id="premium-tx" placeholder="Paste TRON transaction ID to speed up verification" spellcheck="false" autocomplete="off">
-    <button type="button" id="premium-check" class="btn premium-primary-button">Check payment on blockchain</button>
-    <p class="premium-check-info">We'll also check automatically while this page stays open. Keep this browser's order receipt until delivery.</p>
-    <button type="button" id="premium-download" class="btn premium-primary-button" hidden>Download purchased Pine Script</button>
-  </div>
-  <p id="premium-message" class="premium-message" role="status" aria-live="polite"></p>
-  <p class="premium-help">Payment sent but not confirmed? Do not send a second payment. Email <a href="mailto:support@signaltoscript.com">support@signaltoscript.com</a> with the order ID and transaction hash.</p>
- </section>
+<main class="wrap premium-checkout" id="main">
+<div class="premium-checkout-top"><a href="/#premium-scripts">← Back to premium strategies</a><span>Secure external crypto checkout · No account required</span></div>
+<div class="premium-checkout-grid">
+<section class="premium-checkout-product">
+ <span class="deal-eyebrow">EARLY BLACK FRIDAY · LIMITED-TIME LAUNCH</span>
+ <h1 id="premium-product-name">Premium Pine Script</h1>
+ <p>Get the complete TradingView Pine Script v6 source and installation guidance. Pay through NOWPayments and unlock the digital file once your payment is finished.</p>
+ <div class="premium-pricing"><strong class="premium-price">$1.99 <small>USD</small></strong><s>Planned regular $4.99</s><span class="deal-discount">~60% launch saving</span></div>
+ <p class="premium-price-clarity">The $4.99 figure is a planned future price, not a claim this script previously sold for $4.99. Promotion ends November 30, 2026 (UTC).</p>
+ <div class="premium-deliverables"><strong>What you receive</strong><p>The full source-code file, strategy settings documented in the article, and installation support if needed.</p></div>
+ <p class="premium-terms">Your checkout is quoted in USD and paid in the cryptocurrency you select. Exchange rates, supported currencies, minimum payments and transaction fees are determined by NOWPayments. A $1.99 purchase might be below the network's minimum. Do not transfer crypto directly to a wallet address listed elsewhere on this site.</p>
+</section>
+<section class="premium-checkout-card" aria-labelledby="checkout-title">
+ <div class="premium-provider-brand"><span class="premium-provider-dot">●</span><span>Crypto checkout powered by <strong>NOWPayments</strong></span></div>
+ <h2 id="checkout-title">Get your premium script</h2>
+ <p>No login or card details required. Each purchase gets its own payment invoice, not a shared widget.</p>
+ <p id="premium-availability" role="status" aria-live="polite">Checking checkout availability...</p>
+ <div id="premium-new-order">
+  <label class="premium-tx-label" for="premium-coin">Choose how to pay</label>
+  <select id="premium-coin" class="premium-currency-select">
+   <option value="trx">TRX · TRON</option>
+   <option value="ltc">LTC · Litecoin</option>
+   <option value="usdttrc20">USDT · TRON (TRC20)</option>
+  </select>
+  <p class="premium-check-info">Availability depends on the current minimum payment for the selected coin. Some networks may require more than $1.99.</p>
+  <button type="button" id="premium-reserve" class="btn premium-primary-button" disabled>Create secure payment invoice</button>
  </div>
+ <div id="premium-order" hidden>
+  <div class="premium-order-amount"><span>Order total</span><strong id="premium-exact-amount">$1.99 USD</strong><small id="premium-pay-coin"></small></div>
+  <div class="premium-order-wallet"><span>Your order reference</span><code id="premium-order-id"></code></div>
+  <a id="premium-pay-link" class="btn premium-primary-button" href="https://nowpayments.io/" target="_blank" rel="noopener noreferrer" hidden>Continue securely to NOWPayments</a>
+  <p class="premium-order-note">The payment opens in a separate tab. Complete it there, then return here. This page checks for a verified finished payment.</p>
+  <button type="button" id="premium-check" class="premium-copy-button">Check payment status</button>
+  <button type="button" id="premium-download" class="btn premium-primary-button" hidden>Download purchased Pine Script</button>
+ </div>
+ <p id="premium-message" class="premium-message" role="status" aria-live="polite"></p>
+ <p class="premium-help">Sent a payment but not seeing your download? Don't pay twice. Email <a href="mailto:support@signaltoscript.com">support@signaltoscript.com</a> with your order ID and NOWPayments receipt.</p>
+</section>
+</div>
 </main>
-<footer class="footer"><div class="wrap foot"><div>© 2026 Signal to Script · by CW.</div><div>Trading involves risk. No profits are promised.</div></div>
+<footer class="footer"><div class="wrap foot"><div>© 2026 Signal to Script · by CW.</div><div>Historical performance is not guaranteed.</div></div>
 <nav class="policy-links" aria-label="Legal and business policies"><a href="/terms.html">Terms &amp; Conditions</a><a href="/refunds.html">Refund &amp; Cancellation</a><a href="/privacy.html">Privacy Policy</a><a href="mailto:support@signaltoscript.com">support@signaltoscript.com</a></nav></footer>
 <script defer src="/site.js"></script>
 <script defer src="/checkout.js"></script>
