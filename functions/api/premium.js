@@ -32,9 +32,10 @@ export async function onRequestPost({request,env}){
  let body;try{body=JSON.parse(text)}catch{return failure('Invalid request.',400)}
  try{
   if(body.action==='create'){
-   const slug=body.slug,currency=String(body.currency||'').toLowerCase();
+   const slug=String(body.slug||'').trim().toLowerCase();
+   const currency=String(body.currency||'').trim().toLowerCase();
    if(!Object.hasOwn(PRODUCTS,slug)||!CURRENCIES.includes(currency))
-    return failure('Choose a listed product and cryptocurrency.',400,'INVALID_PRODUCT');
+    return failure('Please select a valid Pine Script and payment network.',400,'INVALID_PRODUCT');
    if(!configured(env))return failure('Crypto checkout is not enabled yet. Do not send payment.',503,'NOT_READY');
    if(Date.now()>=OFFER_END)return failure('The Black Friday offer has ended. New purchases are paused.',409,'OFFER_ENDED');
    if(!(await storageAvailable(env,slug)))
