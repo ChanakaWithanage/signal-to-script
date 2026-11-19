@@ -7,7 +7,7 @@ export const PRODUCTS=Object.freeze({
  'gold-breakout-15m':'Gold Breakout 15M Strategy',
  'supertrend-dema-reversal':'Supertrend + DEMA Reversal Strategy'
 });
-export const CURRENCIES=Object.freeze(['trx','ltc','usdttrc20']);
+export const CURRENCIES=Object.freeze(['trx','ltc','usdttrc20','usdtbsc']);
 export const isPremium=slug=>Object.hasOwn(PRODUCTS,slug);
 export const noCache=()=>({'Cache-Control':'no-store','X-Content-Type-Options':'nosniff'});
 const TABLES=[
