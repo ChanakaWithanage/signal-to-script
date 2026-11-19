@@ -447,3 +447,30 @@
 /* Simple payment instructions directly below the QR widget. */
 .premium-qr-steps{display:flex;flex-wrap:wrap;gap:7px;margin:11px 0 16px}
 .premium-qr-steps span{font:600 11px/1.5 var(--sans);color:#385644;background:#f2f7f2;border:1px solid #d7e5d9;border-radius:6px;padding:7px 9px}
+
+/* Helpful payment guide above QR checkout. */
+.premium-payment-guide{border:1px solid #d8e4d9;border-radius:12px;background:#f8fbf8;padding:19px 18px 8px;margin:20px 0 16px}
+.premium-guide-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-bottom:6px}
+.premium-guide-heading span:first-child{font:800 10px/1.5 var(--sans);letter-spacing:.085em;color:#5c7b65}
+.premium-guide-heading h3{font:700 22px/1.2 var(--serif);margin:5px 0 0;color:#224734}
+.premium-guide-heading .premium-guide-count{font:700 10px/1.5 var(--sans);color:#2e6747;background:#e4f2e7;border:1px solid #c9e3d0;border-radius:99px;padding:5px 8px;white-space:nowrap;letter-spacing:0}
+.premium-guide-steps{margin:0;padding:0;list-style:none}
+.premium-guide-steps li{display:flex;gap:13px;align-items:flex-start;padding:15px 0}
+.premium-guide-steps li+li{border-top:1px solid #e1e9e2}
+.premium-guide-step-num{display:grid;place-items:center;width:29px;height:29px;flex:0 0 29px;border-radius:50%;background:#286146;color:white;font:800 12px/1 var(--sans)}
+.premium-guide-steps strong{display:block;color:#284535;font:800 13px/1.5 var(--sans)}
+.premium-guide-steps p{font:400 12px/1.65 var(--sans);color:#526758;margin:4px 0 0}
+.premium-guide-steps b{color:#335c42;font-weight:700}
+.premium-widget-heading{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:20px 0 9px}
+.premium-widget-heading strong{font:800 14px/1.4 var(--sans);color:#254432}
+.premium-widget-heading span{font:600 11px/1.5 var(--sans);color:#687b6e}
+.premium-checkout-card .premium-fee-tip{display:flex;align-items:flex-start;gap:10px;border-radius:9px;border:1px solid #dae6d0;background:#f2f8ed;padding:13px;margin:13px 0 15px}
+.premium-fee-tip-icon{display:grid;place-items:center;flex:0 0 29px;width:29px;height:29px;background:#e1f0d8;border-radius:8px;color:#3d6d3b;font-size:20px}
+.premium-fee-tip div{display:flex;flex-direction:column;gap:3px}
+.premium-fee-tip div strong{font:800 12px/1.5 var(--sans);color:#2a573c}
+.premium-fee-tip div span{font:400 11px/1.65 var(--sans);color:#536a55}
+.premium-confirmation-note{display:flex;align-items:flex-start;gap:12px;padding:14px 15px;border:1px solid #d4e5dd;border-radius:9px;background:#f2f8f5;margin:17px 0 13px}
+.premium-confirmation-dot{display:block;width:11px;height:11px;flex:0 0 11px;margin-top:5px;border-radius:50%;background:#348765;box-shadow:0 0 0 4px #dcefe4}
+.premium-confirmation-note strong{font:800 12px/1.5 var(--sans);color:#2a5744}
+.premium-confirmation-note p{font:400 11px/1.65 var(--sans);margin:4px 0 0;color:#587064}
+@media(max-width:580px){.premium-payment-guide{padding:15px 14px 6px;margin:16px 0 12px}.premium-guide-heading h3{font-size:20px}.premium-guide-heading .premium-guide-count{font-size:9px}.premium-guide-steps li{padding:13px 0;gap:11px}.premium-widget-heading{flex-wrap:wrap}}
