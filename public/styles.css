@@ -402,3 +402,15 @@
 .premium-checkout-card #premium-pay-link{display:block;width:auto;margin:16px 0;text-align:center;text-decoration:none}
 .premium-checkout-card #premium-check{display:block;margin:9px auto 16px;text-underline-offset:3px}
 .premium-order-wallet code{font-size:11px;letter-spacing:.02em}
+
+/* Premium launch offer: compact savings label and confidence cues. */
+.premium-old-price{display:flex;flex-direction:column;gap:0;line-height:1.2;color:#6e7770}
+.premium-old-price s{font-size:18px;text-decoration-thickness:2px}
+.premium-old-price small{font-size:10px}
+.premium-checkout-badges,.premium-trust-row{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 17px}
+.premium-checkout-badges span,.premium-trust-row span{font:600 11px/1.5 var(--sans);border:1px solid #d5e5da;border-radius:30px;background:#f1f8f2;color:#27543c;padding:6px 10px}
+.premium-checkout-card #premium-pay-link{display:flex;flex-direction:column;align-items:center;gap:10px;justify-content:center}
+.premium-nowpayments-button{display:block;width:186px;max-width:100%;height:auto;border-radius:4px}
+.premium-inline-price s,.premium-price-line s,.premium-article-price s{font-size:16px;font-weight:600;color:#7a807a;text-decoration-thickness:2px}
+.premium-price-line .deal-discount,.premium-inline-price .deal-discount,.premium-article-price .deal-discount{background:#e8f5e8;color:#226a3d;border-radius:5px;padding:4px 7px;font-size:11px;font-weight:800}
+@media(max-width:580px){.premium-checkout-badges,.premium-trust-row{gap:6px}.premium-checkout-badges span,.premium-trust-row span{font-size:10px}}
