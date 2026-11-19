@@ -24,7 +24,7 @@
  <span class="deal-eyebrow">EARLY BLACK FRIDAY · LIMITED-TIME LAUNCH</span>
  <h1 id="premium-product-name">Premium Pine Script</h1>
  <p>Get the complete TradingView Pine Script v6 source and installation guidance. Pay through NOWPayments and unlock the digital file once your payment is finished.</p>
- <div class="premium-pricing"><span class="premium-old-price"><s>$4.99</s><small> Regular price</small></span><strong class="premium-price">$1.99 <small>USD</small></strong><span class="deal-discount">SAVE 60%</span></div>
+ <div class="premium-pricing"><span class="premium-old-price"><s>$49.49</s><small> Regular price</small></span><strong class="premium-price">$12.49 <small>USD</small></strong><span class="deal-discount">SAVE 75%</span></div>
  <p class="premium-price-clarity">Black Friday deal through November 30, 2026 (UTC). One payment. Yours to download.</p><div class="premium-trust-row"><span>✓ Complete Pine Script v6 source</span><span>✓ No account required</span><span>✓ Verified order-based delivery</span></div>
  <div class="premium-deliverables"><strong>What you receive</strong><p>The full source-code file, strategy settings documented in the article, and installation support if needed.</p></div>
  <p class="premium-terms">Choose your preferred crypto, complete the secure payment and download your script once confirmed.</p>
@@ -37,11 +37,17 @@
  <div id="premium-new-order">
   <label class="premium-tx-label" for="premium-script">Choose your Pine Script</label>
   <select id="premium-script" class="premium-currency-select"><option value="gold-breakout-15m">Gold Breakout 15M Strategy</option><option value="supertrend-dema-reversal">Supertrend + DEMA Reversal Strategy</option></select>
-  <p class="premium-check-info">Choose your cryptocurrency in the NOWPayments widget after continuing.</p>
+  <label class="premium-tx-label" for="premium-payment-choice">Preferred payment network</label>
+  <select id="premium-payment-choice" class="premium-currency-select">
+   <option value="usdtbsc" selected>USDT · BNB Smart Chain (BEP20) · Recommended</option>
+   <option value="usdttrc20">USDT · TRON (TRC20)</option>
+   <option value="auto">Other cryptocurrency · Choose in widget</option>
+  </select>
+  <p class="premium-check-info">USDT on BNB Smart Chain is selected by default for lower network transfer fees. Choose another option above if preferred.</p>
   <button type="button" id="premium-reserve" class="btn premium-primary-button" disabled>Continue to secure payment</button>
  </div>
  <div id="premium-order" hidden>
-  <div class="premium-order-amount"><span>Order total</span><strong id="premium-exact-amount">$1.99 USD</strong><small id="premium-pay-coin"></small></div>
+  <div class="premium-order-amount"><span>Order total</span><strong id="premium-exact-amount">$12.49 USD</strong><small id="premium-pay-coin"></small></div>
   <div class="premium-order-wallet"><span>Your order reference</span><code id="premium-order-id"></code></div>
   <div class="premium-fee-tip"><strong>💡 Lower-fee tip:</strong> Choose <strong>USDT on BNB Smart Chain (BEP20)</strong> in the payment widget for typically lower network transfer fees.</div>
   <div id="premium-widget-container" class="premium-widget-container" hidden>
@@ -61,5 +67,5 @@
 <footer class="footer"><div class="wrap foot"><div>© 2026 Signal to Script · by CW.</div><div>Pine Script strategies and tools.</div></div>
 <nav class="policy-links" aria-label="Legal and business policies"><a href="/terms.html">Terms &amp; Conditions</a><a href="/refunds.html">Refund &amp; Cancellation</a><a href="/privacy.html">Privacy Policy</a><a href="mailto:support@signaltoscript.com">support@signaltoscript.com</a></nav></footer>
 <script defer src="/site.js"></script>
-<script defer src="/checkout.js?v=20261119-nowpayments-widget2"></script>
+<script defer src="/checkout.js?v=20261119-bsc-price1249"></script>
 </body></html>
