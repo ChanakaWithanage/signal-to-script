@@ -1,144 +1,123 @@
-// Premium product catalog, on-chain verification and D1 order helpers.
-// No wallet seed/private key is ever used on this server.
+// Premium downloads with per-order NOWPayments hosted crypto invoices.
 import {randomToken,hashToken} from './download-access.js';
 
-export const RECEIVER='TYemkXWco4P6h1UCVgvneiMhiVaDpqVBwq';
-export const USDT='TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t';
 export const OFFER_END=Date.parse('2026-12-01T00:00:00Z');
-export const BASE_MICRO=1990000;
-export const ORDER_LIFETIME_MS=30*60*1000;
-export const LANE_COOLDOWN_MS=90*60*1000;
+export const PRICE_USD='1.99';
 export const PRODUCTS=Object.freeze({
  'gold-breakout-15m':'Gold Breakout 15M Strategy',
  'supertrend-dema-reversal':'Supertrend + DEMA Reversal Strategy'
 });
+export const CURRENCIES=Object.freeze(['trx','ltc','usdttrc20']);
 export const isPremium=slug=>Object.hasOwn(PRODUCTS,slug);
 export const noCache=()=>({'Cache-Control':'no-store','X-Content-Type-Options':'nosniff'});
 const TABLES=[
-`CREATE TABLE IF NOT EXISTS premium_orders (
+`CREATE TABLE IF NOT EXISTS premium_nowpayments_orders (
  id TEXT PRIMARY KEY,
  secret_hash TEXT NOT NULL UNIQUE,
  slug TEXT NOT NULL,
- amount_micro INTEGER NOT NULL,
- lane INTEGER NOT NULL,
+ currency TEXT NOT NULL,
+ amount_usd TEXT NOT NULL,
+ invoice_id TEXT UNIQUE,
+ invoice_url TEXT,
+ status TEXT NOT NULL DEFAULT 'creating' CHECK(status IN ('creating','waiting','paid','failed')),
  created_ms INTEGER NOT NULL,
- expires_ms INTEGER NOT NULL,
  paid_ms INTEGER,
- status TEXT NOT NULL DEFAULT 'pending' CHECK(status IN ('pending','paid')),
- tx_hash TEXT UNIQUE
+ payment_id TEXT UNIQUE
 )`,
-`CREATE INDEX IF NOT EXISTS idx_premium_orders_status ON premium_orders(status,expires_ms)`,
-`CREATE TABLE IF NOT EXISTS premium_slots (
- lane INTEGER PRIMARY KEY CHECK(lane IN (0,1,2)),
- order_id TEXT,
- hold_until_ms INTEGER NOT NULL DEFAULT 0
-)`
+`CREATE INDEX IF NOT EXISTS idx_np_invoice ON premium_nowpayments_orders(invoice_id)`
 ];
-let initPromise;
+let init;
 export async function ensurePremiumSchema(db){
- if(!initPromise)initPromise=(async()=>{
-  for(const statement of TABLES)await db.prepare(statement).run();
-  for(let i=0;i<3;i++)await db.prepare('INSERT OR IGNORE INTO premium_slots(lane) VALUES (?)').bind(i).run();
- })();
- try{await initPromise}catch(error){initPromise=null;throw error}
+ if(!init)init=(async()=>{for(const sql of TABLES)await db.prepare(sql).run()})();
+ try{await init}catch(error){init=null;throw error}
 }
-export function goodCredential(token){return typeof token==='string'&&/^[0-9a-f]{64}$/.test(token)}
-export async function fetchOrder(db,id,secret){
- if(!goodCredential(secret)||typeof id!=='string'||!/^[0-9a-f]{24}$/.test(id))return null;
- return db.prepare('SELECT * FROM premium_orders WHERE id=? AND secret_hash=? LIMIT 1')
-  .bind(id,await hashToken(secret)).first();
-}
-export function orderResponse(row){
- return {id:row.id,slug:row.slug,product:PRODUCTS[row.slug],
-  amount:(row.amount_micro/1000000).toFixed(3),amountMicro:row.amount_micro,
-  createdAt:row.created_ms,expiresAt:row.expires_ms,
-  status:row.status==='paid'?'paid':Date.now()>row.expires_ms?'expired':'pending',
-  txHash:row.tx_hash||null,receiver:RECEIVER,network:'TRON (TRC20)',token:'USDT'};
+export function ready(env){
+ return env.PREMIUM_CHECKOUT_ENABLED==='true'&&!!env.DB&&
+  !!env.NOWPAYMENTS_API_KEY&&!!env.NOWPAYMENTS_IPN_SECRET&&!!env.PREMIUM_BUCKET;
 }
 export async function storageAvailable(env,slug){
  if(!env.PREMIUM_BUCKET||typeof env.PREMIUM_BUCKET.head!=='function')return false;
  return !!await env.PREMIUM_BUCKET.head(slug+'.pine');
 }
-export async function createOrder(db,slug,now=Date.now()){
- if(!isPremium(slug))return {error:'Unknown premium script',status:404};
- if(now>=OFFER_END)return {error:'The early Black Friday offer has ended. Checkout is paused until prices are updated.',status:409};
- await ensurePremiumSchema(db);
- const id=randomToken().slice(0,24),secret=randomToken();
- const expiry=now+ORDER_LIFETIME_MS,holdUntil=expiry+LANE_COOLDOWN_MS;
- for(let lane=0;lane<3;lane++){
-  const claim=await db.prepare(
-   'UPDATE premium_slots SET order_id=?,hold_until_ms=? WHERE lane=? AND hold_until_ms < ?'
-  ).bind(id,holdUntil,lane,now).run();
-  if(claim.meta?.changes!==1)continue;
-  try{
-   const amount=BASE_MICRO+1000*lane;
-   await db.prepare(
-    'INSERT INTO premium_orders(id,secret_hash,slug,amount_micro,lane,created_ms,expires_ms) VALUES(?,?,?,?,?,?,?)'
-   ).bind(id,await hashToken(secret),slug,amount,lane,now,expiry).run();
-   return {order:{id,secret,slug,product:PRODUCTS[slug],amount:(amount/1000000).toFixed(3),
-    amountMicro:amount,createdAt:now,expiresAt:expiry,receiver:RECEIVER,
-    network:'TRON (TRC20)',token:'USDT',status:'pending'}};
-  }catch(error){
-   await db.prepare('UPDATE premium_slots SET order_id=NULL,hold_until_ms=0 WHERE order_id=?').bind(id).run();
-   throw error;
-  }
- }
- return {status:429,error:'Three checkout amounts are temporarily reserved. Please try again later.'};
+export function validToken(value){return typeof value==='string'&&/^[0-9a-f]{64}$/.test(value)}
+export async function lookupOrder(db,id,secret){
+ if(typeof id!=='string'||!/^[0-9a-f]{24}$/.test(id)||!validToken(secret))return null;
+ return db.prepare('SELECT * FROM premium_nowpayments_orders WHERE id=? AND secret_hash=? LIMIT 1')
+  .bind(id,await hashToken(secret)).first();
 }
-async function tronRequest(url,env,options={}){
- const headers={'Accept':'application/json',...(options.method==='POST'?{'Content-Type':'application/json'}:{})};
- if(env.TRONGRID_API_KEY)headers['TRON-PRO-API-KEY']=env.TRONGRID_API_KEY;
- const response=await fetch(url,{...options,headers,signal:AbortSignal.timeout(9000)});
- if(!response.ok)throw Error('TRON verification service unavailable ('+response.status+')');
- return response.json();
+export function publicOrder(row){
+ return {id:row.id,slug:row.slug,product:PRODUCTS[row.slug],
+  amountUsd:row.amount_usd,currency:row.currency,
+  status:row.status==='paid'?'paid':row.status==='failed'?'failed':'pending',
+  createdAt:row.created_ms,invoiceUrl:row.invoice_url||null};
 }
-export async function locatePayment(row,env,txid=''){
- const hash=typeof txid==='string'?txid.trim().toLowerCase():'';
- if(hash&&!/^[0-9a-f]{64}$/.test(hash))return {code:'INVALID_HASH'};
- const query=new URL('https://api.trongrid.io/v1/accounts/'+RECEIVER+'/transactions/trc20');
- query.searchParams.set('only_confirmed','true');
- query.searchParams.set('only_to','true');
- query.searchParams.set('contract_address',USDT);
- query.searchParams.set('min_timestamp',String(row.created_ms));
- query.searchParams.set('limit','200');
- const candidates=[];
- let fingerprint='';
- for(let page=0;page<3;page++){
-  if(fingerprint)query.searchParams.set('fingerprint',fingerprint);
-  const history=await tronRequest(query.toString(),env);
-  if(!Array.isArray(history.data))throw Error('Unexpected TRC20 history response');
-  for(const transfer of history.data){
-   const t=Number(transfer.block_timestamp);
-   const id=String(transfer.transaction_id||'').toLowerCase();
-   if(transfer.to!==RECEIVER||transfer.token_info?.address!==USDT||
-      Number(transfer.token_info?.decimals)!==6||
-      String(transfer.value)!==String(row.amount_micro)||
-      !/^[0-9a-f]{64}$/.test(id)||
-      !(t>=row.created_ms&&t<=row.expires_ms))continue;
-   if(hash&&hash!==id)continue;
-   if(!candidates.find(x=>x===id))candidates.push(id);
-  }
-  if(history.data.length<200||!history.meta?.fingerprint)break;
-  fingerprint=history.meta.fingerprint;
- }
- if(!candidates.length)return {code:'NOT_FOUND'};
- if(candidates.length>1&&!hash)return {code:'AMBIGUOUS'};
- const candidate=candidates[0];
- const receipt=await tronRequest('https://api.trongrid.io/walletsolidity/gettransactioninfobyid',env,{
-  method:'POST',body:JSON.stringify({value:candidate})
+export function createCredentials(slug,currency){
+ if(!isPremium(slug)||!CURRENCIES.includes(currency))throw Error('Unknown premium product or coin');
+ return {id:randomToken().slice(0,24),secret:randomToken(),slug,currency,
+  amountUsd:PRICE_USD,createdAt:Date.now()};
+}
+export async function provider(env,endpoint,options={}){
+ const result=await fetch('https://api.nowpayments.io/v1/'+endpoint,{
+  method:options.method||'GET',
+  headers:{'x-api-key':env.NOWPAYMENTS_API_KEY,'Accept':'application/json',
+   ...(options.body?{'Content-Type':'application/json'}:{})},
+  ...(options.body?{body:JSON.stringify(options.body)}:{}),
+  signal:AbortSignal.timeout(8500)
  });
- if(String(receipt.id||'').toLowerCase()!==candidate||receipt.receipt?.result!=='SUCCESS'||receipt.result==='FAILED')
-  return {code:'NOT_CONFIRMED'};
- return {code:'CONFIRMED',txid:candidate};
+ if(!result.ok)throw new Error('NOWPayments returned HTTP '+result.status);
+ return result.json();
 }
-export async function settleOrder(db,row,txid,now=Date.now()){
- // One confirmed transaction may unlock at most one paid order.
+export async function checkMinimum(env,currency){
+ if(!CURRENCIES.includes(currency))return {ok:false,error:'Unsupported currency.'};
+ // Compare the provider's real-time fiat-equivalent minimum before issuing an invoice.
+ // Payout currency is configured in the merchant account; this must match its settings.
+ const payout=String(env.NOWPAYMENTS_PAYOUT_CURRENCY||'usdttrc20').toLowerCase();
+ const data=await provider(env,'min-amount?currency_from='+encodeURIComponent(currency)+
+  '&currency_to='+encodeURIComponent(payout)+'&fiat_equivalent=usd');
+ const minimum=Number(data.fiat_equivalent);
+ if(!Number.isFinite(minimum)||minimum<=0)
+  return {ok:false,error:'NOWPayments did not return a reliable USD minimum. Checkout is unavailable for this currency.'};
+ if(minimum>Number(PRICE_USD))
+  return {ok:false,error:'NOWPayments currently requires approximately $'+minimum.toFixed(2)+
+   ' for '+currency.toUpperCase()+'. The $1.99 launch price is below that minimum. Choose another coin.'};
+ return {ok:true,minimumUsd:minimum};
+}
+export function validInvoiceUrl(value){
+ try{const url=new URL(value);return url.protocol==='https:'&&
+  (url.hostname==='nowpayments.io'||url.hostname.endsWith('.nowpayments.io'))}
+ catch{return false}
+}
+function sortKeys(value){
+ if(Array.isArray(value))return value.map(sortKeys);
+ if(value&&typeof value==='object')
+  return Object.fromEntries(Object.keys(value).sort().map(k=>[k,sortKeys(value[k])]));
+ return value;
+}
+export async function validateSignature(payload,signature,secret){
+ if(!secret||typeof signature!=='string'||!/^[a-f0-9]{128}$/i.test(signature))return false;
+ const key=await crypto.subtle.importKey('raw',new TextEncoder().encode(secret.trim()),
+  {name:'HMAC',hash:'SHA-512'},false,['verify']);
+ const bytes=new Uint8Array(signature.match(/../g).map(s=>parseInt(s,16)));
+ return crypto.subtle.verify('HMAC',key,bytes,new TextEncoder().encode(JSON.stringify(sortKeys(payload))));
+}
+export function matchesPayment(row,p){
+ // Do not treat "confirmed" or "partially_paid" as completed delivery.
+ return String(p.payment_status).toLowerCase()==='finished'&&
+  String(p.payment_id||'')!==''&&
+  String(p.order_id||'')===row.id&&
+  String(p.invoice_id||'')===String(row.invoice_id||'')&&
+  String(p.price_currency||'').toLowerCase()==='usd'&&
+  Math.abs(Number(p.price_amount)-Number(row.amount_usd))<0.000001&&
+  String(p.pay_currency||'').toLowerCase()===row.currency;
+}
+export async function settlePayment(db,row,p){
+ if(!matchesPayment(row,p))return false;
  try{
   const result=await db.prepare(
-   "UPDATE premium_orders SET status='paid',tx_hash=?,paid_ms=? WHERE id=? AND status='pending' AND expires_ms>=? AND NOT EXISTS(SELECT 1 FROM premium_orders WHERE tx_hash=?)"
-  ).bind(txid,now,row.id,now,txid).run();
-  if(result.meta?.changes===1)return {paid:true};
- }catch(error){if(!/UNIQUE|constraint/i.test(String(error)))throw error}
- const updated=await db.prepare('SELECT status,tx_hash FROM premium_orders WHERE id=?').bind(row.id).first();
- return {paid:updated?.status==='paid'&&updated.tx_hash===txid};
+   "UPDATE premium_nowpayments_orders SET status='paid',payment_id=?,paid_ms=? WHERE id=? AND invoice_id=? AND status='waiting' AND NOT EXISTS(SELECT 1 FROM premium_nowpayments_orders WHERE payment_id=?)"
+  ).bind(String(p.payment_id),Date.now(),row.id,String(row.invoice_id),String(p.payment_id)).run();
+  if(result.meta?.changes===1)return true;
+ }catch(error){if(!/unique|constraint/i.test(String(error)))throw error}
+ const current=await db.prepare('SELECT status,payment_id FROM premium_nowpayments_orders WHERE id=?').bind(row.id).first();
+ return current?.status==='paid'&&current.payment_id===String(p.payment_id);
 }
