@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
 <title>Premium Pine Script Checkout | NOWPayments | Signal to Script</title>
-<meta name="description" content="Purchase original premium Pine Script source through a per-order NOWPayments crypto invoice.">
+<meta name="description" content="Buy your premium Pine Script v6 source with an embedded NOWPayments crypto checkout.">
 <link rel="canonical" href="https://signaltoscript.com/checkout.html">
 <link rel="icon" href="/favicon.svg">
 <link rel="stylesheet" href="/styles.css">
@@ -18,7 +18,7 @@
 <nav aria-label="Main navigation" class="nav" id="nav"><a href="/#premium-scripts">Premium scripts</a><a href="/#free-scripts">Free scripts</a><a href="/#articles">Articles</a><a href="/#support">Get help</a><a href="/join.html">Join free</a></nav>
 </div></header>
 <main class="wrap premium-checkout" id="main">
-<div class="premium-checkout-top"><a href="/#premium-scripts">← Back to premium strategies</a><span>Secure external crypto checkout · No account required</span></div>
+<div class="premium-checkout-top"><a href="/#premium-scripts">← Back to premium strategies</a><span>Secure checkout right here · No account required</span></div>
 <div class="premium-checkout-grid">
 <section class="premium-checkout-product">
  <span class="deal-eyebrow">EARLY BLACK FRIDAY · LIMITED-TIME LAUNCH</span>
@@ -32,26 +32,23 @@
 <section class="premium-checkout-card" aria-labelledby="checkout-title">
  <div class="premium-provider-brand"><span class="premium-provider-dot">●</span><span>Payments processed by <strong>NOWPayments</strong></span></div><div class="premium-checkout-badges"><span>🔒 Secure hosted payment</span><span>✓ Payment verified before delivery</span></div>
  <h2 id="checkout-title">Get your premium script</h2>
- <p>Select your script and payment network. You will receive a unique NOWPayments checkout link for this purchase.</p>
+ <p>Choose your script and pay securely below, without leaving this page.</p>
  <p id="premium-availability" role="status" aria-live="polite">Checking checkout availability...</p>
  <div id="premium-new-order">
   <label class="premium-tx-label" for="premium-script">Choose your Pine Script</label>
   <select id="premium-script" class="premium-currency-select"><option value="gold-breakout-15m">Gold Breakout 15M Strategy</option><option value="supertrend-dema-reversal">Supertrend + DEMA Reversal Strategy</option></select>
-  <label class="premium-tx-label" for="premium-coin">Choose how to pay</label>
-  <select id="premium-coin" class="premium-currency-select">
-   <option value="usdttrc20">USDT · TRON (TRC20)</option>
-   <option value="usdtbsc">USDT · BNB Smart Chain (BEP20)</option>
-   <option value="trx">TRX · TRON</option>
-   <option value="ltc">LTC · Litecoin</option>
-  </select>
-  <p class="premium-check-info">Choose your preferred payment network to continue.</p>
+  <p class="premium-check-info">Choose your cryptocurrency in the NOWPayments widget after continuing.</p>
   <button type="button" id="premium-reserve" class="btn premium-primary-button" disabled>Continue to secure payment</button>
  </div>
  <div id="premium-order" hidden>
   <div class="premium-order-amount"><span>Order total</span><strong id="premium-exact-amount">$1.99 USD</strong><small id="premium-pay-coin"></small></div>
   <div class="premium-order-wallet"><span>Your order reference</span><code id="premium-order-id"></code></div>
-  <a id="premium-pay-link" class="btn premium-primary-button" href="https://nowpayments.io/" target="_blank" rel="noopener noreferrer" hidden><span>Continue to secure payment</span><img class="premium-nowpayments-button" src="https://nowpayments.io/images/embeds/payments-button-black.svg" alt="Pay with NOWPayments"></a>
-  <p class="premium-order-note">The payment opens in a separate tab. Complete it there, then return here. This page checks for a verified finished payment.</p>
+  <div class="premium-fee-tip"><strong>💡 Lower-fee tip:</strong> Choose <strong>USDT on BNB Smart Chain (BEP20)</strong> in the payment widget for typically lower network transfer fees.</div>
+  <div id="premium-widget-container" class="premium-widget-container" hidden>
+   <iframe id="premium-payment-widget" title="NOWPayments secure payment widget" width="410" height="696" frameborder="0" scrolling="no" loading="eager" referrerpolicy="strict-origin-when-cross-origin" style="overflow-y:hidden"></iframe>
+  </div>
+  <a id="premium-pay-link" class="premium-widget-fallback" href="https://nowpayments.io/" target="_blank" rel="noopener noreferrer" hidden>Open payment in a new tab instead</a>
+  <p class="premium-order-note">Complete your payment above. This page checks automatically and unlocks your download after payment confirmation.</p>
   <button type="button" id="premium-check" class="premium-copy-button">Check payment status</button>
   <button type="button" id="premium-download" class="btn premium-primary-button" hidden>Download purchased Pine Script</button>
  </div>
@@ -63,5 +60,5 @@
 <footer class="footer"><div class="wrap foot"><div>© 2026 Signal to Script · by CW.</div><div>Pine Script strategies and tools.</div></div>
 <nav class="policy-links" aria-label="Legal and business policies"><a href="/terms.html">Terms &amp; Conditions</a><a href="/refunds.html">Refund &amp; Cancellation</a><a href="/privacy.html">Privacy Policy</a><a href="mailto:support@signaltoscript.com">support@signaltoscript.com</a></nav></footer>
 <script defer src="/site.js"></script>
-<script defer src="/checkout.js?v=20261119-checkout-fix2"></script>
+<script defer src="/checkout.js?v=20261119-nowpayments-widget1"></script>
 </body></html>
