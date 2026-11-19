@@ -47,7 +47,9 @@ export async function onRequestPost({request,env}){
     if(!min.ok)return failure(min.error,409,'MINIMUM_TOO_HIGH');
    }
    await ensurePremiumSchema(env.DB);
-   const o=createCredentials(slug,currency);
+   // The requested coin is a checkout preference, not a restriction on verified payments.
+   // Store auto so a permitted coin switch inside the widget does not block fulfillment.
+   const o=createCredentials(slug,'auto');
    await env.DB.prepare(
     "INSERT INTO premium_nowpayments_orders(id,secret_hash,slug,currency,amount_usd,created_ms,status) VALUES(?,?,?,?,?,?,'creating')"
    ).bind(o.id,await hashToken(o.secret),slug,currency,PRICE_USD,o.createdAt).run();
