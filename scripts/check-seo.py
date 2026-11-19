@@ -37,6 +37,9 @@ xml = ET.parse(public / "sitemap.xml")
 urls = [n.text for n in xml.findall(".//s:loc", ns)]
 expected = {domain + path for path in pages.values()}
 assert set(urls) == expected and len(urls) == len(expected), "Unexpected sitemap URLs"
+checkout=(public/"checkout.html").read_text(encoding="utf-8")
+assert 'name="robots" content="noindex, nofollow"' in checkout
+assert "https://signaltoscript.com/checkout.html" not in urls
 for page in public.rglob("*.html"):
     html = page.read_text(encoding="utf-8")
     assert 'class="policy-links"' in html, f"Policy footer missing: {page}"
