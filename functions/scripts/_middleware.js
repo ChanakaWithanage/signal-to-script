@@ -3,11 +3,13 @@
 import {ensureAccessSchema,isMember} from '../_lib/download-access.js';
 
 const headers={'Cache-Control':'no-store','X-Content-Type-Options':'nosniff'};
+const PAID_FILES=new Set(['gold-breakout-15m.pine','supertrend-dema-reversal.pine']);
 export async function onRequest({request,env,next}){
   const path=new URL(request.url).pathname;
   if(!/^\/scripts\/[a-z0-9-]+\.pine$/.test(path)){
     return new Response('Not found',{status:404,headers});
   }
+  if(PAID_FILES.has(path.split('/').at(-1)))return new Response('Premium scripts are not available from public URLs.',{status:404,headers});
   if(!env.DB)return new Response('Downloads are temporarily unavailable.',{status:503,headers});
   try{
     await ensureAccessSchema(env.DB);
