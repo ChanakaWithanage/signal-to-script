@@ -28,6 +28,7 @@ assert "Black Friday" in home
 assert 'name="robots" content="noindex, nofollow"' in checkout
 assert "Planned regular 4.99 USDT" in checkout and "~60% launch saving" in checkout
 assert "November 30, 2026" in checkout and "not a claim that this script previously sold" in checkout
+assert "PREMIUM_CHECKOUT_ENABLED" in premium_api, "Checkout must start disabled by default"
 assert 'if(!(await storageAvailable(env,slug)))' in premium_api, "Do not accept payments until R2 file exists"
 assert "receipt?.result!=='SUCCESS'" in library and "only_confirmed" in library
 assert "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t" in library
