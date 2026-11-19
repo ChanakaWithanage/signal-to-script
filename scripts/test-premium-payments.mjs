@@ -8,7 +8,7 @@ globalThis.crypto??=webcrypto;
 
 const orders=new Map();
 const invoices=new Map();
-let minUsd=9, invoiceSeq=4299592143,providerStatus='waiting';
+let minUsd=20, invoiceSeq=4299592143,providerStatus='waiting';
 const db={prepare(sql){
  let args=[];
  const q={
@@ -77,7 +77,7 @@ const callback=(payload,signature=sign(payload))=>onIpn({env,request:new Request
 })});
 function mockPayment(o,paymentId='123456789'){
  return {payment_id:paymentId,invoice_id:o.invoiceId,order_id:o.id,
-  payment_status:providerStatus,price_amount:1.99,price_currency:'usd',pay_currency:o.currency};
+  payment_status:providerStatus,price_amount:Number(PRICE_USD),price_currency:'usd',pay_currency:o.currency};
 }
 const originalFetch=globalThis.fetch;
 globalThis.fetch=async (uri,opts={})=>{
@@ -86,7 +86,7 @@ globalThis.fetch=async (uri,opts={})=>{
  if(url.includes('/min-amount?'))return Response.json({min_amount:minUsd,fiat_equivalent:minUsd});
  if(url.endsWith('/invoice')&&opts.method==='POST'){
   const b=JSON.parse(opts.body);
-  assert.equal(b.price_amount,PRICE_USD);
+  assert.equal(b.price_amount,Number(PRICE_USD));
   assert.equal(b.price_currency,'usd');
   assert.equal(b.ipn_callback_url,validOrigin+'/api/nowpayments-ipn');
   const id=String(++invoiceSeq);
@@ -97,7 +97,7 @@ globalThis.fetch=async (uri,opts={})=>{
  if(paymentId){
   const o=orders.values().next().value;
   const invoice=invoices.get(o.id);
-  return Response.json({...mockPayment({id:o.id,invoiceId:invoice.id,currency:o.currency},paymentId)});
+  return Response.json({...mockPayment({id:o.id,invoiceId:invoice.id,currency:invoice.currency||'usdtbsc'},paymentId)});
  }
  throw Error('Unexpected NOWPayments URL '+url);
 };
@@ -109,13 +109,15 @@ try{
  result=await post('create',{slug:'gold-breakout-15m',currency:'trx'},{...env,PREMIUM_BUCKET:null});
  assert.equal(result.status,503,'must have private file');
  result=await post('create',{slug:'gold-breakout-15m',currency:'trx'});
- assert.equal(result.status,409,'provider minimum above 1.99 must block invoice');
+ assert.equal(result.status,409,'provider minimum above 12.49 must block invoice');
  assert.equal(orders.size,0);
  minUsd=1;
  result=await post('create',{slug:'gold-breakout-15m',currency:'trx',price_amount:'0.01'});
  assert.equal(result.status,200);
  const first=(await result.json()).order;
- assert.equal(first.amountUsd,'1.99');
+ assert.equal(first.amountUsd,PRICE_USD);
+ assert.equal(first.currency,'auto','widget coin changes may still be verified');
+ assert.equal(invoices.get(first.id).currency,'trx','invoice remembers requested coin');
  assert.match(first.secret,/^[a-f0-9]{64}$/);
  assert.match(first.invoiceUrl,/^https:\/\/nowpayments\.io\/payment/);
  assert.equal(orders.size,1);
@@ -123,6 +125,11 @@ try{
  assert.equal(result.status,200,'second order does not need an amount lane');
  const second=(await result.json()).order;
  assert.notEqual(first.invoiceUrl,second.invoiceUrl);
+ result=await post('create',{slug:'gold-breakout-15m',currency:'usdtbsc'});
+ assert.equal(result.status,200,'USDT BSC default available');
+ const bscOrder=(await result.json()).order;
+ assert.equal(invoices.get(bscOrder.id).currency,'usdtbsc','preferred BSC sent to NOWPayments');
+ assert.equal(bscOrder.currency,'auto','verify whatever valid payment coin widget ultimately uses');
  const auth={id:first.id,secret:first.secret};
  result=await post('download',auth);
  assert.equal(result.status,403,'prepaid file protected');
