@@ -5,11 +5,9 @@ if(menu&&nav){
   nav.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>nav.classList.remove('open')));
 }
 const scripts={
-  'supertrend-dema-reversal':'Supertrend + DEMA Reversal Strategy',
   '1r-bear-breakout-achievements':'1R Bear Breakout Achievements',
   'goat-trap-pinbar-3ls-combo':'Goat Trap Pinbar + 3LS',
-  'supertrend-visual-bridge':'Supertrend Visual Bridge',
-  'gold-breakout-15m':'Gold Breakout 15M Strategy'
+  'supertrend-visual-bridge':'Supertrend Visual Bridge'
 };
 const GOOGLE_CLIENT_ID='121639481880-4lrf81h9me5o35tdv3p9jjb4gmr9983b.apps.googleusercontent.com';
 async function refreshCounts(){
@@ -207,3 +205,25 @@ document.querySelectorAll('a[data-download-script]').forEach(a=>a.addEventListen
   if(slug)choose(slug);
 }));
 window.SignalDownloads={fileDownload,scripts,refreshCounts,mountGoogleButton};
+
+const PREMIUM_ARTICLES={
+ 'gold-breakout-15m':'/articles/gold-breakout-15m-strategy.html',
+ 'supertrend-dema-reversal':'/articles/supertrend-dema-reversal-strategy.html'
+};
+function premiumEngagement(event,slug){
+ if(!Object.hasOwn(PREMIUM_ARTICLES,slug))return;
+ // Aggregate click counts only. No user identifier or IP address is sent.
+ fetch('/api/engagement',{
+  method:'POST',credentials:'same-origin',keepalive:true,
+  headers:{'Content-Type':'application/json'},
+  body:JSON.stringify({event,slug})
+ }).catch(()=>{});
+}
+document.querySelectorAll('a[data-track-article]').forEach(link=>{
+ link.addEventListener('click',()=>premiumEngagement('article_click',link.dataset.trackArticle));
+});
+document.querySelectorAll('a[data-buy-script]').forEach(link=>{
+ link.addEventListener('click',()=>premiumEngagement('buy_click',link.dataset.buyScript));
+});
+const articleSlug=document.body.dataset.premiumArticle;
+if(articleSlug)premiumEngagement('article_view',articleSlug);
