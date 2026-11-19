@@ -219,8 +219,13 @@ function premiumEngagement(event,slug){
   body:JSON.stringify({event,slug})
  }).catch(()=>{});
 }
-document.querySelectorAll('a[data-track-article]').forEach(link=>{
- link.addEventListener('click',()=>premiumEngagement('article_click',link.dataset.trackArticle));
+document.querySelectorAll('a[href]').forEach(link=>{
+ try{
+  const target=new URL(link.href,location.href);
+  if(target.origin!==location.origin)return;
+  const slug=Object.keys(PREMIUM_ARTICLES).find(key=>PREMIUM_ARTICLES[key]===target.pathname);
+  if(slug)link.addEventListener('click',()=>premiumEngagement('article_click',slug));
+ }catch{}
 });
 document.querySelectorAll('a[data-buy-script]').forEach(link=>{
  link.addEventListener('click',()=>premiumEngagement('buy_click',link.dataset.buyScript));
