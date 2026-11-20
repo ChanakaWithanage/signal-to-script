@@ -474,3 +474,22 @@
 .premium-confirmation-note strong{font:800 12px/1.5 var(--sans);color:#2a5744}
 .premium-confirmation-note p{font:400 11px/1.65 var(--sans);margin:4px 0 0;color:#587064}
 @media(max-width:580px){.premium-payment-guide{padding:15px 14px 6px;margin:16px 0 12px}.premium-guide-heading h3{font-size:20px}.premium-guide-heading .premium-guide-count{font-size:9px}.premium-guide-steps li{padding:13px 0;gap:11px}.premium-widget-heading{flex-wrap:wrap}}
+
+/* PayPal checkout alternative. Hidden until merchant API is enabled. */
+.premium-payment-divider{display:flex;align-items:center;gap:12px;text-align:center;margin:27px 0 20px;color:#7a817a;font:700 11px/1.4 var(--sans);letter-spacing:.02em}
+.premium-payment-divider:before,.premium-payment-divider:after{content:"";height:1px;flex:1;background:#dfe5e0}
+.premium-paypal-choice{padding:19px;background:#f9fafc;border:1px solid #d9e0ec;border-radius:10px;margin:0 0 20px}
+.premium-paypal-heading{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px}
+.premium-paypal-heading>div{display:flex;flex-direction:column;gap:2px}
+.premium-paypal-heading strong{font:800 16px/1.4 var(--sans);color:#24364a}
+.premium-paypal-heading div span{font:500 11px/1.5 var(--sans);color:#657284}
+.premium-paypal-mark{color:#003087;font:italic 800 20px/1.2 var(--sans);letter-spacing:-.8px}
+.premium-paypal-button{display:block;width:100%;border:1px solid #0070ba;border-radius:6px;padding:13px 14px;background:#0070ba;color:#fff;font:800 14px/1.35 var(--sans);cursor:pointer;transition:filter .14s ease}
+.premium-paypal-button:hover:not(:disabled){filter:brightness(.92)}
+.premium-paypal-button:focus-visible{outline:3px solid #67a5df;outline-offset:3px}
+.premium-paypal-button:disabled{cursor:not-allowed;opacity:.5}
+.premium-paypal-caption{font:500 11px/1.6 var(--sans);color:#677284;margin:10px 0 0}
+.premium-paypal-result{padding:13px 0 0;font:500 12px/1.65 var(--sans);color:#355645}
+.premium-paypal-result .premium-primary-button{width:100%;text-align:center;margin:13px 0}
+.premium-paypal-result .premium-copy-button{display:block;margin:8px 0}
+@media(max-width:580px){.premium-paypal-choice{padding:16px}.premium-paypal-heading strong{font-size:15px}}
