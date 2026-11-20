@@ -180,17 +180,22 @@ async function initPayPalButtons(state){
  paypalAvailability.textContent='Loading secure PayPal and card checkout...';
  try{
   const sdk=await loadPayPalSdk(state.paypalClientId);
+  // Buttons require a visible container to measure their iframe width.
+  paypalSdkArea.hidden=false;
   const wallet=sdk.Buttons(paypalButtonConfig(sdk.FUNDING.PAYPAL,
    {layout:'vertical',color:'gold',shape:'rect',label:'paypal',height:49}));
   if(!wallet.isEligible())throw Error('PayPal checkout is not available for this buyer or merchant.');
   await wallet.render('#premium-paypal-wallet-buttons');
-  // Card funding buttons are rendered only if PayPal considers this merchant/buyer eligible.
-  const card=sdk.Buttons(paypalButtonConfig(sdk.FUNDING.CARD,
-   {layout:'vertical',color:'black',shape:'rect',label:'pay',height:49}));
-  if(card.isEligible()){
-   await card.render('#premium-paypal-card-buttons');
-   paypalCardNote.hidden=true;
-  }else{
+  // Debit/credit checkout depends on PayPal's funding eligibility.
+  try{
+   const card=sdk.FUNDING?.CARD?sdk.Buttons(paypalButtonConfig(sdk.FUNDING.CARD,
+    {layout:'vertical',color:'black',shape:'rect',label:'pay',height:49})):null;
+   if(card?.isEligible()){
+    await card.render('#premium-paypal-card-buttons');
+    paypalCardNote.hidden=true;
+   }else{paypalCardNote.hidden=false}
+  }catch(error){
+   console.info('PayPal card funding is not eligible for this account or buyer.',error);
    paypalCardNote.hidden=false;
   }
   paypalSdkReady=true;
