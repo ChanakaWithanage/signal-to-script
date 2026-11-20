@@ -6,6 +6,29 @@ const NAMES={
 const params=new URLSearchParams(location.search);
 const initialSlug=String(params.get('script')||'').trim().toLowerCase();
 const productSelect=document.getElementById('premium-script');
+const manualRequest=document.getElementById('premium-manual-request');
+const paypalDetails=document.getElementById('premium-paypal-details');
+let currentPayPalState=null;
+function updateManualRequest(){
+ const selected=Object.hasOwn(NAMES,productSelect.value)?productSelect.value:'gold-breakout-15m';
+ const name=NAMES[selected];
+ const subject='Pine Script request - $4.99 - '+name;
+ const body=[
+  'Hi Signal to Script,',
+  '',
+  'I would like to request the following Pine Script:',
+  'Script: '+name,
+  'Special manual purchase offer: $4.99 USD',
+  '',
+  'I cannot use crypto checkout. Please let me know whether a PayPal Goods & Services payment or another supported payment method is available.',
+  'Please confirm the payment details and manual delivery process before I pay.',
+  '',
+  'Thanks!'
+ ].join('\n');
+ manualRequest.href='mailto:support@signaltoscript.com?subject='+
+  encodeURIComponent(subject)+'&body='+encodeURIComponent(body);
+}
+
 const coinSelect=document.getElementById('premium-payment-choice');
 const NEW_PRICE_USD='12.49';
 const buyerSessionId=(()=>{
@@ -92,6 +115,7 @@ function savePaypalOrder(record){
 function renderPaypal(){
  paypalOrder=loadPaypalOrder();
  const paid=paypalOrder?.status==='paid';
+ if(paid)paypalDetails.open=true;
  paypalSdkArea.hidden=!paypalSdkReady||!!paid;
  paypalPanel.hidden=!paypalOrder;
  if(!paypalOrder)return;
@@ -136,6 +160,7 @@ async function handlePaypalReturn(){
  }
  if(!qs.has('paypal_return'))return;
  const token=qs.get('token');
+ paypalDetails.open=true;
  if(!token){
   paypalAvailability.textContent='Your PayPal return did not contain an order reference. Contact support if you paid.';
   return;
@@ -310,6 +335,7 @@ productSelect.addEventListener('change',()=>{
  slug=productSelect.value;
  history.replaceState(null,'','/checkout?script='+encodeURIComponent(slug));
  title.textContent=NAMES[slug];
+ updateManualRequest();
  order=restoreOrder();
  newOrder.hidden=!!order;orderPanel.hidden=!order;
  renderPaypal();
@@ -402,8 +428,11 @@ async function loadAvailability(){
   const response=await fetch('/api/premium',{cache:'no-store'});
   if(!response.ok)throw Error('Checkout availability cannot be verified.');
   const state=await response.json();
-  await initPayPalButtons(state);
+  currentPayPalState=state;
   renderPaypal();
+  // Never automatically load PayPal when the merchant has reported receiving ineligibility.
+  // The buyer must explicitly open the optional automatic checkout section.
+  if(paypalDetails.open)await initPayPalButtons(state);
   const recovered=restoreOrder();
   if(recovered){
    saveOrder(recovered);
@@ -428,5 +457,9 @@ async function loadAvailability(){
   availability.textContent='Checkout is temporarily unavailable. Do not send a payment.';
  }
 }
+paypalDetails.addEventListener('toggle',()=>{
+ if(paypalDetails.open&&currentPayPalState)initPayPalButtons(currentPayPalState);
+});
+updateManualRequest();
 loadAvailability();
 handlePaypalReturn();
