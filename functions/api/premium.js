@@ -10,6 +10,9 @@ const sameOrigin=req=>req.headers.get('Origin')===new URL(req.url).origin;
 const configured=env=>ready(env);
 
 export async function onRequestGet({env}){
+ if(env.DB){
+  try{await ensurePremiumSchema(env.DB)}catch(error){console.error('Premium D1 schema migration failed',error)}
+ }
  const available={};
  for(const slug of Object.keys(PRODUCTS)){
   try{available[slug]=configured(env)&&await storageAvailable(env,slug)}
