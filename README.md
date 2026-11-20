@@ -312,3 +312,25 @@ ORDER BY slug, currency, status;
 ```
 
 CI runs mocked NOWPayments invoice/minimum/payment-status/webhook tests. Passing these tests does **not** confirm real credentials, incoming IPN delivery through Cloudflare, the payout wallet configuration or a live $12.49 payment. Perform a real end-to-end purchase with a supported amount and verify refund/support processes before launch.
+
+
+## Checkout timestamps, visitor geography and PayPal (November 2026)
+
+The **NOWPayments orders** D1 table is upgraded in place the first time the premium API initializes after deployment. It gains `created_at_utc`, `created_at_ist`, `paid_at_utc`, and `paid_at_ist`, along with anonymous session and approximate location columns (`visitor_country`, `visitor_region`, `visitor_city`, `visitor_timezone`, `visitor_browser_timezone`). Existing orders retain their invoice and payment IDs; historical `created_ms`/`paid_ms` are converted into readable UTC and Sri Lanka time (UTC+05:30). This does not rewrite the old amount or transaction status.
+
+**Checkout attempts** are also saved in `premium_checkout_attempts` each time a buyer presses the purchase button. Records include a random browser-tab session ID (not a name), script, provider, preferred currency, approximate Cloudflare country/region/city/time zone, browser time zone and an attempt status (including provider-minimum failures). This does not store raw visitor IP addresses or browser fingerprinting identifiers in D1. Location is estimated from the network and may not reflect the buyer's real residence. The Privacy Policy discloses this collection. A browser can clear the random session ID; it is not an individual-customer identity.
+
+**Useful D1 reporting SQL** is in `docs/checkout-analytics.sql`. In Cloudflare dashboard go to **D1 → signal-to-script-downloads → Console** (or the actual D1 database linked to the Pages project's `DB` binding) and run one of its SELECT queries.
+
+### Optional PayPal checkout
+
+The site includes an alternative **Pay with PayPal** button. It stays disabled until you configure a PayPal merchant app and explicitly enable the integration; this avoids collecting payments that the site cannot verify or fulfill. The checkout uses PayPal Orders v2: server creates a fixed-price USD order, buyer approves payment on PayPal, and the return page calls the server to capture and verify the completed payment. Each successful order unlocks only its purchased private R2 source file. PayPal order and capture IDs, UTC/IST times, and coarse location are tracked in a separate `premium_paypal_orders` D1 table.
+
+1. Confirm that your PayPal account is eligible for **merchant receiving and the REST checkout Orders API** in your jurisdiction. PayPal account availability, business features and receiving/withdrawal rules vary by country and onboarding program.
+2. Visit the [PayPal Developer Dashboard](https://developer.paypal.com/dashboard/applications). Create a sandbox app first, and obtain its **Client ID** and **Secret**. Create live credentials only when merchant access is approved.
+3. Under Cloudflare **Workers & Pages → SignalToScript → Settings → Variables and Secrets**, set `PAYPAL_CLIENT_ID` and `PAYPAL_CLIENT_SECRET` as encrypted secrets. Set `PAYPAL_MODE=sandbox` for a safe initial test or `PAYPAL_MODE=live` for actual transactions. Set `PAYPAL_ENABLED=true` **only after** those credentials and your merchant eligibility are confirmed.
+4. Retain the existing `DB` and `PREMIUM_BUCKET` bindings. Redeploy the Pages project. If the credentials, mode or enable flag are missing, PayPal remains unavailable, while NOWPayments continues independently.
+5. Complete the sandbox payment flow end-to-end and verify a `paid` PayPal row plus a private R2 download before enabling live mode. The PayPal return URL is `https://signaltoscript.com/checkout.html?script=<slug>&paypal_return=1`; PayPal adds its order token. No PayPal client secret is ever exposed to the browser.
+
+**PayPal availability:** The button being present in the source code does not mean that your current PayPal account can accept merchant payments. The account must provide valid Orders v2 credentials and be allowed to receive payments.
+
