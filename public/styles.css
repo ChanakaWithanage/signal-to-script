@@ -493,3 +493,33 @@
 .premium-paypal-result .premium-primary-button{width:100%;text-align:center;margin:13px 0}
 .premium-paypal-result .premium-copy-button{display:block;margin:8px 0}
 @media(max-width:580px){.premium-paypal-choice{padding:16px}.premium-paypal-heading strong{font-size:15px}}
+
+/* PayPal-first checkout: official gold button plus PayPal-eligible card funding. */
+.premium-product-picker{border:1px solid var(--line);background:#f9fbf8;border-radius:9px;padding:12px 15px;margin:15px 0 17px}
+.premium-product-picker .premium-tx-label{margin-top:0}
+.premium-product-picker .premium-currency-select{margin-bottom:0}
+.premium-checkout-card .premium-paypal-primary{background:#fff;border:1px solid #d3dce9;border-radius:12px;padding:19px 18px;margin:13px 0 14px;box-shadow:0 3px 14px rgba(24,61,91,.04)}
+.premium-checkout-card .premium-paypal-primary .premium-paypal-heading{margin-bottom:14px}
+.premium-paypal-sdk-area{width:100%;max-width:100%;min-height:48px}
+.premium-paypal-wallet-buttons,.premium-paypal-card-buttons{width:100%;max-width:100%;min-height:0}
+.premium-paypal-card-buttons:not(:empty){margin-top:10px}
+.premium-paypal-card-note{font:500 11px/1.6 var(--sans);color:#6d7986;margin:10px 0 2px}
+.premium-crypto-details{border:1px solid #dce6dd;border-radius:10px;background:#fbfcfb;overflow:hidden;margin-top:8px}
+.premium-crypto-details summary{display:flex;justify-content:space-between;align-items:center;gap:12px;list-style:none;cursor:pointer;position:relative;padding:16px 18px;font:800 14px/1.4 var(--sans);color:#29563c}
+.premium-crypto-details summary::-webkit-details-marker{display:none}
+.premium-crypto-details summary:after{content:"+";font:800 22px/1 var(--sans);color:#37694b;margin-left:auto}
+.premium-crypto-details[open] summary:after{content:"−"}
+.premium-crypto-details summary span{font:500 11px/1.45 var(--sans);color:#738175;max-width:140px;text-align:right}
+.premium-crypto-details summary:hover{background:#f2f7f1}
+.premium-crypto-details summary:focus-visible{outline:2px solid #37694b;outline-offset:-3px}
+.premium-crypto-content{border-top:1px solid #e1e9e2;padding:18px 18px 9px}
+.premium-crypto-content .premium-provider-brand{margin-bottom:12px}
+.premium-payment-divider{margin:18px 0 13px}
+.premium-checkout-card .premium-checkout-badges{margin:0 0 15px}
+@media(max-width:560px){
+ .premium-checkout-card .premium-paypal-primary{padding:15px 13px}
+ .premium-product-picker{padding:12px}
+ .premium-crypto-details summary{padding:14px 12px;align-items:flex-start}
+ .premium-crypto-details summary span{font-size:10px;max-width:115px}
+ .premium-crypto-content{padding:13px 11px 6px}
+}
