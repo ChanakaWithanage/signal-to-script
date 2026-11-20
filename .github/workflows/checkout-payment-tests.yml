@@ -1,0 +1,31 @@
+name: Checkout payment tests
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'functions/api/premium.js'
+      - 'functions/api/paypal.js'
+      - 'functions/api/nowpayments-ipn.js'
+      - 'functions/_lib/premium.js'
+      - 'functions/_lib/checkout-tracking.js'
+      - 'scripts/test-premium-payments.mjs'
+      - 'scripts/test-paypal-payments.mjs'
+      - '.github/workflows/checkout-payment-tests.yml'
+  pull_request:
+    paths:
+      - 'functions/api/**'
+      - 'functions/_lib/**'
+      - 'scripts/test-premium-payments.mjs'
+      - 'scripts/test-paypal-payments.mjs'
+jobs:
+  checkout:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Test NOWPayments orders and webhook
+        run: node scripts/test-premium-payments.mjs
+      - name: Test PayPal checkout and capture
+        run: node scripts/test-paypal-payments.mjs
