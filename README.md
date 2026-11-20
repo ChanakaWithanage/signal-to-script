@@ -334,3 +334,19 @@ PayPal is now the **first** payment choice, with the official PayPal JavaScript 
 
 **PayPal availability:** The button being present in the source code does not mean that your current PayPal account can accept merchant payments. The account must provide valid Orders v2 credentials and be allowed to receive payments.
 
+
+
+### $4.99 manual purchase requests (when crypto/PayPal Checkout are unavailable)
+
+Checkout now prioritizes an **alternative $4.99 manual purchase request** for each premium Pine Script. This is a simple `mailto:` contact flow, not a PayPal payment gateway, hosted PayPal invoice or automatic order. Clicking **Request this script for $4.99** opens the buyer's email client with the selected strategy and manual offer price filled in, addressed to `support@signaltoscript.com`. A fallback plain email address is shown when no default mail app is configured. Make sure this support mailbox actually receives messages.
+
+The automatic PayPal SDK checkout stays in an optional collapsed section, because the merchant reported that PayPal cannot receive funds. It only loads after a buyer intentionally expands that section. NOWPayments cryptocurrency payments remain available and retain the existing order tracking, payment verification and private R2 download workflow.
+
+**Manual handling for the owner:**
+1. Review the buyer's email, confirm which strategy they want, and acknowledge the $4.99 manual offer.
+2. **Before sharing any PayPal link**, verify that the chosen account is actually eligible to receive **Goods and Services** payments. PayPal's Sri Lanka rules currently require an eligible linked bank partner for receiving; creating a second personal account or a PayPal.Me link is not a workaround for an ineligible account. Do **not** ask customers to use Friends and Family payments for software purchases.
+3. Offer an eligible payment route, and share its instructions privately after confirming that it can receive the payment. Do not publicly expose a personal wallet or account link on the checkout page.
+4. Confirm payment in the payment provider's dashboard before manually delivering the correct `.pine` file through an agreed channel. No automatic delivery button will unlock for manual purchases.
+
+**Commercial display:** $12.49 USD remains the standard promotional automated crypto price in the existing checkout; $4.99 USD is an alternative manual-request offer and includes manual fulfillment rather than automated order verification.
+
