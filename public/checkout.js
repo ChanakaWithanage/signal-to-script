@@ -79,7 +79,9 @@ async function checkPaypalPayment(){
  if(!paypalOrder)return;
  paypalCheck.disabled=true;
  try{
-  const result=await paypalApi('status',{id:paypalOrder.id,secret:paypalOrder.secret});
+  const action=paypalOrder.status==='paid'?'status':'capture';
+  const result=await paypalApi(action,{id:paypalOrder.id,secret:paypalOrder.secret,
+   paypalOrderId:paypalOrder.paypalOrderId});
   savePaypalOrder({...paypalOrder,...result.order});
   renderPaypal();
  }catch(e){paypalMessage.textContent=e.message}
