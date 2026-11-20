@@ -93,8 +93,9 @@ export async function onRequestPost({request,env}){
       amount:{currency_code:'USD',value:PRICE_USD}}],
      application_context:{
       brand_name:'Signal to Script',user_action:'PAY_NOW',shipping_preference:'NO_SHIPPING',
-      return_url:'https://signaltoscript.com/checkout.html?script='+encodeURIComponent(slug)+'&paypal_return=1',
-      cancel_url:'https://signaltoscript.com/checkout.html?script='+encodeURIComponent(slug)+'&paypal_cancel=1'
+      // Use Cloudflare Pages' actual canonical route, /checkout (not /checkout.html).
+      return_url:'https://signaltoscript.com/checkout?script='+encodeURIComponent(slug)+'&paypal_return=1',
+      cancel_url:'https://signaltoscript.com/checkout?script='+encodeURIComponent(slug)+'&paypal_cancel=1'
      }
     }});
    }catch(error){
