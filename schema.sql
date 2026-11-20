@@ -109,3 +109,28 @@ CREATE TABLE IF NOT EXISTS premium_paypal_orders (
  visitor_session_id TEXT, visitor_country TEXT, visitor_region TEXT,
  visitor_city TEXT, visitor_timezone TEXT
 );
+
+
+-- One-field $4.99 script purchase requests submitted directly from checkout.
+-- Email is stored only so the owner can reply; the request is not an automatic payment.
+CREATE TABLE IF NOT EXISTS premium_manual_requests (
+ id TEXT PRIMARY KEY,
+ email TEXT NOT NULL,
+ slug TEXT NOT NULL,
+ product TEXT NOT NULL,
+ price_usd TEXT NOT NULL,
+ message TEXT NOT NULL,
+ status TEXT NOT NULL DEFAULT 'new',
+ notify_status TEXT NOT NULL DEFAULT 'not_configured',
+ session_id TEXT,
+ visitor_country TEXT,
+ visitor_region TEXT,
+ visitor_city TEXT,
+ visitor_timezone TEXT,
+ browser_timezone TEXT,
+ created_ms INTEGER NOT NULL,
+ created_at_utc TEXT NOT NULL,
+ created_at_ist TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_manual_requests_date ON premium_manual_requests(created_ms DESC);
+CREATE INDEX IF NOT EXISTS idx_manual_requests_email ON premium_manual_requests(email, created_ms);
