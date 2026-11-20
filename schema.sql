@@ -79,7 +79,33 @@ CREATE TABLE IF NOT EXISTS premium_nowpayments_orders (
  invoice_url TEXT,
  status TEXT NOT NULL DEFAULT 'creating' CHECK(status IN ('creating','waiting','paid','failed')),
  created_ms INTEGER NOT NULL,
- paid_ms INTEGER,
+ created_at_utc TEXT, created_at_ist TEXT,
+ paid_ms INTEGER, paid_at_utc TEXT, paid_at_ist TEXT,
+ visitor_session_id TEXT, visitor_country TEXT, visitor_region TEXT,
+ visitor_city TEXT, visitor_timezone TEXT, visitor_browser_timezone TEXT,
  payment_id TEXT UNIQUE
 );
 CREATE INDEX IF NOT EXISTS idx_np_invoice ON premium_nowpayments_orders(invoice_id);
+
+-- Session-level checkout attempts, including failures before an invoice is issued.
+-- Cloudflare provides approximate IP-derived geography; no IP address is retained.
+CREATE TABLE IF NOT EXISTS premium_checkout_attempts (
+ id TEXT PRIMARY KEY,
+ session_id TEXT, provider TEXT NOT NULL, slug TEXT NOT NULL, currency TEXT,
+ country TEXT, region TEXT, city TEXT, visitor_timezone TEXT, browser_timezone TEXT,
+ status TEXT NOT NULL, order_id TEXT, error_code TEXT,
+ created_ms INTEGER NOT NULL, created_at_utc TEXT NOT NULL, created_at_ist TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_checkout_attempt_time ON premium_checkout_attempts(created_ms);
+
+-- PayPal purchases are separate from NOWPayments invoices; their payment evidence
+-- is verified via PayPal's Orders v2 server API before private download delivery.
+CREATE TABLE IF NOT EXISTS premium_paypal_orders (
+ id TEXT PRIMARY KEY, secret_hash TEXT NOT NULL UNIQUE, slug TEXT NOT NULL,
+ amount_usd TEXT NOT NULL, paypal_order_id TEXT NOT NULL UNIQUE,
+ paypal_capture_id TEXT UNIQUE, status TEXT NOT NULL,
+ created_ms INTEGER NOT NULL, created_at_utc TEXT NOT NULL, created_at_ist TEXT NOT NULL,
+ paid_ms INTEGER, paid_at_utc TEXT, paid_at_ist TEXT,
+ visitor_session_id TEXT, visitor_country TEXT, visitor_region TEXT,
+ visitor_city TEXT, visitor_timezone TEXT
+);
