@@ -11,6 +11,8 @@ on:
       - 'scripts/test-premium-payments.mjs'
       - 'scripts/test-paypal-payments.mjs'
       - 'scripts/test-checkout-ui.mjs'
+      - 'scripts/test-manual-request.mjs'
+      - 'functions/api/manual-request.js'
       - 'public/checkout.js'
       - 'public/checkout.html'
       - '.github/workflows/checkout-payment-tests.yml'
@@ -21,6 +23,8 @@ on:
       - 'scripts/test-premium-payments.mjs'
       - 'scripts/test-paypal-payments.mjs'
       - 'scripts/test-checkout-ui.mjs'
+      - 'scripts/test-manual-request.mjs'
+      - 'functions/api/manual-request.js'
       - 'public/checkout.js'
       - 'public/checkout.html'
 jobs:
@@ -35,5 +39,7 @@ jobs:
         run: node scripts/test-premium-payments.mjs
       - name: Test PayPal checkout and capture
         run: node scripts/test-paypal-payments.mjs
-      - name: Verify PayPal-first UI and canonical return URLs
+      - name: Test direct D1 script requests and optional email
+        run: node scripts/test-manual-request.mjs
+      - name: Verify instant request form and visible crypto
         run: node scripts/test-checkout-ui.mjs
