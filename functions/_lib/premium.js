@@ -1,5 +1,6 @@
 // Premium downloads via a NOWPayments widget, with a distinct invoice for each buyer.
 import {randomToken,hashToken} from './download-access.js';
+import {utcTime,sriLankaTime,ensureCheckoutTracking} from './checkout-tracking.js';
 
 export const OFFER_END=Date.parse('2026-12-01T00:00:00Z');
 export const PRICE_USD='12.49';
@@ -21,14 +22,34 @@ const TABLES=[
  invoice_url TEXT,
  status TEXT NOT NULL DEFAULT 'creating' CHECK(status IN ('creating','waiting','paid','failed')),
  created_ms INTEGER NOT NULL,
- paid_ms INTEGER,
+ created_at_utc TEXT, created_at_ist TEXT,
+ paid_ms INTEGER, paid_at_utc TEXT, paid_at_ist TEXT,
+ visitor_session_id TEXT, visitor_country TEXT, visitor_region TEXT,
+ visitor_city TEXT, visitor_timezone TEXT, visitor_browser_timezone TEXT,
  payment_id TEXT UNIQUE
 )`,
 `CREATE INDEX IF NOT EXISTS idx_np_invoice ON premium_nowpayments_orders(invoice_id)`
 ];
 let init;
 export async function ensurePremiumSchema(db){
- if(!init)init=(async()=>{for(const sql of TABLES)await db.prepare(sql).run()})();
+ if(!init)init=(async()=>{
+  for(const sql of TABLES)await db.prepare(sql).run();
+  // Upgrade old D1 tables in place; existing order IDs, receipts and payments are retained.
+  for(const col of ['created_at_utc','created_at_ist','paid_at_utc','paid_at_ist',
+   'visitor_session_id','visitor_country','visitor_region','visitor_city',
+   'visitor_timezone','visitor_browser_timezone']){
+   try{await db.prepare('ALTER TABLE premium_nowpayments_orders ADD COLUMN '+col+' TEXT').run()}
+   catch(e){if(!/duplicate column name/i.test(String(e)))throw e}
+  }
+  // Readable historical timestamps for invoices created before the upgrade.
+  await db.prepare(`UPDATE premium_nowpayments_orders SET
+    created_at_utc=COALESCE(created_at_utc,datetime(created_ms/1000,'unixepoch')||' UTC'),
+    created_at_ist=COALESCE(created_at_ist,datetime(created_ms/1000,'unixepoch','+5 hours','+30 minutes')||' +05:30'),
+    paid_at_utc=COALESCE(paid_at_utc,CASE WHEN paid_ms IS NOT NULL THEN datetime(paid_ms/1000,'unixepoch')||' UTC' END),
+    paid_at_ist=COALESCE(paid_at_ist,CASE WHEN paid_ms IS NOT NULL THEN datetime(paid_ms/1000,'unixepoch','+5 hours','+30 minutes')||' +05:30' END)
+    WHERE created_at_utc IS NULL OR created_at_ist IS NULL OR (paid_ms IS NOT NULL AND paid_at_utc IS NULL)`).run();
+  await ensureCheckoutTracking(db);
+ })();
  try{await init}catch(error){init=null;throw error}
 }
 export function ready(env){
@@ -49,7 +70,9 @@ export function publicOrder(row){
  return {id:row.id,slug:row.slug,product:PRODUCTS[row.slug],
   amountUsd:row.amount_usd,currency:row.currency,
   status:row.status==='paid'?'paid':row.status==='failed'?'failed':'pending',
-  createdAt:row.created_ms,invoiceId:row.invoice_id||null,invoiceUrl:row.invoice_url||null};
+  createdAt:row.created_ms,createdAtUtc:row.created_at_utc||utcTime(row.created_ms),
+  createdAtSriLanka:row.created_at_ist||sriLankaTime(row.created_ms),
+  invoiceId:row.invoice_id||null,invoiceUrl:row.invoice_url||null};
 }
 export function createCredentials(slug,currency){
  if(!isPremium(slug)||(currency!=='auto'&&!CURRENCIES.includes(currency)))throw Error('Unknown premium product or coin');
@@ -116,8 +139,8 @@ export async function settlePayment(db,row,p){
  if(!matchesPayment(row,p))return false;
  try{
   const result=await db.prepare(
-   "UPDATE premium_nowpayments_orders SET status='paid',payment_id=?,paid_ms=? WHERE id=? AND invoice_id=? AND status='waiting' AND NOT EXISTS(SELECT 1 FROM premium_nowpayments_orders WHERE payment_id=?)"
-  ).bind(String(p.payment_id),Date.now(),row.id,String(row.invoice_id),String(p.payment_id)).run();
+   "UPDATE premium_nowpayments_orders SET status='paid',payment_id=?,paid_ms=?,paid_at_utc=?,paid_at_ist=? WHERE id=? AND invoice_id=? AND status='waiting' AND NOT EXISTS(SELECT 1 FROM premium_nowpayments_orders WHERE payment_id=?)"
+  ).bind(String(p.payment_id),Date.now(),utcTime(Date.now()),sriLankaTime(Date.now()),row.id,String(row.invoice_id),String(p.payment_id)).run();
   if(result.meta?.changes===1)return true;
  }catch(error){if(!/unique|constraint/i.test(String(error)))throw error}
  const current=await db.prepare('SELECT status,payment_id FROM premium_nowpayments_orders WHERE id=?').bind(row.id).first();
