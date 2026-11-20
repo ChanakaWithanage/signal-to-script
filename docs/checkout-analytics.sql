@@ -36,3 +36,16 @@ LIMIT 100;
 
 -- 5. Historical orders prior to the migration still retain their original epoch ms
 -- and are automatically backfilled when the checkout API initializes.
+
+
+-- 6. Pending direct $4.99 script requests (customer email and prefilled request message).
+SELECT id, email, product, price_usd, message, status,
+       notify_status, created_at_ist, created_at_utc,
+       visitor_country, visitor_region, visitor_city
+FROM premium_manual_requests
+ORDER BY created_ms DESC
+LIMIT 100;
+
+-- 7. Mark a request as replied to after contacting the buyer.
+-- Replace REQUEST_ID with the request's actual UUID:
+-- UPDATE premium_manual_requests SET status='replied' WHERE id='REQUEST_ID';
