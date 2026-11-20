@@ -2,6 +2,7 @@ import {PRODUCTS,CURRENCIES,OFFER_END,PRICE_USD,ensurePremiumSchema,ready,
  storageAvailable,lookupOrder,publicOrder,createCredentials,provider,checkMinimum,
  validInvoiceUrl,noCache} from '../_lib/premium.js';
 import {hashToken} from '../_lib/download-access.js';
+import {trackCheckout,updateCheckoutAttempt,utcTime,sriLankaTime} from '../_lib/checkout-tracking.js';
 
 const headers=noCache();
 const failure=(error,status=400,code='ERROR')=>Response.json({error,code},{status,headers});
@@ -18,7 +19,9 @@ export async function onRequestGet({env}){
   products:PRODUCTS,ready:available,
   offerActive:Date.now()<OFFER_END,offerEndsAt:OFFER_END,
   salePrice:PRICE_USD,priceCurrency:'USD',
-  paymentProvider:'NOWPayments',currencies:CURRENCIES
+  paymentProvider:'NOWPayments',currencies:CURRENCIES,
+  paypalReady:env.PAYPAL_ENABLED==='true'&&!!env.PAYPAL_CLIENT_ID&&!!env.PAYPAL_CLIENT_SECRET&&
+   !!env.DB&&!!env.PREMIUM_BUCKET&&Date.now()<OFFER_END
  },{headers});
 }
 
@@ -38,21 +41,35 @@ export async function onRequestPost({request,env}){
     return failure('Selected script is unavailable. Please choose a script again.',400,'INVALID_PRODUCT');
    if(currency!=='auto'&&!CURRENCIES.includes(currency))
     return failure('Selected payment network is unavailable. Please choose USDT TRC20 or BEP20.',400,'INVALID_CURRENCY');
-   if(!configured(env))return failure('Crypto checkout is not enabled yet. Do not send payment.',503,'NOT_READY');
-   if(Date.now()>=OFFER_END)return failure('The Black Friday offer has ended. New purchases are paused.',409,'OFFER_ENDED');
-   if(!(await storageAvailable(env,slug)))
-    return failure('Private file delivery is not ready. Do not send payment.',503,'NOT_READY');
+   await ensurePremiumSchema(env.DB);
+   const attempt=await trackCheckout(env.DB,request,body,'nowpayments',slug,currency);
+   if(!configured(env)){
+    await updateCheckoutAttempt(env.DB,attempt.id,'unavailable',null,'NOT_READY');
+    return failure('Crypto checkout is not enabled yet.',503,'NOT_READY');
+   }
+   if(Date.now()>=OFFER_END){
+    await updateCheckoutAttempt(env.DB,attempt.id,'expired',null,'OFFER_ENDED');
+    return failure('The Black Friday offer has ended. New purchases are paused.',409,'OFFER_ENDED');
+   }
+   if(!(await storageAvailable(env,slug))){
+    await updateCheckoutAttempt(env.DB,attempt.id,'unavailable',null,'FILE_NOT_READY');
+    return failure('Private file delivery is not ready.',503,'NOT_READY');
+   }
    if(currency!=='auto'){
     const min=await checkMinimum(env,currency);
-    if(!min.ok)return failure(min.error,409,'MINIMUM_TOO_HIGH');
+    if(!min.ok){
+     await updateCheckoutAttempt(env.DB,attempt.id,'minimum_blocked',null,'MINIMUM_TOO_HIGH');
+     return failure(min.error,409,'MINIMUM_TOO_HIGH');
+    }
    }
-   await ensurePremiumSchema(env.DB);
    // The requested coin is a checkout preference, not a restriction on verified payments.
    // Store auto so a permitted coin switch inside the widget does not block fulfillment.
    const o=createCredentials(slug,'auto');
    await env.DB.prepare(
-    "INSERT INTO premium_nowpayments_orders(id,secret_hash,slug,currency,amount_usd,created_ms,status) VALUES(?,?,?,?,?,?,'creating')"
-   ).bind(o.id,await hashToken(o.secret),slug,currency,PRICE_USD,o.createdAt).run();
+    "INSERT INTO premium_nowpayments_orders(id,secret_hash,slug,currency,amount_usd,created_ms,created_at_utc,created_at_ist,visitor_session_id,visitor_country,visitor_region,visitor_city,visitor_timezone,visitor_browser_timezone,status) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,'creating')"
+   ).bind(o.id,await hashToken(o.secret),slug,'auto',PRICE_USD,o.createdAt,
+     utcTime(o.createdAt),sriLankaTime(o.createdAt),attempt.sessionId,
+     attempt.country,attempt.region,attempt.city,attempt.timezone,attempt.browserTimezone).run();
    let invoice;
    try{
     invoice=await provider(env,'invoice',{method:'POST',body:{
@@ -68,11 +85,13 @@ export async function onRequestPost({request,env}){
     await env.DB.prepare(
      "UPDATE premium_nowpayments_orders SET status='waiting',invoice_id=?,invoice_url=? WHERE id=? AND status='creating'"
     ).bind(String(invoice.id),invoice.invoice_url,o.id).run();
+    await updateCheckoutAttempt(env.DB,attempt.id,'invoice_created',o.id);
    }catch(error){
     console.error('NOWPayments invoice creation failed',error);
     await env.DB.prepare(
      "UPDATE premium_nowpayments_orders SET status='failed' WHERE id=? AND status='creating'"
     ).bind(o.id).run();
+    await updateCheckoutAttempt(env.DB,attempt.id,'failed',o.id,'INVOICE_FAILED');
     return failure('Invoice could not be created. No payment was requested. Try another coin or contact support.',502,'INVOICE_FAILED');
    }
    const row=await lookupOrder(env.DB,o.id,o.secret);
