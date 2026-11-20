@@ -65,6 +65,26 @@ function loadPaypalOrder(){
    /^[a-f0-9]{64}$/.test(record.secret)?record:null;
  }catch{return null}
 }
+function restorePaypalByProviderId(paypalOrderId){
+ // Approval windows can remain open while the buyer switches the selected script.
+ try{
+  for(const product of Object.keys(NAMES)){
+   const saved=JSON.parse(localStorage.getItem('sts_paypal_order_'+product)||'null');
+   if(saved?.paypalOrderId===paypalOrderId&&saved.slug===product&&
+      /^[a-f0-9]{24}$/.test(saved.id)&&/^[a-f0-9]{64}$/.test(saved.secret)){
+    if(slug!==product){
+     slug=product;productSelect.value=product;
+     title.textContent=NAMES[product];
+     history.replaceState(null,'','/checkout?script='+encodeURIComponent(product));
+     order=restoreOrder();
+     if(order){display()}else{newOrder.hidden=false;orderPanel.hidden=true}
+    }
+    return saved;
+   }
+  }
+ }catch{}
+ return null;
+}
 function savePaypalOrder(record){
  paypalOrder=record;
  try{localStorage.setItem(paypalKey(),JSON.stringify(record))}catch{}
@@ -93,8 +113,8 @@ async function checkPaypalPayment(){
  finally{paypalCheck.disabled=false}
 }
 async function finalizePaypalPayment(paypalOrderId){
- const saved=loadPaypalOrder();
- if(!saved||saved.paypalOrderId!==paypalOrderId)
+ const saved=restorePaypalByProviderId(paypalOrderId);
+ if(!saved)
   throw Error('Could not match the PayPal approval to this browser order. Contact support with your receipt.');
  paypalPanel.hidden=false;
  paypalMessage.textContent='Verifying your approved PayPal payment...';
