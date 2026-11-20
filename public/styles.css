@@ -523,3 +523,44 @@
  .premium-crypto-details summary span{font-size:10px;max-width:115px}
  .premium-crypto-content{padding:13px 11px 6px}
 }
+
+/* $4.99 personal-assistance request, displayed before payment providers. */
+.premium-manual-offer{margin:13px 0 17px;padding:20px 19px;border:1px solid #cadfcf;border-radius:12px;background:linear-gradient(140deg,#f5fbf5 0%,#ffffff 82%);box-shadow:0 5px 21px rgba(37,85,52,.06)}
+.premium-manual-topline{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.premium-manual-eyebrow{font:800 10px/1.5 var(--sans);letter-spacing:.075em;color:#507a5b}
+.premium-manual-badge{font:750 10px/1.5 var(--sans);padding:4px 9px;border-radius:40px;color:#226044;border:1px solid #d1e9d5;background:#e6f5e8}
+.premium-manual-title-row{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin:15px 0 17px}
+.premium-manual-title-row>div:first-child{min-width:0;flex:1}
+.premium-manual-title-row h3{font:700 clamp(19px,2.2vw,23px)/1.22 var(--serif);letter-spacing:-.01em;color:#1f4630;margin:0 0 7px}
+.premium-manual-title-row p{font:400 12px/1.7 var(--sans);color:#546c5b;margin:0}
+.premium-manual-price{flex:0 0 auto;display:flex;flex-direction:column;align-items:flex-end;gap:1px}
+.premium-manual-price strong{font:800 clamp(23px,2.6vw,32px)/1.15 var(--sans);letter-spacing:-.04em;color:#245d3f;white-space:nowrap}
+.premium-manual-price small{font:600 10px/1.5 var(--sans);color:#789181;white-space:nowrap}
+.premium-manual-process{display:flex;align-items:flex-start;justify-content:space-between;gap:7px;margin:0 0 17px}
+.premium-manual-process span{display:flex;align-items:center;gap:6px;font:650 10px/1.4 var(--sans);color:#4d6353;flex:1}
+.premium-manual-process b{display:grid;place-items:center;flex:0 0 19px;height:19px;border-radius:50%;background:#e0f0e2;color:#2a6745;font:800 10px/1 var(--sans)}
+.premium-checkout-card .premium-manual-button{display:flex;align-items:center;justify-content:center;gap:8px;border-radius:7px;min-height:46px;padding:11px 15px;background:#24583d;color:white;font:800 13px/1.35 var(--sans);text-decoration:none;text-align:center;transition:background .15s}
+.premium-checkout-card .premium-manual-button:hover{background:#193e2b}
+.premium-checkout-card .premium-manual-button:focus-visible{outline:3px solid #8ab7a0;outline-offset:3px}
+.premium-manual-caption{font:400 11px/1.65 var(--sans);color:#607267;margin:12px 0 5px}
+.premium-manual-email{font:500 11px/1.6 var(--sans);color:#6a7a70;margin:8px 0 0}
+.premium-manual-email a{color:#24583d}
+.premium-paypal-details{margin:8px 0 0;border:1px solid #e1e6ed;border-radius:9px;background:#fbfcfe;overflow:hidden}
+.premium-paypal-details summary{display:flex;justify-content:space-between;align-items:center;gap:12px;cursor:pointer;list-style:none;padding:13px 15px;font:700 12px/1.5 var(--sans);color:#526377}
+.premium-paypal-details summary::-webkit-details-marker{display:none}
+.premium-paypal-details summary:after{content:"+";margin-left:auto;font:800 20px/1 var(--sans);color:#6b7a89}
+.premium-paypal-details[open] summary:after{content:"−"}
+.premium-paypal-details summary span{font:500 10px/1.5 var(--sans);color:#84919b;text-align:right;max-width:135px}
+.premium-paypal-details summary:hover{background:#f2f5f9}
+.premium-paypal-details-inner{border-top:1px solid #e7ebef;padding:12px}
+.premium-checkout-card .premium-paypal-details .premium-paypal-choice{margin:0}
+@media(max-width:580px){
+ .premium-manual-offer{padding:16px 14px}
+ .premium-manual-title-row{flex-wrap:wrap;gap:8px}
+ .premium-manual-price{align-items:flex-start}
+ .premium-manual-title-row h3{font-size:21px}
+ .premium-manual-process{flex-direction:column;gap:9px}
+ .premium-manual-process span{font-size:11px}
+ .premium-paypal-details summary{padding:12px}
+ .premium-paypal-details summary span{max-width:108px}
+}
