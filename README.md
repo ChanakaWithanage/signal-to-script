@@ -336,17 +336,30 @@ PayPal is now the **first** payment choice, with the official PayPal JavaScript 
 
 
 
-### $4.99 manual purchase requests (when crypto/PayPal Checkout are unavailable)
+### Instant $4.99 request form and Cloudflare D1 inbox
 
-Checkout now prioritizes an **alternative $4.99 manual purchase request** for each premium Pine Script. This is a simple `mailto:` contact flow, not a PayPal payment gateway, hosted PayPal invoice or automatic order. Clicking **Request this script for $4.99** opens the buyer's email client with the selected strategy and manual offer price filled in, addressed to `support@signaltoscript.com`. A fallback plain email address is shown when no default mail app is configured. Make sure this support mailbox actually receives messages.
+The checkout now has a one-field request form **above a fully expanded NOWPayments crypto checkout**. The buyer chooses a script from the common selector, enters their email, reviews the automatically generated purchase request and clicks **Send purchase request · $4.99**. No external email application, buyer account, or crypto wallet is required to submit the request. The form is not a payment processor and does not unlock a download automatically.
 
-The automatic PayPal SDK checkout stays in an optional collapsed section, because the merchant reported that PayPal cannot receive funds. It only loads after a buyer intentionally expands that section. NOWPayments cryptocurrency payments remain available and retain the existing order tracking, payment verification and private R2 download workflow.
+The Cloudflare Pages Function `functions/api/manual-request.js` validates the script and email, applies an invisible honeypot and a basic per-email rate limit, and saves the generated request to D1 table `premium_manual_requests`, including timestamps in UTC and Sri Lanka time, a status, and approximate country/region/city when available. The visitor receives a confirmation and request ID. The email address is kept only to reply about the request.
 
-**Manual handling for the owner:**
-1. Review the buyer's email, confirm which strategy they want, and acknowledge the $4.99 manual offer.
-2. **Before sharing any PayPal link**, verify that the chosen account is actually eligible to receive **Goods and Services** payments. PayPal's Sri Lanka rules currently require an eligible linked bank partner for receiving; creating a second personal account or a PayPal.Me link is not a workaround for an ineligible account. Do **not** ask customers to use Friends and Family payments for software purchases.
-3. Offer an eligible payment route, and share its instructions privately after confirming that it can receive the payment. Do not publicly expose a personal wallet or account link on the checkout page.
-4. Confirm payment in the payment provider's dashboard before manually delivering the correct `.pine` file through an agreed channel. No automatic delivery button will unlock for manual purchases.
+**Read the inbox without any extra service:** Cloudflare Dashboard → D1 → the database bound as `DB` → Console. Run:
 
-**Commercial display:** $12.49 USD remains the standard promotional automated crypto price in the existing checkout; $4.99 USD is an alternative manual-request offer and includes manual fulfillment rather than automated order verification.
+```sql
+SELECT created_at_ist, email, product, price_usd, message, status, notify_status
+FROM premium_manual_requests ORDER BY created_ms DESC LIMIT 100;
+```
+
+Full query is also stored in `docs/checkout-analytics.sql`. New requests start at `status='new'`; mark them `replied` after contacting the buyer. An optional automatic notification to your email can be enabled with [Resend](https://resend.com/):
+
+- `RESEND_API_KEY` — a secret, not stored in GitHub.
+- `MANUAL_REQUEST_NOTIFY_TO` — your actual inbox address for receiving alerts.
+- `MANUAL_REQUEST_FROM` — a sender email on a domain verified in Resend, such as `notifications@signaltoscript.com` **only after** verifying that sending domain.
+
+Add those as Cloudflare Pages environment variables, redeploy, and submit a test request. Without these variables, requests still work and are saved in D1; `notify_status` stays `not_configured`. With successful notifications it becomes `sent`; if Resend fails it becomes `failed` but the submitted request remains saved. Do not promise the user that mail was delivered until the notification service confirms delivery. The default owner inbox in checkout is `support@signaltoscript.com`, but it does not have to be a working mailbox for D1 to receive purchase requests.
+
+The **automatic PayPal buttons and cards have been removed from the visible checkout entirely** because the merchant's PayPal account is not currently eligible to receive payments. The server code for existing PayPal orders remains only for prior-order reconciliation and is not invoked by new manual requests. Crypto is visible and usable independently; once an order is created, the full embedded NOWPayments QR widget appears.
+
+**Manual delivery:** Reply to the buyer, confirm a supported payment method, verify receipt with that provider and send the purchased `.pine` file. A personal PayPal link must only be offered if that account can actually receive commercial payments; do not use Friends & Family for sales. Do not treat an email inquiry as evidence of payment.
+
+**Pricing:** $12.49 USD remains the automated crypto promotional offer; $4.99 USD is an alternative manual-request offer.
 
