@@ -8,17 +8,34 @@ globalThis.crypto??=webcrypto;
 
 const orders=new Map();
 const invoices=new Map();
+const attempts=new Map();
 let minUsd=20, invoiceSeq=4299592143,providerStatus='waiting';
 const db={prepare(sql){
  let args=[];
  const q={
   bind(...values){args=values;return q},
   async run(){
-   if(sql.startsWith('CREATE TABLE')||sql.startsWith('CREATE INDEX'))return {meta:{changes:0}};
+   if(sql.startsWith('CREATE TABLE')||sql.startsWith('CREATE INDEX')||
+      sql.startsWith('ALTER TABLE')||sql.includes('SET\n    created_at_utc='))return {meta:{changes:0}};
+   if(sql.startsWith('INSERT INTO premium_checkout_attempts')){
+    const [id,session_id,provider,slug,currency,country,region,city,
+     visitor_timezone,browser_timezone,created_ms,created_at_utc,created_at_ist]=args;
+    attempts.set(id,{id,session_id,provider,slug,currency,country,region,city,
+      visitor_timezone,browser_timezone,created_ms,created_at_utc,created_at_ist,status:'started'});
+    return {meta:{changes:1}};
+   }
+   if(sql.startsWith('UPDATE premium_checkout_attempts')){
+    const [status,orderId,errorCode,id]=args;
+    const a=attempts.get(id);if(a)Object.assign(a,{status,orderId,errorCode});
+    return {meta:{changes:a?1:0}};
+   }
    if(sql.startsWith('INSERT INTO premium_nowpayments_orders')){
-    const [id,secret_hash,slug,currency,amount_usd,created_ms]=args;
-    orders.set(id,{id,secret_hash,slug,currency,amount_usd,created_ms,
-      invoice_id:null,invoice_url:null,status:'creating',paid_ms:null,payment_id:null});
+    const [id,secret_hash,slug,currency,amount_usd,created_ms,created_at_utc,created_at_ist,
+     visitor_session_id,visitor_country,visitor_region,visitor_city,visitor_timezone,
+     visitor_browser_timezone]=args;
+    orders.set(id,{id,secret_hash,slug,currency,amount_usd,created_ms,created_at_utc,created_at_ist,
+      visitor_session_id,visitor_country,visitor_region,visitor_city,visitor_timezone,
+      visitor_browser_timezone,invoice_id:null,invoice_url:null,status:'creating',paid_ms:null,payment_id:null});
     return {meta:{changes:1}};
    }
    if(sql.startsWith("UPDATE premium_nowpayments_orders SET status='waiting'")){
@@ -32,11 +49,12 @@ const db={prepare(sql){
     return {meta:{changes:1}};
    }
    if(sql.startsWith("UPDATE premium_nowpayments_orders SET status='paid'")){
-    const [payment_id,paid_ms,id,invoice_id]=args;
+    const [payment_id,paid_ms,paid_at_utc,paid_at_ist,id,invoice_id]=args;
     const row=orders.get(id);
     if(!row||row.status!=='waiting'||String(row.invoice_id)!==invoice_id||
       [...orders.values()].some(x=>x.payment_id===payment_id))return {meta:{changes:0}};
     row.status='paid';row.payment_id=payment_id;row.paid_ms=paid_ms;
+    row.paid_at_utc=paid_at_utc;row.paid_at_ist=paid_at_ist;
     return {meta:{changes:1}};
    }
    throw Error('Unexpected D1 run: '+sql);
@@ -116,6 +134,10 @@ try{
  assert.equal(result.status,200);
  const first=(await result.json()).order;
  assert.equal(first.amountUsd,PRICE_USD);
+ assert.match(first.createdAtUtc,/Z$|UTC$/);
+ assert.match(first.createdAtSriLanka,/\+05:30$/);
+ assert.equal([...attempts.values()][0].status,'minimum_blocked','failed checkout attempt tracked');
+ assert.equal([...attempts.values()].filter(a=>a.status==='invoice_created').length,1);
  assert.equal(first.currency,'auto','widget coin changes may still be verified');
  assert.equal(invoices.get(first.id).currency,'trx','invoice remembers requested coin');
  assert.match(first.secret,/^[a-f0-9]{64}$/);
@@ -150,6 +172,7 @@ try{
  result=await callback({...event,payment_status:'finished'});
  assert.equal(result.status,200);
  assert.equal(orders.get(first.id).status,'paid');
+ assert.match(orders.get(first.id).paid_at_ist,/\+05:30$/);
  result=await post('download',auth);
  assert.equal(result.status,200);
  assert.equal(await result.text(),file);
@@ -160,5 +183,5 @@ try{
  result=await onRequestPost({request:req('create',{slug:'gold-breakout-15m'},'https://bad.example'),env});
  assert.equal(result.status,403,'cross-origin checkout rejected');
  assert.equal(orders.get(second.id).status,'waiting','other buyer remains unpaid');
- console.log('NOWPayments tests passed: minimum checks, unique invoices, signed IPN, provider confirmation, idempotency and private downloads.');
+ console.log('NOWPayments tests passed: timestamps, attempts, minimum checks, unique invoices, signed IPN, provider confirmation, idempotency and private downloads.');
 }finally{globalThis.fetch=originalFetch}
