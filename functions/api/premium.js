@@ -25,7 +25,10 @@ export async function onRequestGet({env}){
   paymentProvider:'NOWPayments',currencies:CURRENCIES,
   paypalReady:env.PAYPAL_ENABLED==='true'&&!!env.PAYPAL_CLIENT_ID&&!!env.PAYPAL_CLIENT_SECRET&&
    ['sandbox','live'].includes(env.PAYPAL_MODE)&&
-   !!env.DB&&!!env.PREMIUM_BUCKET&&Date.now()<OFFER_END
+   !!env.DB&&!!env.PREMIUM_BUCKET&&Date.now()<OFFER_END,
+  // The REST Client ID is public and needed by PayPal's official browser SDK.
+  paypalClientId:env.PAYPAL_ENABLED==='true'&&!!env.PAYPAL_CLIENT_SECRET&&
+   ['sandbox','live'].includes(env.PAYPAL_MODE)?String(env.PAYPAL_CLIENT_ID||''):null
  },{headers});
 }
 
