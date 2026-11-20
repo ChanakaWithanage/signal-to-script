@@ -564,3 +564,30 @@
  .premium-paypal-details summary{padding:12px}
  .premium-paypal-details summary span{max-width:108px}
 }
+
+/* Instant one-field manual script request: no email app or account required. */
+.premium-request-form{display:flex;flex-direction:column;gap:9px;margin-top:10px}
+.premium-request-form>label{font:800 12px/1.5 var(--sans);color:#2b4938}
+.premium-request-form input[type=email]{width:100%;box-sizing:border-box;border:1px solid #c9d9cd;background:#fff;border-radius:7px;padding:14px 13px;color:#173928;font:500 14px/1.45 var(--sans);outline:none}
+.premium-request-form input[type=email]:focus{border-color:#37885d;box-shadow:0 0 0 3px rgba(55,136,93,.12)}
+.premium-request-form input[type=email]::placeholder{color:#8d9c90}
+.premium-manual-preview{border:1px solid #dae7dc;border-radius:8px;background:rgba(255,255,255,.75);padding:12px 13px;margin:4px 0 5px}
+.premium-manual-preview>span{display:block;font:800 10px/1.5 var(--sans);letter-spacing:.075em;color:#698275;margin-bottom:4px}
+.premium-manual-preview p{font:500 12px/1.6 var(--sans);color:#3d6048;margin:0}
+.premium-request-trap{position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none}
+.premium-checkout-card button.premium-manual-button{width:100%;border:0;cursor:pointer;font-family:var(--sans)}
+.premium-checkout-card button.premium-manual-button:disabled{cursor:wait;opacity:.7}
+.premium-manual-status:empty{display:none}
+.premium-manual-status:not(:empty){padding:10px 12px;background:#fff4ec;border:1px solid #edd5c6;color:#874821;border-radius:7px;font:600 12px/1.6 var(--sans);margin-top:12px}
+.premium-manual-success{display:flex;gap:12px;align-items:flex-start;border:1px solid #c3e1cb;border-radius:9px;background:#eaf7ee;padding:17px 15px;margin:17px 0 8px}
+.premium-manual-success-icon{display:grid;place-items:center;flex:0 0 31px;width:31px;height:31px;border-radius:50%;background:#2c7951;color:#fff;font:800 16px/1 var(--sans)}
+.premium-manual-success strong{display:block;font:800 14px/1.5 var(--sans);color:#245637}
+.premium-manual-success p{font:500 12px/1.65 var(--sans);color:#436a51;margin:5px 0}
+.premium-manual-success small{display:block;font:500 10px/1.5 var(--sans);color:#698775;overflow-wrap:anywhere}
+.premium-crypto-details{overflow:visible}
+.premium-crypto-header{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;padding:17px 17px 15px}
+.premium-crypto-header h3{font:750 20px/1.25 var(--serif);color:#265940;margin:0}
+.premium-crypto-header span{font:600 11px/1.45 var(--sans);color:#678271;text-align:right;max-width:160px}
+.premium-crypto-content{border-top:1px solid #e1e9e2}
+.premium-widget-container iframe{height:696px;min-height:696px}
+@media(max-width:580px){.premium-request-form input[type=email]{font-size:16px}.premium-manual-preview{padding:10px 11px}.premium-crypto-header{padding:14px 12px}.premium-crypto-header h3{font-size:18px}.premium-crypto-header span{font-size:10px;max-width:130px}}
