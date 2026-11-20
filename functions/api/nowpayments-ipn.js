@@ -37,6 +37,8 @@ export async function onRequestPost({request,env}){
   if(!matchesPayment(row,payment)||!matchesPayment(row,event))
    return respond('Provider payment does not match the invoice.',422);
   if(!(await settlePayment(env.DB,row,payment)))return respond('Transfer already used.',409);
+  try{await env.DB.prepare("UPDATE premium_checkout_attempts SET status='paid' WHERE provider='nowpayments' AND order_id=?").bind(row.id).run()}
+  catch(e){console.error('Checkout analytics status update failed',e)}
   return respond('Payment finished and order unlocked.');
  }catch(error){
   console.error('NOWPayments notification could not be processed',error);
