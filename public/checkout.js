@@ -266,7 +266,6 @@ restart.addEventListener('click',()=>{
  newOrder.hidden=false;
  setMessage('');
  loadAvailability();
-handlePaypalReturn();
 });
 download.addEventListener('click',async()=>{
  if(!order)return;
@@ -292,7 +291,7 @@ async function loadAvailability(){
   const response=await fetch('/api/premium',{cache:'no-store'});
   if(!response.ok)throw Error('Checkout availability cannot be verified.');
   const state=await response.json();
-  const canPayPal=Boolean(state.paypalReady&&state.offerActive&&state.ready?.[slug]);
+  const canPayPal=Boolean(state.paypalReady&&state.offerActive);
   paypalStart.disabled=!canPayPal;
   paypalAvailability.textContent=canPayPal?
    'PayPal checkout opens securely on PayPal, then returns here for your download.':
@@ -323,3 +322,4 @@ async function loadAvailability(){
  }
 }
 loadAvailability();
+handlePaypalReturn();
