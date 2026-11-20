@@ -6,27 +6,22 @@ const NAMES={
 const params=new URLSearchParams(location.search);
 const initialSlug=String(params.get('script')||'').trim().toLowerCase();
 const productSelect=document.getElementById('premium-script');
-const manualRequest=document.getElementById('premium-manual-request');
-const paypalDetails=document.getElementById('premium-paypal-details');
-let currentPayPalState=null;
+const manualForm=document.getElementById('premium-manual-form');
+const manualEmail=document.getElementById('premium-manual-email');
+const manualSubmit=document.getElementById('premium-manual-submit');
+const manualMessage=document.getElementById('premium-manual-message');
+const manualStatus=document.getElementById('premium-manual-status');
+const manualSuccess=document.getElementById('premium-manual-success');
+const manualConfirmedEmail=document.getElementById('premium-manual-confirmed-email');
+const manualReference=document.getElementById('premium-manual-reference');
+const manualWebsite=document.getElementById('premium-manual-website');
 function updateManualRequest(){
  const selected=Object.hasOwn(NAMES,productSelect.value)?productSelect.value:'gold-breakout-15m';
- const name=NAMES[selected];
- const subject='Pine Script request - $4.99 - '+name;
- const body=[
-  'Hi Signal to Script,',
-  '',
-  'I would like to request the following Pine Script:',
-  'Script: '+name,
-  'Special manual purchase offer: $4.99 USD',
-  '',
-  'I cannot use crypto checkout. Please let me know whether a PayPal Goods & Services payment or another supported payment method is available.',
-  'Please confirm the payment details and manual delivery process before I pay.',
-  '',
-  'Thanks!'
- ].join('\n');
- manualRequest.href='mailto:support@signaltoscript.com?subject='+
-  encodeURIComponent(subject)+'&body='+encodeURIComponent(body);
+ manualMessage.textContent='I would like to purchase '+NAMES[selected]+
+  ' for the $4.99 USD manual offer. Please email me the available payment and delivery details.';
+ manualSuccess.hidden=true;
+ manualForm.hidden=false;
+ manualStatus.textContent='';
 }
 
 const coinSelect=document.getElementById('premium-payment-choice');
@@ -54,217 +49,43 @@ const restart=document.getElementById('premium-restart');
 const payLink=document.getElementById('premium-pay-link');
 const download=document.getElementById('premium-download');
 const storageKey=()=> 'sts_nowpayments_order_'+slug;
-const paypalKey=()=> 'sts_paypal_order_'+slug;
-const paypalSdkArea=document.getElementById('premium-paypal-sdk-area');
-const paypalWalletButtons=document.getElementById('premium-paypal-wallet-buttons');
-const paypalCardButtons=document.getElementById('premium-paypal-card-buttons');
-const paypalCardNote=document.getElementById('premium-paypal-card-note');
-const paypalAvailability=document.getElementById('premium-paypal-availability');
-const paypalPanel=document.getElementById('premium-paypal-order');
-const paypalMessage=document.getElementById('premium-paypal-message');
-const paypalCheck=document.getElementById('premium-paypal-check');
-const paypalDownload=document.getElementById('premium-paypal-download');
-const cryptoDetails=document.getElementById('premium-crypto-details');
-let paypalOrder=null,paypalSdkReady=false,paypalSdkLoading=false;
 let order=null,checking=false;
 const setMessage=value=>{message.textContent=value};
-async function paypalApi(action,extra={}){
- const res=await fetch('/api/paypal',{method:'POST',credentials:'same-origin',cache:'no-store',
-  headers:{'Content-Type':'application/json'},
-  body:JSON.stringify({action,...extra})});
- if(action==='download'){
-  if(res.ok)return res;
-  const b=await res.json().catch(()=>({}));
-  throw Error(b.error||'Could not download the purchased file.');
- }
- const b=await res.json().catch(()=>({}));
- if(!res.ok)throw Error(b.error||'PayPal checkout is unavailable.');
- return b;
-}
-function loadPaypalOrder(){
- try{
-  const record=JSON.parse(localStorage.getItem(paypalKey())||'null');
-  return record&&record.slug===slug&&/^[a-f0-9]{24}$/.test(record.id)&&
-   /^[a-f0-9]{64}$/.test(record.secret)?record:null;
- }catch{return null}
-}
-function restorePaypalByProviderId(paypalOrderId){
- // Approval windows can remain open while the buyer switches the selected script.
- try{
-  for(const product of Object.keys(NAMES)){
-   const saved=JSON.parse(localStorage.getItem('sts_paypal_order_'+product)||'null');
-   if(saved?.paypalOrderId===paypalOrderId&&saved.slug===product&&
-      /^[a-f0-9]{24}$/.test(saved.id)&&/^[a-f0-9]{64}$/.test(saved.secret)){
-    if(slug!==product){
-     slug=product;productSelect.value=product;
-     title.textContent=NAMES[product];
-     history.replaceState(null,'','/checkout?script='+encodeURIComponent(product));
-     order=restoreOrder();
-     if(order){display()}else{newOrder.hidden=false;orderPanel.hidden=true}
-    }
-    return saved;
-   }
-  }
- }catch{}
- return null;
-}
-function savePaypalOrder(record){
- paypalOrder=record;
- try{localStorage.setItem(paypalKey(),JSON.stringify(record))}catch{}
-}
-function renderPaypal(){
- paypalOrder=loadPaypalOrder();
- const paid=paypalOrder?.status==='paid';
- if(paid)paypalDetails.open=true;
- paypalSdkArea.hidden=!paypalSdkReady||!!paid;
- paypalPanel.hidden=!paypalOrder;
- if(!paypalOrder)return;
- paypalMessage.textContent=paid?
-  'PayPal payment confirmed. Your Pine Script is ready to download.':
-  'Your PayPal order is pending. Complete the PayPal approval window to finish the purchase.';
- paypalDownload.hidden=!paid;
- paypalCheck.hidden=paid;
-}
-async function checkPaypalPayment(){
- if(!paypalOrder)return;
- paypalCheck.disabled=true;
- try{
-  const result=await paypalApi('status',{id:paypalOrder.id,secret:paypalOrder.secret});
-  savePaypalOrder({...paypalOrder,...result.order});
-  renderPaypal();
-  if(result.order?.status!=='paid')paypalMessage.textContent='Your payment is not yet confirmed. Check the PayPal window or your receipt.';
- }catch(error){paypalMessage.textContent=error.message}
- finally{paypalCheck.disabled=false}
-}
-async function finalizePaypalPayment(paypalOrderId){
- const saved=restorePaypalByProviderId(paypalOrderId);
- if(!saved)
-  throw Error('Could not match the PayPal approval to this browser order. Contact support with your receipt.');
- paypalPanel.hidden=false;
- paypalMessage.textContent='Verifying your approved PayPal payment...';
- const result=await paypalApi('capture',{id:saved.id,secret:saved.secret,paypalOrderId});
- savePaypalOrder({...saved,...result.order});
- renderPaypal();
- if(result.order?.status==='paid'){
-  paypalAvailability.textContent='Payment confirmed. Your Pine Script download is ready.';
-  paypalDownload.focus();
- }
- return result;
-}
-async function handlePaypalReturn(){
- // Recovery for legacy hosted-approval links and mobile PayPal app switches.
- const qs=new URLSearchParams(location.search);
- if(qs.has('paypal_cancel')){
-  paypalAvailability.textContent='PayPal payment canceled. You can try again below.';
+manualForm.addEventListener('submit',async event=>{
+ event.preventDefault();
+ if(!manualForm.reportValidity())return;
+ const requestedSlug=String(productSelect.value||'');
+ if(!Object.hasOwn(NAMES,requestedSlug)){
+  manualStatus.textContent='Please select a Pine Script.';
   return;
  }
- if(!qs.has('paypal_return'))return;
- const token=qs.get('token');
- paypalDetails.open=true;
- if(!token){
-  paypalAvailability.textContent='Your PayPal return did not contain an order reference. Contact support if you paid.';
-  return;
- }
+ manualSubmit.disabled=true;
+ manualSubmit.textContent='Sending your request...';
+ manualStatus.textContent='';
+ const submittedEmail=manualEmail.value.trim();
  try{
-  await finalizePaypalPayment(token);
-  const clean=new URL(location.href);
-  clean.searchParams.delete('paypal_return');clean.searchParams.delete('token');clean.searchParams.delete('PayerID');
-  history.replaceState(null,'',clean.pathname+clean.search);
- }catch(error){paypalAvailability.textContent=error.message}
-}
-function loadPayPalSdk(clientId){
- return new Promise((resolve,reject)=>{
-  if(window.paypal?.Buttons){resolve(window.paypal);return}
-  const script=document.createElement('script');
-  const query=new URLSearchParams({ 'client-id':clientId,currency:'USD',
-   intent:'capture',components:'buttons' });
-  script.src='https://www.paypal.com/sdk/js?'+query.toString();
-  script.async=true;
-  script.onload=()=>window.paypal?.Buttons?resolve(window.paypal):reject(Error('PayPal buttons unavailable.'));
-  script.onerror=()=>reject(Error('Unable to load PayPal checkout. Please try again or use crypto.'));
-  document.head.appendChild(script);
- });
-}
-function paypalButtonConfig(fundingSource,style){
- return {
-  fundingSource,style,
-  createOrder:async()=>{
-   const selected=String(productSelect.value||'').trim().toLowerCase();
-   if(!Object.hasOwn(NAMES,selected))throw Error('Select a Pine Script first.');
-   paypalAvailability.textContent='Preparing your secure PayPal order...';
-   const created=await paypalApi('create',{slug:selected,sessionId:buyerSessionId,browserTimezone});
-   savePaypalOrder(created.order);
-   renderPaypal();
-   paypalAvailability.textContent='Approve the payment in the PayPal window.';
-   return created.order.paypalOrderId;
-  },
-  onApprove:async data=>{
-   try{await finalizePaypalPayment(String(data.orderID||''))}
-   catch(error){
-    console.error('PayPal payment capture failed',error);
-    paypalAvailability.textContent=error.message+' If you approved the payment, do not pay twice.';
-   }
-  },
-  onCancel:()=>{
-   paypalAvailability.textContent='PayPal payment was canceled. No confirmed purchase was recorded.';
-  },
-  onError:error=>{
-   console.error('PayPal checkout error',error);
-   paypalAvailability.textContent='PayPal checkout could not finish. Try again or choose crypto below.';
-  }
- };
-}
-async function initPayPalButtons(state){
- if(!state.paypalReady||!state.paypalClientId){
-  paypalSdkArea.hidden=true;
-  paypalAvailability.textContent='PayPal is not available yet. You can pay with crypto below.';
-  return;
- }
- if(paypalSdkReady||paypalSdkLoading){renderPaypal();return}
- paypalSdkLoading=true;
- paypalAvailability.textContent='Loading secure PayPal and card checkout...';
- try{
-  const sdk=await loadPayPalSdk(state.paypalClientId);
-  // Buttons require a visible container to measure their iframe width.
-  paypalSdkArea.hidden=false;
-  const wallet=sdk.Buttons(paypalButtonConfig(sdk.FUNDING.PAYPAL,
-   {layout:'vertical',color:'gold',shape:'rect',label:'paypal',height:49}));
-  if(!wallet.isEligible())throw Error('PayPal checkout is not available for this buyer or merchant.');
-  await wallet.render('#premium-paypal-wallet-buttons');
-  // Debit/credit checkout depends on PayPal's funding eligibility.
-  try{
-   const card=sdk.FUNDING?.CARD?sdk.Buttons(paypalButtonConfig(sdk.FUNDING.CARD,
-    {layout:'vertical',color:'black',shape:'rect',label:'pay',height:49})):null;
-   if(card?.isEligible()){
-    await card.render('#premium-paypal-card-buttons');
-    paypalCardNote.hidden=true;
-   }else{paypalCardNote.hidden=false}
-  }catch(error){
-   console.info('PayPal card funding is not eligible for this account or buyer.',error);
-   paypalCardNote.hidden=false;
-  }
-  paypalSdkReady=true;
-  paypalAvailability.textContent='Secure checkout by PayPal · USD $12.49';
-  renderPaypal();
+  const response=await fetch('/api/manual-request',{
+   method:'POST',credentials:'same-origin',cache:'no-store',
+   headers:{'Content-Type':'application/json'},
+   body:JSON.stringify({
+    slug:requestedSlug,email:submittedEmail,website:manualWebsite.value,
+    sessionId:buyerSessionId,browserTimezone
+   })
+  });
+  const result=await response.json().catch(()=>({}));
+  if(!response.ok||!result.received)
+   throw Error(result.error||'Could not send your request. Please try again.');
+  manualForm.hidden=true;
+  manualSuccess.hidden=false;
+  manualConfirmedEmail.textContent=submittedEmail;
+  manualReference.textContent=result.requestId?'Request ID: '+result.requestId:'';
+  manualStatus.textContent='';
  }catch(error){
-  console.error('PayPal SDK setup failed',error);
-  paypalAvailability.textContent=error.message||'PayPal could not be loaded. Try crypto below.';
-  paypalSdkArea.hidden=true;
- }finally{paypalSdkLoading=false}
-}
-paypalCheck.addEventListener('click',()=>checkPaypalPayment());
-paypalDownload.addEventListener('click',async()=>{
- if(!paypalOrder)return;
- paypalDownload.disabled=true;
- try{
-  const res=await paypalApi('download',{id:paypalOrder.id,secret:paypalOrder.secret});
-  const blob=await res.blob(),url=URL.createObjectURL(blob),a=document.createElement('a');
-  a.href=url;a.download=paypalOrder.slug+'.pine';
-  document.body.appendChild(a);a.click();a.remove();
-  setTimeout(()=>URL.revokeObjectURL(url),5000);
-  paypalMessage.textContent='Download started. Thank you for your purchase.';
- }catch(error){paypalMessage.textContent=error.message}
- finally{paypalDownload.disabled=false}
+  manualStatus.textContent=error.message;
+ }finally{
+  manualSubmit.disabled=false;
+  manualSubmit.textContent='Send purchase request · $4.99 ↗';
+ }
 });
 async function api(action,extra={}){
  const response=await fetch('/api/premium',{
@@ -300,7 +121,6 @@ function display(){
  document.getElementById('premium-pay-coin').textContent='Select your coin and network below';
  document.getElementById('premium-order-id').textContent=order.id;
  newOrder.hidden=true;orderPanel.hidden=false;
- cryptoDetails.open=true;
  if(oldPending){
   widgetContainer.hidden=true;payLink.hidden=true;check.hidden=false;restart.hidden=false;download.hidden=true;
   availability.textContent='This order uses an earlier price. Start a new checkout for the current $12.49 offer.';
@@ -338,7 +158,6 @@ productSelect.addEventListener('change',()=>{
  updateManualRequest();
  order=restoreOrder();
  newOrder.hidden=!!order;orderPanel.hidden=!order;
- renderPaypal();
  if(order){display();refresh(true)}else{setMessage('');loadAvailability()}
 });
 async function refresh(silent=false){
@@ -428,11 +247,6 @@ async function loadAvailability(){
   const response=await fetch('/api/premium',{cache:'no-store'});
   if(!response.ok)throw Error('Checkout availability cannot be verified.');
   const state=await response.json();
-  currentPayPalState=state;
-  renderPaypal();
-  // Never automatically load PayPal when the merchant has reported receiving ineligibility.
-  // The buyer must explicitly open the optional automatic checkout section.
-  if(paypalDetails.open)await initPayPalButtons(state);
   const recovered=restoreOrder();
   if(recovered){
    saveOrder(recovered);
@@ -457,9 +271,5 @@ async function loadAvailability(){
   availability.textContent='Checkout is temporarily unavailable. Do not send a payment.';
  }
 }
-paypalDetails.addEventListener('toggle',()=>{
- if(paypalDetails.open&&currentPayPalState)initPayPalButtons(currentPayPalState);
-});
 updateManualRequest();
 loadAvailability();
-handlePaypalReturn();
