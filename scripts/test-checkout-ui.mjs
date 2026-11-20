@@ -5,8 +5,21 @@ const html=readFileSync(new URL('../public/checkout.html',import.meta.url),'utf8
 const js=readFileSync(new URL('../public/checkout.js',import.meta.url),'utf8');
 const paypal=readFileSync(new URL('../functions/api/paypal.js',import.meta.url),'utf8');
 const premium=readFileSync(new URL('../functions/api/premium.js',import.meta.url),'utf8');
-assert(html.indexOf('premium-paypal-sdk-area')<html.indexOf('premium-crypto-details'),
-  'PayPal must be above the crypto option');
+assert(html.indexOf('id="manual-script-request"')<html.indexOf('id="premium-paypal-details"'),
+  'Manual $4.99 request must be the primary checkout option');
+assert(html.indexOf('id="premium-paypal-details"')<html.indexOf('id="premium-crypto-details"'),
+  'Optional PayPal and crypto methods should remain available');
+assert(html.includes('<strong>$4.99</strong>')&&html.includes('Request this script for $4.99'),
+  'Manual offer must clearly show the $4.99 USD amount');
+assert(html.includes('If PayPal Goods &amp; Services receiving is available'),
+  'Do not promise a PayPal transfer when the receiving account is ineligible');
+assert(html.includes('delivered manually after verified payment'),
+  'Manual contact option must not promise automatic delivery');
+assert(js.includes('mailto:support@signaltoscript.com?subject=')&&
+  js.includes('encodeURIComponent(subject)')&&js.includes('encodeURIComponent(body)'),
+  'Email request must contain the selected script and amount');
+assert(js.includes('updateManualRequest();')&&js.includes('id="premium-manual-request"')===false,
+  'Manual link must update for the selected product');
 assert(html.includes('<details id="premium-crypto-details"'),
   'Crypto should be collapsed initially');
 assert(html.includes('premium-paypal-wallet-buttons'));
@@ -34,4 +47,4 @@ assert(premium.includes('paypalClientId:'),
 assert(!premium.includes('paypalClientSecret:'),
   'Never expose PayPal secret in the SDK config');
 new Function(js);
-console.log('Checkout UI regression checks passed: gold PayPal, eligible cards, canonical URL, verified capture and crypto fallback.');
+console.log('Checkout UI regression checks passed: $4.99 email request, optional PayPal, eligible cards, canonical URL and crypto fallback.');
