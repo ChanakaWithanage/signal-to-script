@@ -8,7 +8,7 @@
 <meta name="description" content="Buy your premium Pine Script v6 source with an embedded NOWPayments crypto checkout.">
 <link rel="canonical" href="https://signaltoscript.com/checkout.html">
 <link rel="icon" href="/favicon.svg">
-<link rel="stylesheet" href="/styles.css?v=20261119-qr-payment-guide">
+<link rel="stylesheet" href="/styles.css?v=20261120-paypal-geotime">
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
@@ -68,6 +68,17 @@
   <button type="button" id="premium-restart" class="premium-copy-button" hidden>Start a new checkout</button>
   <button type="button" id="premium-download" class="btn premium-primary-button" hidden>Download purchased Pine Script</button>
  </div>
+ <div class="premium-payment-divider" role="separator"><span>or pay with PayPal</span></div>
+ <section class="premium-paypal-choice" aria-label="PayPal checkout">
+  <div class="premium-paypal-heading"><div><strong>Pay with PayPal</strong><span>Use your PayPal account · $12.49 USD</span></div><span class="premium-paypal-mark">PayPal</span></div>
+  <button type="button" id="premium-paypal-start" class="premium-paypal-button" disabled>Continue with PayPal</button>
+  <p id="premium-paypal-availability" class="premium-paypal-caption" role="status" aria-live="polite">Checking PayPal availability...</p>
+  <div id="premium-paypal-order" class="premium-paypal-result" hidden>
+   <p id="premium-paypal-message" role="status" aria-live="polite"></p>
+   <button type="button" id="premium-paypal-check" class="premium-copy-button" hidden>Check PayPal payment</button>
+   <button type="button" id="premium-paypal-download" class="btn premium-primary-button" hidden>Download purchased Pine Script</button>
+  </div>
+ </section>
  <p id="premium-message" class="premium-message" role="status" aria-live="polite"></p>
  <p class="premium-help">Sent a payment but not seeing your download? Don't pay twice. Email <a href="mailto:support@signaltoscript.com">support@signaltoscript.com</a> with your order ID and NOWPayments receipt.</p>
 </section>
@@ -76,5 +87,5 @@
 <footer class="footer"><div class="wrap foot"><div>© 2026 Signal to Script · by CW.</div><div>Pine Script strategies and tools.</div></div>
 <nav class="policy-links" aria-label="Legal and business policies"><a href="/terms.html">Terms &amp; Conditions</a><a href="/refunds.html">Refund &amp; Cancellation</a><a href="/privacy.html">Privacy Policy</a><a href="mailto:support@signaltoscript.com">support@signaltoscript.com</a></nav></footer>
 <script defer src="/site.js"></script>
-<script defer src="/checkout.js?v=20261119-bsc-price1249"></script>
+<script defer src="/checkout.js?v=20261120-paypal-geotime"></script>
 </body></html>
