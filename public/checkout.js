@@ -8,6 +8,14 @@ const initialSlug=String(params.get('script')||'').trim().toLowerCase();
 const productSelect=document.getElementById('premium-script');
 const coinSelect=document.getElementById('premium-payment-choice');
 const NEW_PRICE_USD='12.49';
+const buyerSessionId=(()=>{
+ try{
+  let id=sessionStorage.getItem('sts_checkout_session');
+  if(!id){id=crypto.randomUUID();sessionStorage.setItem('sts_checkout_session',id)}
+  return id;
+ }catch{return crypto.randomUUID()}
+})();
+const browserTimezone=(()=>{try{return Intl.DateTimeFormat().resolvedOptions().timeZone||''}catch{return ''}})();
 let slug=Object.hasOwn(NAMES,initialSlug)?initialSlug:'gold-breakout-15m';
 productSelect.value=slug;
 const title=document.getElementById('premium-product-name');
@@ -23,8 +31,106 @@ const restart=document.getElementById('premium-restart');
 const payLink=document.getElementById('premium-pay-link');
 const download=document.getElementById('premium-download');
 const storageKey=()=> 'sts_nowpayments_order_'+slug;
+const paypalKey=()=> 'sts_paypal_order_'+slug;
+const paypalStart=document.getElementById('premium-paypal-start');
+const paypalAvailability=document.getElementById('premium-paypal-availability');
+const paypalPanel=document.getElementById('premium-paypal-order');
+const paypalMessage=document.getElementById('premium-paypal-message');
+const paypalCheck=document.getElementById('premium-paypal-check');
+const paypalDownload=document.getElementById('premium-paypal-download');
+let paypalOrder=null;
 let order=null,checking=false;
 const setMessage=value=>{message.textContent=value};
+async function paypalApi(action,extra={}){
+ const res=await fetch('/api/paypal',{method:'POST',credentials:'same-origin',cache:'no-store',
+  headers:{'Content-Type':'application/json'},
+  body:JSON.stringify({action,...extra})});
+ if(action==='download'){
+  if(res.ok)return res;
+  const b=await res.json().catch(()=>({}));
+  throw Error(b.error||'Could not download the purchased file.');
+ }
+ const b=await res.json().catch(()=>({}));
+ if(!res.ok)throw Error(b.error||'PayPal checkout is unavailable.');
+ return b;
+}
+function loadPaypalOrder(){
+ try{
+  const record=JSON.parse(localStorage.getItem(paypalKey())||'null');
+  return record&&record.slug===slug&&/^[a-f0-9]{24}$/.test(record.id)&&
+   /^[a-f0-9]{64}$/.test(record.secret)?record:null;
+ }catch{return null}
+}
+function savePaypalOrder(record){
+ paypalOrder=record;
+ try{localStorage.setItem(paypalKey(),JSON.stringify(record))}catch{}
+}
+function renderPaypal(){
+ paypalOrder=loadPaypalOrder();
+ paypalPanel.hidden=!paypalOrder;
+ if(!paypalOrder)return;
+ const paid=paypalOrder.status==='paid';
+ paypalMessage.textContent=paid?'PayPal payment confirmed. Your Pine Script is ready to download.':
+  'Your PayPal checkout has been started. Return here after approving payment.';
+ paypalDownload.hidden=!paid;
+ paypalCheck.hidden=paid;
+}
+async function checkPaypalPayment(){
+ if(!paypalOrder)return;
+ paypalCheck.disabled=true;
+ try{
+  const result=await paypalApi('status',{id:paypalOrder.id,secret:paypalOrder.secret});
+  savePaypalOrder({...paypalOrder,...result.order});
+  renderPaypal();
+ }catch(e){paypalMessage.textContent=e.message}
+ finally{paypalCheck.disabled=false}
+}
+async function handlePaypalReturn(){
+ const qs=new URLSearchParams(location.search);
+ const token=qs.get('token');
+ if(!qs.has('paypal_return'))return;
+ const record=loadPaypalOrder();
+ if(!record||!token||token!==record.paypalOrderId){
+  paypalAvailability.textContent='Could not match your PayPal return to an order in this browser. Contact support with your PayPal receipt.';
+  return;
+ }
+ paypalPanel.hidden=false;
+ paypalMessage.textContent='Checking your PayPal payment...';
+ try{
+  const result=await paypalApi('capture',{id:record.id,secret:record.secret,paypalOrderId:token});
+  savePaypalOrder({...record,...result.order});
+  renderPaypal();
+  if(result.order?.status==='paid')paypalDownload.focus();
+  const clean=new URL(location.href);
+  clean.searchParams.delete('paypal_return');clean.searchParams.delete('token');clean.searchParams.delete('PayerID');
+  history.replaceState(null,'',clean.pathname+clean.search);
+ }catch(e){paypalMessage.textContent=e.message+' You can check the payment status here.'}
+}
+paypalStart.addEventListener('click',async()=>{
+ const selected=String(productSelect.value||'').toLowerCase();
+ if(!Object.hasOwn(NAMES,selected))return;
+ paypalStart.disabled=true;
+ paypalAvailability.textContent='Preparing your PayPal checkout...';
+ try{
+  const response=await paypalApi('create',{slug:selected,sessionId:buyerSessionId,browserTimezone});
+  savePaypalOrder(response.order);
+  location.assign(response.approvalUrl);
+ }catch(e){paypalAvailability.textContent=e.message;paypalStart.disabled=false}
+});
+paypalCheck.addEventListener('click',()=>checkPaypalPayment());
+paypalDownload.addEventListener('click',async()=>{
+ if(!paypalOrder)return;
+ paypalDownload.disabled=true;
+ try{
+  const res=await paypalApi('download',{id:paypalOrder.id,secret:paypalOrder.secret});
+  const blob=await res.blob(),url=URL.createObjectURL(blob),a=document.createElement('a');
+  a.href=url;a.download=paypalOrder.slug+'.pine';
+  document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),5000);
+  paypalMessage.textContent='Download started. Thank you for your purchase.';
+ }catch(e){paypalMessage.textContent=e.message}
+ finally{paypalDownload.disabled=false}
+});
 async function api(action,extra={}){
  const response=await fetch('/api/premium',{
   method:'POST',credentials:'same-origin',cache:'no-store',
@@ -95,6 +201,7 @@ productSelect.addEventListener('change',()=>{
  title.textContent=NAMES[slug];
  order=restoreOrder();
  newOrder.hidden=!!order;orderPanel.hidden=!order;
+ renderPaypal();
  if(order){display();refresh(true)}else{setMessage('');loadAvailability()}
 });
 async function refresh(silent=false){
@@ -134,7 +241,7 @@ reserve.addEventListener('click',async()=>{
  }
  setMessage('Preparing your secure NOWPayments widget...');
  try{
-  const result=await api('create',{slug,currency:preferredCurrency});
+  const result=await api('create',{slug,currency:preferredCurrency,sessionId:buyerSessionId,browserTimezone});
   saveOrder(result.order);
   display();
  }catch(error){
@@ -159,6 +266,7 @@ restart.addEventListener('click',()=>{
  newOrder.hidden=false;
  setMessage('');
  loadAvailability();
+handlePaypalReturn();
 });
 download.addEventListener('click',async()=>{
  if(!order)return;
@@ -184,6 +292,12 @@ async function loadAvailability(){
   const response=await fetch('/api/premium',{cache:'no-store'});
   if(!response.ok)throw Error('Checkout availability cannot be verified.');
   const state=await response.json();
+  const canPayPal=Boolean(state.paypalReady&&state.offerActive&&state.ready?.[slug]);
+  paypalStart.disabled=!canPayPal;
+  paypalAvailability.textContent=canPayPal?
+   'PayPal checkout opens securely on PayPal, then returns here for your download.':
+   'PayPal is being set up. Crypto checkout remains available.';
+  renderPaypal();
   const recovered=restoreOrder();
   if(recovered){
    saveOrder(recovered);
