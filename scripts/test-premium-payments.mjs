@@ -79,10 +79,14 @@ const env={DB:db,PREMIUM_CHECKOUT_ENABLED:'true',NOWPAYMENTS_API_KEY:'test-api-k
  NOWPAYMENTS_IPN_SECRET:'test-ipn-secret',NOWPAYMENTS_PAYOUT_CURRENCY:'trx',
  PREMIUM_BUCKET:{head:async()=>({size:100}),get:async()=>({body:file})}};
 const validOrigin='https://signaltoscript.com';
-const req=(action,data={},origin=validOrigin)=>new Request(validOrigin+'/api/premium',{
- method:'POST',headers:{Origin:origin,'Content-Type':'application/json'},
- body:JSON.stringify({action,...data})
-});
+const req=(action,data={},origin=validOrigin)=>{
+ const request=new Request(validOrigin+'/api/premium',{
+  method:'POST',headers:{Origin:origin,'Content-Type':'application/json'},
+  body:JSON.stringify({action,...data})
+ });
+ Object.defineProperty(request,'cf',{value:{country:'GB',region:'England',city:'London',timezone:'Europe/London'}});
+ return request;
+};
 const post=(action,data={},environment=env)=>onRequestPost({request:req(action,data),env:environment});
 function sorted(value){
  if(Array.isArray(value))return value.map(sorted);
@@ -130,7 +134,8 @@ try{
  assert.equal(result.status,409,'provider minimum above 12.49 must block invoice');
  assert.equal(orders.size,0);
  minUsd=1;
- result=await post('create',{slug:'gold-breakout-15m',currency:'trx',price_amount:'0.01'});
+ result=await post('create',{slug:'gold-breakout-15m',currency:'trx',price_amount:'0.01',
+  sessionId:'923054b9-2465-443d-9719-61e0f37eef6a',browserTimezone:'Europe/London'});
  assert.equal(result.status,200);
  const first=(await result.json()).order;
  assert.equal(first.amountUsd,PRICE_USD);
@@ -139,6 +144,12 @@ try{
  assert.equal([...attempts.values()][0].status,'minimum_blocked','failed checkout attempt tracked');
  assert.equal([...attempts.values()].filter(a=>a.status==='invoice_created').length,1);
  assert.equal(first.currency,'auto','widget coin changes may still be verified');
+ assert.equal(orders.get(first.id).visitor_country,'GB','Cloudflare country is stored');
+ assert.equal(orders.get(first.id).visitor_region,'England','Cloudflare region is stored');
+ assert.equal(orders.get(first.id).visitor_city,'London','Cloudflare city is stored');
+ assert.equal(orders.get(first.id).visitor_browser_timezone,'Europe/London');
+ assert.equal([...attempts.values()].find(a=>a.orderId===first.id).session_id,
+  '923054b9-2465-443d-9719-61e0f37eef6a');
  assert.equal(invoices.get(first.id).currency,'trx','invoice remembers requested coin');
  assert.match(first.secret,/^[a-f0-9]{64}$/);
  assert.match(first.invoiceUrl,/^https:\/\/nowpayments\.io\/payment/);
