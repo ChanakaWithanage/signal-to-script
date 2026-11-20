@@ -7,6 +7,7 @@ const headers=noCache();
 const fail=(error,status=400,code='ERROR')=>Response.json({error,code},{status,headers});
 const sameOrigin=request=>request.headers.get('Origin')===new URL(request.url).origin;
 const configured=env=>env.PAYPAL_ENABLED==='true'&&!!env.PAYPAL_CLIENT_ID&&
+ ['sandbox','live'].includes(env.PAYPAL_MODE)&&
  !!env.PAYPAL_CLIENT_SECRET&&!!env.DB&&!!env.PREMIUM_BUCKET;
 const paypalBase=env=>env.PAYPAL_MODE==='live'?'https://api-m.paypal.com':'https://api-m.sandbox.paypal.com';
 const validId=id=>typeof id==='string'&&/^[0-9a-f]{24}$/.test(id);
