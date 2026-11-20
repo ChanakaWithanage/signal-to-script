@@ -148,6 +148,8 @@ export async function onRequestPost({request,env}){
     if(reread?.status!=='paid'||reread.paypal_capture_id!==captured.id)
      return fail('Payment could not be reconciled.',409,'CAPTURE_CONFLICT');
    }
+   try{await env.DB.prepare("UPDATE premium_checkout_attempts SET status='paid' WHERE provider='paypal' AND order_id=?").bind(row.id).run()}
+   catch(e){console.error('Checkout analytics status update failed',e)}
    return Response.json({order:{...publicRow(row),status:'paid'}},{headers});
   }
   if(body.action==='status')return Response.json({order:publicRow(row)},{headers});
