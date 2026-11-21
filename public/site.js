@@ -7,7 +7,8 @@ if(menu&&nav){
 const scripts={
   '1r-bear-breakout-achievements':'1R Bear Breakout Achievements',
   'goat-trap-pinbar-3ls-combo':'Goat Trap Pinbar + 3LS',
-  'supertrend-visual-bridge':'Supertrend Visual Bridge'
+  'supertrend-visual-bridge':'Supertrend Visual Bridge',
+  'no-wick-ema-retest-strategy':'No-Wick EMA Retest Strategy'
 };
 const GOOGLE_CLIENT_ID='121639481880-4lrf81h9me5o35tdv3p9jjb4gmr9983b.apps.googleusercontent.com';
 async function refreshCounts(){

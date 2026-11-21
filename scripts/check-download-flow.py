@@ -6,7 +6,7 @@ import re
 root=Path(__file__).resolve().parents[1]
 public=root/"public"
 slugs={p.stem for p in (public/"scripts").glob("*.pine")}
-assert slugs == {"1r-bear-breakout-achievements", "goat-trap-pinbar-3ls-combo", "supertrend-visual-bridge"}, "Only three free script files should be in public/scripts"
+assert slugs == {"1r-bear-breakout-achievements", "goat-trap-pinbar-3ls-combo", "supertrend-visual-bridge", "no-wick-ema-retest-strategy"}
 for page in public.rglob("*.html"):
     if page.name=="404.html":
         continue
@@ -72,7 +72,7 @@ assert "if(valid)downloadSelected();return" in join
 assert "Gmail" in site and "Google Drive" in (public/"privacy.html").read_text(encoding="utf-8")
 assert 'href="/privacy.html"' in (public/"index.html").read_text(encoding="utf-8")
 assert "410" in (root/"functions/api/join.js").read_text(encoding="utf-8")
-print("One guest download and unlimited Google access remain for the three free script routes.")
+print("One guest download and unlimited Google access remain for the free script routes.")
 
 # Gold strategy conversion placement and source wiring.
 gold = (public/"articles/gold-breakout-15m-strategy.html").read_text(encoding="utf-8")

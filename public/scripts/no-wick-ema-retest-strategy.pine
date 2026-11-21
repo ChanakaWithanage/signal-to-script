@@ -1,0 +1,417 @@
+//@version=6
+strategy("No-Wick EMA + S/R Strategy [v6] - Retest Clarity", shorttitle="No-Wick EMA R2", overlay=true,
+     pyramiding=0, initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=10,
+     process_orders_on_close=false, calc_on_every_tick=false,
+     calc_on_order_fills=false, max_labels_count=500)
+
+// This is a TradingView backtesting strategy. It is not a broker news-calendar feed.
+// Signals: adapted from the omarnowick indicator (open == low/high): https://www.tradingview.com/script/yTrRQHtf-omarnowick/.
+// Pivot S/R levels: adapted from the supplied S/R Ultimate default price-pivot method.
+// Confirmed pivots only: never use the pivot until its right-hand bars have closed.
+// A no-wick setup is NOT an executed trade. Its limit order waits at the no-wick
+// candle OPEN (the wick-free end) and can fill only on a subsequent bar.
+// TradingView's broker emulator controls intrabar fill simulation; opening gaps
+// can fill a buy/sell limit at a better price than the requested limit price.
+
+//=============================================================================
+// 1. USER SETTINGS
+//=============================================================================
+grpTrend = "1. EMA Trend"
+fastLength = input.int(20, "Fast EMA length", minval=1, group=grpTrend)
+slowLength = input.int(50, "Slow EMA length", minval=1, group=grpTrend)
+
+grpEntry = "2. Entry / Trade Limits"
+maxEntryBars = input.int(10, "Limit entry expires after N bars", minval=1, maxval=100, group=grpEntry)
+maxTradesDay = input.int(3, "Maximum filled trades per day (EAT)", minval=1, maxval=100, group=grpEntry)
+
+grpStops = "3. Stop Loss / Take Profit"
+riskReward = input.float(1.0, "Risk-to-reward ratio", minval=0.1, step=0.1, group=grpStops)
+breathingPips = input.float(2.0, "Extra breathing-room pips", minval=0.0, step=0.5, group=grpStops)
+minStopPips = input.float(5.0, "Minimum stop distance (pips)", minval=0.1, step=0.5, group=grpStops)
+swingLeft = input.int(3, "Swing high/low: left bars", minval=1, maxval=50, group=grpStops)
+swingRight = input.int(3, "Swing high/low: right bars (confirmation)", minval=1, maxval=50, group=grpStops)
+
+grpPips = "4. Pip Size"
+goldPipMode = input.string("Standard ($0.10)", "Gold pip size", options=["Standard ($0.10)", "Micro ($0.01)"], group=grpPips)
+silverPipMode = input.string("Standard ($0.01)", "Silver pip size", options=["Standard ($0.01)", "Micro ($0.001)"], group=grpPips)
+otherPipOverride = input.float(0.0, "Other symbols: custom pip size (0 = automatic)", minval=0.0, group=grpPips)
+
+grpTime = "5. Restricted Trading Hours"
+useSessionFilter = input.bool(true, "Enable restricted hours", group=grpTime)
+noTradeSession = input.session("2200-0200", "No-trading window (EAT / UTC+3)", group=grpTime)
+
+grpNews = "6. USD High-Impact News (Manual Calendar)"
+useNewsFilter = input.bool(true, "Enable manually supplied USD red-news filter", group=grpNews)
+newsBefore = input.int(60, "Block minutes BEFORE news", minval=0, maxval=1440, group=grpNews)
+newsAfter = input.int(15, "Block minutes AFTER news", minval=0, maxval=1440, group=grpNews)
+newsText = input.text_area("", "USD red-news events in EAT, one per line: YYYY-MM-DD HH:MM", group=grpNews,
+     tooltip="Paste only the actual USD high-impact event timestamps. All times are East Africa Time (UTC+3).\nExample:\n2026-10-14 15:30\n2026-10-16 15:30\nA blank list cannot filter news automatically.")
+
+grpSR = "7. Support / Resistance Filter"
+useSRFilter = input.bool(false, "Enable OPTIONAL S/R proximity filter", group=grpSR)
+srDistancePips = input.float(10.0, "Minimum distance to any S/R level (pips)", minval=0.0, step=0.5, group=grpSR)
+srLeft = input.int(50, "S/R pivot bars to left", minval=1, maxval=200, group=grpSR)
+srRight = input.int(20, "S/R pivot bars to right", minval=1, maxval=100, group=grpSR)
+srQuickRight = input.int(10, "S/R quick right bars", minval=1, maxval=100, group=grpSR)
+srSource = input.string("Close", "S/R pivot source", options=["Close", "High/Low"], group=grpSR)
+srLevelCount = input.int(6, "How many S/R levels to use", minval=1, maxval=8, group=grpSR)
+
+grpVis = "8. Chart Display"
+showEMAs = input.bool(true, "Show EMAs", group=grpVis)
+showNoWick = input.bool(true, "Show ALL detected no-wick candles", group=grpVis)
+showSetups = input.bool(true, "Show setups, waiting retest price, and FILLS", group=grpVis)
+showSR = input.bool(false, "Draw S/R price levels", group=grpVis)
+showRestricted = input.bool(true, "Shade restricted hours and news", group=grpVis)
+showStatus = input.bool(true, "Show news / trade status", group=grpVis)
+
+string EAT = "Africa/Nairobi" // No daylight saving time (UTC+3).
+
+//=============================================================================
+// 2. COMMON HELPERS
+//=============================================================================
+f_pipSize() =>
+    bool isGold = str.contains(syminfo.ticker, "XAU") or str.contains(syminfo.ticker, "GOLD")
+    bool isSilver = str.contains(syminfo.ticker, "XAG") or str.contains(syminfo.ticker, "SILVER")
+    float goldPip = goldPipMode == "Standard ($0.10)" ? 0.10 : 0.01
+    float silverPip = silverPipMode == "Standard ($0.01)" ? 0.01 : 0.001
+    float automatic = syminfo.mintick * (syminfo.type == "forex" or syminfo.type == "cfd" ? 10 : 1)
+    isGold ? goldPip : isSilver ? silverPip : (otherPipOverride > 0 ? otherPipOverride : automatic)
+
+float pip = f_pipSize()
+
+f_inNoTradingWindow(int ts) =>
+    bool result = false
+    if useSessionFilter and not na(ts)
+        int startHour = int(str.tonumber(str.substring(noTradeSession, 0, 2)))
+        int startMin = int(str.tonumber(str.substring(noTradeSession, 2, 4)))
+        int endHour = int(str.tonumber(str.substring(noTradeSession, 5, 7)))
+        int endMin = int(str.tonumber(str.substring(noTradeSession, 7, 9)))
+        int sessionStart = startHour * 60 + startMin
+        int sessionEnd = endHour * 60 + endMin
+        int nowMin = hour(ts, EAT) * 60 + minute(ts, EAT)
+        if sessionStart < sessionEnd
+            result := nowMin >= sessionStart and nowMin < sessionEnd
+        else if sessionStart > sessionEnd
+            result := nowMin >= sessionStart or nowMin < sessionEnd
+        else
+            result := true
+    result
+
+f_near(float level, float price, float distance) =>
+    not na(level) and math.abs(price - level) <= distance
+
+//=============================================================================
+// 3. HIGH-IMPACT USD NEWS: PARSE INPUT ONLY ONCE PER RUN
+//=============================================================================
+var array<int> newsEvents = array.new_int()
+var int invalidNewsLines = 0
+
+if barstate.isfirst
+    array.clear(newsEvents)
+    invalidNewsLines := 0
+    string uniformText = str.replace_all(str.replace_all(newsText, ",", "\n"), ";", "\n")
+    array<string> rows = str.split(uniformText, "\n")
+    for i = 0 to array.size(rows) - 1
+        string row = str.trim(array.get(rows, i))
+        if str.length(row) > 0
+            if str.length(row) == 16 and str.substring(row, 4, 5) == "-" and str.substring(row, 7, 8) == "-" and str.substring(row, 10, 11) == " " and str.substring(row, 13, 14) == ":"
+                float y = str.tonumber(str.substring(row, 0, 4))
+                float m = str.tonumber(str.substring(row, 5, 7))
+                float d = str.tonumber(str.substring(row, 8, 10))
+                float h = str.tonumber(str.substring(row, 11, 13))
+                float mn = str.tonumber(str.substring(row, 14, 16))
+                if not na(y) and not na(m) and not na(d) and not na(h) and not na(mn) and y >= 2000 and m >= 1 and m <= 12 and d >= 1 and d <= 31 and h >= 0 and h <= 23 and mn >= 0 and mn <= 59
+                    array.push(newsEvents, timestamp(EAT, int(y), int(m), int(d), int(h), int(mn)))
+                else
+                    invalidNewsLines += 1
+            else
+                invalidNewsLines += 1
+
+// Checks whether any portion of [startTime, endTime) overlaps the news embargo.
+f_newsOverlaps(int startTime, int endTime) =>
+    bool blocked = false
+    if useNewsFilter and not na(startTime) and not na(endTime) and array.size(newsEvents) > 0
+        for i = 0 to array.size(newsEvents) - 1
+            int eventTime = array.get(newsEvents, i)
+            int blockedFrom = eventTime - newsBefore * 60000
+            int blockedUntil = eventTime + newsAfter * 60000
+            if startTime < blockedUntil and endTime > blockedFrom
+                blocked := true
+                break
+    blocked
+
+int barMs = int(nz(timeframe.in_seconds(timeframe.period), 300) * 1000)
+int barEnd = na(time_close) ? time + barMs : time_close
+int nextBarStart = barEnd
+int nextBarEnd = nextBarStart + barMs
+bool sessionNow = f_inNoTradingWindow(time) or f_inNoTradingWindow(barEnd - 1)
+bool sessionNext = f_inNoTradingWindow(nextBarStart) or f_inNoTradingWindow(nextBarEnd - 1)
+bool newsNow = f_newsOverlaps(time, barEnd)
+bool newsNext = f_newsOverlaps(nextBarStart, nextBarEnd)
+bool restrictedNow = sessionNow or newsNow
+bool restrictedNext = sessionNext or newsNext
+
+//=============================================================================
+// 4. NO-WICK SIGNALS AND EMA TREND
+//=============================================================================
+float emaFast = ta.ema(close, fastLength)
+float emaSlow = ta.ema(close, slowLength)
+bool bullishNoWick = close > open and open == low
+bool bearishNoWick = close < open and open == high
+bool uptrend = close > emaFast and close > emaSlow
+bool downtrend = close < emaFast and close < emaSlow
+
+//=============================================================================
+// 5. S/R ULTIMATE PRICE-BASED PIVOT LEVELS
+// Same level-price selection, quick/regular confirmations, and 8 candidates
+// as in the supplied indicator's DEFAULT (pivot-based) configuration.
+//=============================================================================
+float srSupportSeries = srSource == "Close" ? close : low
+float srResistanceSeries = srSource == "Close" ? close : high
+float qSupport = ta.pivotlow(srSupportSeries, srLeft, srQuickRight)
+float qResistance = ta.pivothigh(srResistanceSeries, srLeft, srQuickRight)
+float pSupport = ta.pivotlow(srSupportSeries, srLeft, srRight)
+float pResistance = ta.pivothigh(srResistanceSeries, srLeft, srRight)
+
+// Note: The supplied S/R indicator uses pivot candle HIGH for its High/Low
+// support and pivot candle LOW for its High/Low resistance. Preserve that.
+float qSupportPrice = srSource == "Close" ? close[srQuickRight] : high[srQuickRight]
+float qResistancePrice = srSource == "Close" ? close[srQuickRight] : low[srQuickRight]
+float pSupportPrice = srSource == "Close" ? close[srRight] : high[srRight]
+float pResistancePrice = srSource == "Close" ? close[srRight] : low[srRight]
+
+float sr1 = ta.valuewhen(not na(qSupport), qSupportPrice, 0)
+float sr2 = ta.valuewhen(not na(qResistance), qResistancePrice, 0)
+float sr3 = ta.valuewhen(not na(pSupport), pSupportPrice, 0)
+float sr4 = ta.valuewhen(not na(pResistance), pResistancePrice, 0)
+float sr5 = ta.valuewhen(not na(pSupport), pSupportPrice, 1)
+float sr6 = ta.valuewhen(not na(pResistance), pResistancePrice, 1)
+float sr7 = ta.valuewhen(not na(pSupport), pSupportPrice, 2)
+float sr8 = ta.valuewhen(not na(pResistance), pResistancePrice, 2)
+
+f_nearSR(float price) =>
+    float distance = srDistancePips * pip
+    bool nearAny = false
+    nearAny := nearAny or (srLevelCount >= 1 and f_near(sr1, price, distance))
+    nearAny := nearAny or (srLevelCount >= 2 and f_near(sr2, price, distance))
+    nearAny := nearAny or (srLevelCount >= 3 and f_near(sr3, price, distance))
+    nearAny := nearAny or (srLevelCount >= 4 and f_near(sr4, price, distance))
+    nearAny := nearAny or (srLevelCount >= 5 and f_near(sr5, price, distance))
+    nearAny := nearAny or (srLevelCount >= 6 and f_near(sr6, price, distance))
+    nearAny := nearAny or (srLevelCount >= 7 and f_near(sr7, price, distance))
+    nearAny := nearAny or (srLevelCount >= 8 and f_near(sr8, price, distance))
+    nearAny
+
+//=============================================================================
+// 6. MOST RECENT *CONFIRMED* SWING BEHIND EACH ENTRY
+//=============================================================================
+float swingLowConfirmed = ta.pivotlow(low, swingLeft, swingRight)
+float swingHighConfirmed = ta.pivothigh(high, swingLeft, swingRight)
+var array<float> swingLows = array.new_float()
+var array<float> swingHighs = array.new_float()
+if barstate.isconfirmed
+    if not na(swingLowConfirmed)
+        array.unshift(swingLows, swingLowConfirmed)
+        if array.size(swingLows) > 100
+            array.pop(swingLows)
+    if not na(swingHighConfirmed)
+        array.unshift(swingHighs, swingHighConfirmed)
+        if array.size(swingHighs) > 100
+            array.pop(swingHighs)
+
+f_recentLowBelow(float entryPrice) =>
+    float result = na
+    if array.size(swingLows) > 0
+        for i = 0 to array.size(swingLows) - 1
+            float candidate = array.get(swingLows, i)
+            if candidate < entryPrice
+                result := candidate
+                break
+    result
+
+f_recentHighAbove(float entryPrice) =>
+    float result = na
+    if array.size(swingHighs) > 0
+        for i = 0 to array.size(swingHighs) - 1
+            float candidate = array.get(swingHighs, i)
+            if candidate > entryPrice
+                result := candidate
+                break
+    result
+
+//=============================================================================
+// 7. PER-DAY FILLED TRADE COUNTER (EAT CALENDAR DATE)
+//=============================================================================
+int eatDay = year(time, EAT) * 10000 + month(time, EAT) * 100 + dayofmonth(time, EAT)
+var int previousEatDay = na
+var int filledToday = 0
+var int previousTotalFills = 0
+int totalFills = strategy.closedtrades + strategy.opentrades
+int fillsSinceLastCalc = math.max(0, totalFills - previousTotalFills)
+if na(previousEatDay) or eatDay != previousEatDay
+    filledToday := 0
+    previousEatDay := eatDay
+filledToday += fillsSinceLastCalc
+previousTotalFills := totalFills
+
+//=============================================================================
+// 8. PENDING ORDER STATE AND ACTIVE TRADE MANAGEMENT
+//=============================================================================
+var int pendingDir = 0    // +1 long limit, -1 short limit, 0 none.
+var int pendingSignalBar = na
+var float pendingEntryPrice = na
+var float plannedLongSL = na
+var float plannedLongTP = na
+var float plannedShortSL = na
+var float plannedShortTP = na
+var bool longBreakeven = false
+var bool shortBreakeven = false
+
+// Track ACTUAL broker-emulator fills separately from setup creation.
+// With calc_on_order_fills=false, historical fills are observed at bar close.
+bool filledLongAtRetest = fillsSinceLastCalc > 0 and pendingDir == 1
+bool filledShortAtRetest = fillsSinceLastCalc > 0 and pendingDir == -1
+
+// Clear pending state as soon as an order has filled (including trades
+// that were both opened and closed within one historical candle).
+if fillsSinceLastCalc > 0 or strategy.position_size != 0
+    pendingDir := 0
+    pendingSignalBar := na
+
+bool acceptedBuy = false
+bool acceptedSell = false
+bool cancelledPending = false
+bool tradeActive = strategy.position_size != 0
+bool dailyLimitReached = filledToday >= maxTradesDay
+
+if barstate.isconfirmed
+    // 8A. Cancel invalid unfilled orders. Bar N is INCLUDED; after N closes,
+    //     the order is cancelled and cannot fill on bar N+1.
+    if pendingDir != 0
+        bool expired = bar_index >= pendingSignalBar + maxEntryBars
+        bool oppositeFormed = (pendingDir == 1 and bearishNoWick) or (pendingDir == -1 and bullishNoWick)
+        bool disallowed = restrictedNow or restrictedNext or dailyLimitReached
+        if expired or oppositeFormed or disallowed
+            if pendingDir == 1
+                strategy.cancel("Long")
+                strategy.cancel("Long Exit")
+            else
+                strategy.cancel("Short")
+                strategy.cancel("Short Exit")
+            pendingDir := 0
+            pendingSignalBar := na
+            cancelledPending := true
+
+    // 8B. Opposite no-wick on a CLOSED candle: move active SL to entry.
+    //     Never reverse the position solely because of the opposite candle.
+    if strategy.position_size > 0
+        if bearishNoWick
+            longBreakeven := true
+        float activeLongStop = longBreakeven ? math.max(plannedLongSL, strategy.position_avg_price) : plannedLongSL
+        strategy.exit("Long Exit", from_entry="Long", stop=activeLongStop, limit=plannedLongTP)
+    if strategy.position_size < 0
+        if bullishNoWick
+            shortBreakeven := true
+        float activeShortStop = shortBreakeven ? math.min(plannedShortSL, strategy.position_avg_price) : plannedShortSL
+        strategy.exit("Short Exit", from_entry="Short", stop=activeShortStop, limit=plannedShortTP)
+
+    // 8C. Exactly ONE open or pending setup at a time; no pyramiding.
+    //     New limit orders only become eligible after the signal bar closes.
+    bool canPlace = not tradeActive and pendingDir == 0 and not dailyLimitReached and not restrictedNow and not restrictedNext
+    if canPlace and bullishNoWick and uptrend
+        float entryLong = math.round_to_mintick(open)
+        float nearestLow = f_recentLowBelow(entryLong)
+        bool farFromSR = not useSRFilter or not f_nearSR(entryLong)
+        if not na(nearestLow) and farFromSR
+            float stopLong = math.round_to_mintick(math.min(nearestLow - breathingPips * pip, entryLong - minStopPips * pip))
+            float targetLong = math.round_to_mintick(entryLong + (entryLong - stopLong) * riskReward)
+            if stopLong < entryLong and targetLong > entryLong
+                plannedLongSL := stopLong
+                plannedLongTP := targetLong
+                longBreakeven := false
+                pendingDir := 1
+                pendingSignalBar := bar_index
+                pendingEntryPrice := entryLong
+                // This remains an unfilled limit order until price RETESTS entryLong.
+                // Signal bar cannot fill it: orders are processed from next tick onward.
+                strategy.entry("Long", strategy.long, limit=entryLong, comment="Bullish no-wick retest")
+                strategy.exit("Long Exit", from_entry="Long", stop=plannedLongSL, limit=plannedLongTP)
+                acceptedBuy := true
+    else if canPlace and bearishNoWick and downtrend
+        float entryShort = math.round_to_mintick(open)
+        float nearestHigh = f_recentHighAbove(entryShort)
+        bool farFromSR = not useSRFilter or not f_nearSR(entryShort)
+        if not na(nearestHigh) and farFromSR
+            float stopShort = math.round_to_mintick(math.max(nearestHigh + breathingPips * pip, entryShort + minStopPips * pip))
+            float targetShort = math.round_to_mintick(entryShort - (stopShort - entryShort) * riskReward)
+            if stopShort > entryShort and targetShort < entryShort
+                plannedShortSL := stopShort
+                plannedShortTP := targetShort
+                shortBreakeven := false
+                pendingDir := -1
+                pendingSignalBar := bar_index
+                pendingEntryPrice := entryShort
+                // This remains an unfilled limit order until price RETESTS entryShort.
+                strategy.entry("Short", strategy.short, limit=entryShort, comment="Bearish no-wick retest")
+                strategy.exit("Short Exit", from_entry="Short", stop=plannedShortSL, limit=plannedShortTP)
+                acceptedSell := true
+
+//=============================================================================
+// 9. VISUALS AND STATUS
+//=============================================================================
+plot(showEMAs ? emaFast : na, "Fast EMA", color=color.teal, linewidth=2)
+plot(showEMAs ? emaSlow : na, "Slow EMA", color=color.orange, linewidth=2)
+plotshape(showNoWick and bullishNoWick, title="Bullish no-wick", style=shape.triangleup,
+     location=location.belowbar, color=color.new(color.lime, 0), size=size.tiny)
+plotshape(showNoWick and bearishNoWick, title="Bearish no-wick", style=shape.triangledown,
+     location=location.abovebar, color=color.new(color.red, 0), size=size.tiny)
+// The first labels mark the SETUP candle, NOT the entry fill.
+plotshape(showSetups and acceptedBuy, title="Buy setup (pending retest)", style=shape.labelup,
+     location=location.belowbar, color=color.new(color.teal, 25), text="BUY\nSETUP", textcolor=color.white, size=size.tiny)
+plotshape(showSetups and acceptedSell, title="Sell setup (pending retest)", style=shape.labeldown,
+     location=location.abovebar, color=color.new(color.orange, 25), text="SELL\nSETUP", textcolor=color.white, size=size.tiny)
+
+// Actual entry fills: these appear only AFTER TradingView has filled the limit.
+plotshape(showSetups and filledLongAtRetest, title="BUY filled on retest", style=shape.labelup,
+     location=location.belowbar, color=color.lime, text="BUY\nFILLED", textcolor=color.black, size=size.tiny)
+plotshape(showSetups and filledShortAtRetest, title="SELL filled on retest", style=shape.labeldown,
+     location=location.abovebar, color=color.red, text="SELL\nFILLED", textcolor=color.white, size=size.tiny)
+plotshape(showSetups and cancelledPending, title="Pending setup cancelled", style=shape.xcross,
+     location=location.abovebar, color=color.gray, size=size.tiny)
+
+// The EXACT price the market must revisit: the no-wick signal candle's OPEN.
+// Keep the level visible through a fill bar, so the retest can be verified.
+plot(showSetups and (pendingDir != 0 or filledLongAtRetest or filledShortAtRetest) ? pendingEntryPrice : na,
+     title="Waiting retest at no-wick OPEN", color=color.yellow, linewidth=2, style=plot.style_linebr)
+
+plot(showSR and srLevelCount >= 1 ? sr1 : na, "S/R 1", color=color.new(color.aqua, 20), style=plot.style_stepline)
+plot(showSR and srLevelCount >= 2 ? sr2 : na, "S/R 2", color=color.new(color.fuchsia, 20), style=plot.style_stepline)
+plot(showSR and srLevelCount >= 3 ? sr3 : na, "S/R 3", color=color.new(color.aqua, 35), style=plot.style_stepline)
+plot(showSR and srLevelCount >= 4 ? sr4 : na, "S/R 4", color=color.new(color.fuchsia, 35), style=plot.style_stepline)
+plot(showSR and srLevelCount >= 5 ? sr5 : na, "S/R 5", color=color.new(color.aqua, 50), style=plot.style_stepline)
+plot(showSR and srLevelCount >= 6 ? sr6 : na, "S/R 6", color=color.new(color.fuchsia, 50), style=plot.style_stepline)
+plot(showSR and srLevelCount >= 7 ? sr7 : na, "S/R 7", color=color.new(color.aqua, 60), style=plot.style_stepline)
+plot(showSR and srLevelCount >= 8 ? sr8 : na, "S/R 8", color=color.new(color.fuchsia, 60), style=plot.style_stepline)
+
+bgcolor(showRestricted and restrictedNow ? color.new(color.red, 90) : na, title="Restricted entry period")
+plot(strategy.position_size > 0 ? (longBreakeven ? math.max(plannedLongSL, strategy.position_avg_price) : plannedLongSL) : strategy.position_size < 0 ? (shortBreakeven ? math.min(plannedShortSL, strategy.position_avg_price) : plannedShortSL) : na,
+     "Active Stop Loss", color=color.red, linewidth=2, style=plot.style_linebr)
+plot(strategy.position_size > 0 ? plannedLongTP : strategy.position_size < 0 ? plannedShortTP : na,
+     "Active Take Profit", color=color.green, linewidth=2, style=plot.style_linebr)
+plot(showSetups and strategy.position_size != 0 ? strategy.position_avg_price : na,
+     "ACTUAL FILLED Entry Price", color=color.white, linewidth=1, style=plot.style_linebr)
+
+var table statusTable = table.new(position.top_right, 2, 4, border_width=1)
+if barstate.islast and showStatus
+    table.cell(statusTable, 0, 0, "Filled trades today (EAT)", text_color=color.white, bgcolor=color.new(color.black, 25))
+    table.cell(statusTable, 1, 0, str.tostring(filledToday) + " / " + str.tostring(maxTradesDay), text_color=color.white, bgcolor=color.new(color.black, 25))
+    table.cell(statusTable, 0, 1, "Waiting for retest", text_color=color.white, bgcolor=color.new(color.black, 25))
+    string pendingText = pendingDir == 1 ? "BUY @ " + str.tostring(pendingEntryPrice, format.mintick) : pendingDir == -1 ? "SELL @ " + str.tostring(pendingEntryPrice, format.mintick) : "None"
+    table.cell(statusTable, 1, 1, pendingText, text_color=pendingDir == 0 ? color.white : color.yellow, bgcolor=color.new(color.black, 25))
+    table.cell(statusTable, 0, 2, "Manual USD news events", text_color=color.white, bgcolor=color.new(color.black, 25))
+    table.cell(statusTable, 1, 2, useNewsFilter ? (array.size(newsEvents) == 0 ? "NONE: filter inactive" : str.tostring(array.size(newsEvents))) : "Disabled", text_color=array.size(newsEvents) == 0 and useNewsFilter ? color.yellow : color.white, bgcolor=color.new(color.black, 25))
+    table.cell(statusTable, 0, 3, "Invalid news rows", text_color=color.white, bgcolor=color.new(color.black, 25))
+    table.cell(statusTable, 1, 3, str.tostring(invalidNewsLines), text_color=invalidNewsLines > 0 ? color.yellow : color.white, bgcolor=color.new(color.black, 25))
+else if barstate.islast and not showStatus
+    table.clear(statusTable, 0, 0, 1, 3)
