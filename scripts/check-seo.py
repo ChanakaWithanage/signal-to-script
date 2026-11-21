@@ -8,6 +8,7 @@ public = Path(__file__).resolve().parents[1] / "public"
 domain = "https://signaltoscript.com"
 pages = {
     "index.html": "/",
+    "articles/no-wick-ema-retest-strategy.html": "/articles/no-wick-ema-retest-strategy.html",
     "articles/free-pine-script-backtester-tradingview-alternative.html": "/articles/free-pine-script-backtester-tradingview-alternative.html",
     "articles/gold-breakout-15m-strategy.html": "/articles/gold-breakout-15m-strategy.html",
     "articles/supertrend-dema-reversal-strategy.html": "/articles/supertrend-dema-reversal-strategy.html",

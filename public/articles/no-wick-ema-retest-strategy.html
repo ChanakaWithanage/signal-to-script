@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>No-Wick EMA Retest Strategy for Gold | Pine Script v6 | Signal to Script</title>
+<meta name="description" content="See how a TradingView Pine Script v6 strategy turns no-wick candles into limit orders. Two XAUUSD charts show a six-bar retest and a setup that expired.">
+<meta name="robots" content="index, follow">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Gold Flashed a Buy Signal. Why Did This Strategy Wait?">
+<meta property="og:description" content="See how a TradingView Pine Script v6 strategy turns no-wick candles into limit orders. Two XAUUSD charts show a six-bar retest and a setup that expired.">
+<meta property="og:image" content="https://signaltoscript.com/images/gold-no-wick-retest.webp">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="stylesheet" href="/styles.css">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9855777255503695" crossorigin="anonymous"></script>
+<link rel="canonical" href="https://signaltoscript.com/articles/no-wick-ema-retest-strategy.html">
+<meta property="og:url" content="https://signaltoscript.com/articles/no-wick-ema-retest-strategy.html">
+<meta name="twitter:card" content="summary_large_image">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header"><div class="wrap head">
+<a class="brand" href="/"><span class="brand-mark">CW.</span><span class="brand-wordmark"><span class="brand-name">Signal to Script</span><span class="brand-by">by CW</span></span></a>
+<button aria-expanded="false" aria-label="Open menu" class="menu-toggle" id="menu" type="button">☰</button>
+<nav aria-label="Main navigation" class="nav" id="nav"><a href="/#free-scripts">Free scripts</a><a href="/#articles">Articles</a><a href="/#about">About CW</a><a href="/#support">Get help</a><a href="/join.html">Join free</a></nav>
+</div></header>
+<main id="main">
+<div class="read-wrap article-top">
+<div class="breadcrumb"><a href="/">Home</a> / <a href="/#articles">Articles</a> / No-Wick EMA Retest</div>
+<div class="eyebrow">Gold price action · TradingView strategy · Pine Script v6</div>
+<h1>Gold Flashed a Buy Signal. Why Did This Strategy Wait?</h1>
+<p class="lead">Gold printed a bullish candle with a flat bottom and closed above both moving averages. The strategy marked a buy setup and left a limit order at the candle’s opening price. Six bars later, gold came back to that yellow line. On another day, price came back two bars too late.</p>
+<div class="article-meta">By CW · <time datetime="2026-11-21">November 21, 2026</time> · XAUUSD 15-minute charts</div>
+<figure class="article-lead-chart">
+  <a href="/images/gold-no-wick-retest.webp"><img src="/images/gold-no-wick-retest.webp" width="1800" height="855" fetchpriority="high" alt="XAUUSD crosses the $4,345.61 open of a bullish no-wick candle six bars later."></a>
+  <figcaption>September 11, 2026. Historical XAUUSD candles with a calculated retest overlay. Chart times are UTC. <a href="https://github.com/getdata-finance/xauusd-15m-ohlcv-metals-historical-data">Market data from GetData Finance</a>.</figcaption>
+</figure>
+</div>
+<section class="article"><div class="read-wrap article-body">
+<h2>What counts as a no-wick candle?</h2>
+<p>A bullish no-wick candle closes above its open, and its low equals its open. A bearish one closes below its open, and its high equals its open. The wick on the other side can still be there.</p>
+<p>The strategy also checks where the candle closes. For a buy setup, the close has to be above both the 20 EMA and the 50 EMA. For a sell setup, it has to be below both. Once a setup qualifies, the script places a limit order at the candle’s open. The order becomes eligible on the next bar.</p>
+<h2>Two gold charts, two different outcomes</h2>
+<p>On September 11, the 06:00 candle opened at $4,345.61. The next five bars stayed above that price. The 07:30 candle traded through the limit level, so this retest was within the ten-bar window.</p>
+<p>On May 25, a 09:15 setup left a buy limit at $4,623.66. The next ten bars stayed above it. Gold finally touched the level at 12:15, on bar 12. The order would already have expired. Both examples replay the entry rules from a flat position.</p>
+<figure>
+  <a href="/images/gold-no-wick-expiry.webp"><img src="/images/gold-no-wick-expiry.webp" width="1800" height="855" loading="lazy" alt="XAUUSD reaches $4,623.66 on bar 12 after a pending buy setup expires on bar 10."></a>
+  <figcaption>May 25, 2026. The yellow line ends after the tenth eligible candle. The dotted line shows the original order level through the later touch.</figcaption>
+</figure>
+<h2>What happens once an order fills?</h2>
+<p>The stop goes beyond the most recent confirmed swing on the other side of the planned entry, with a configurable buffer and minimum distance. The target defaults to 1R, measured from the planned entry and stop. If an opposite no-wick candle closes while the trade is active, the strategy moves the stop to the simulated entry price.</p>
+<p>The default limit is three filled trades per day. An opposite no-wick candle can cancel an unfilled order. The script also supports restricted hours, manually entered USD news times, and an optional support and resistance filter.</p>
+<h2>The setting I’d test first</h2>
+<p>I’d start with the retest window. Keep the same gold feed, timeframe, and exit rules, then compare five, ten, and twenty bars. Pull up the trades that appear only in the longer window. The May 25 chart shows exactly the kind of entry you’d be adding.</p>
+<p>Already have a strategy? <a href="/articles/free-pine-script-backtester-tradingview-alternative.html">See how to compare settings in Pine Backtest Studio</a>.</p>
+<div class="download">
+  <h2>Have a setup you want to backtest?</h2>
+  <p>Send me your entry and exit rules and a chart example. I can turn them into a TradingView strategy you can test bar by bar.</p>
+  <a class="btn" href="mailto:support@signaltoscript.com?subject=Custom%20Pine%20Script%20strategy">Request a Pine Script strategy</a>
+</div>
+<div class="author-card"><div class="author-monogram">CW.</div><div><strong>Written by CW</strong><p>Sharing practical TradingView strategies and Pine Script development notes.</p></div></div>
+</div></section></main>
+<footer class="footer"><div class="wrap foot"><div>© 2026 Signal to Script · by CW. Independent Pine Script guides and examples.</div><div>TradingView is a trademark of its respective owner. Not financial advice.</div></div><nav class="policy-links" aria-label="Legal and business policies"><a href="/terms.html">Terms &amp; Conditions</a><a href="/refunds.html">Refund &amp; Cancellation</a><a href="/privacy.html">Privacy Policy</a><a href="mailto:support@signaltoscript.com">support@signaltoscript.com</a></nav></footer>
+<script defer src="/site.js"></script></body></html>
