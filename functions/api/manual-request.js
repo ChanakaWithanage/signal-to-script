@@ -1,10 +1,16 @@
 // One-step $4.99 manual script request: D1 is the source of truth, email notification is optional.
-import {PRODUCTS} from '../_lib/premium.js';
+import {PRODUCTS,MEMBERSHIP,MEMBERSHIP_NAME,OFFER_END} from '../_lib/premium.js';
 import {utcTime,sriLankaTime,visitorMeta} from '../_lib/checkout-tracking.js';
 
 const HEADERS={'Cache-Control':'no-store','X-Content-Type-Options':'nosniff'};
 const respond=(obj,status=200)=>Response.json(obj,{status,headers:HEADERS});
 const EMAIL=/^[^\s@<>]{1,64}@[^\s@<>]{1,190}\.[A-Za-z]{2,30}$/;
+import {randomToken,hashToken} from '../_lib/download-access.js';
+
+export async function manualReceiptId(secret){
+ const digest=await hashToken(secret);
+ return [digest.slice(0,8),digest.slice(8,12),digest.slice(12,16),digest.slice(16,20),digest.slice(20,32)].join('-');
+}
 const OFFER='4.99';
 const validEmail=value=>typeof value==='string'&&value.length<=254&&EMAIL.test(value);
 let tableInit;
@@ -33,7 +39,7 @@ async function notifyOwner(env,db,entry){
    body:JSON.stringify({
     from:env.MANUAL_REQUEST_FROM,to:[env.MANUAL_REQUEST_NOTIFY_TO],
     reply_to:entry.email,
-    subject:'New $4.99 Pine Script request - '+entry.product,
+    subject:'Lifetime membership request - '+entry.product,
     text:'A new manual purchase request was submitted on SignalToScript.\n\n'+
      'Request ID: '+entry.id+'\nEmail: '+entry.email+'\n'+
      'Script: '+entry.product+'\nOffer: $'+entry.priceUsd+' USD\n'+
@@ -73,23 +79,24 @@ export async function onRequestPost({request,env,waitUntil}){
   ).bind(email,ms-86400000).first();
   if(Number(recent?.total||0)>=5)return respond({error:'You have reached today\'s request limit. Please email support@signaltoscript.com.'},429);
   if(ms-Number(recent?.latest||0)<90000)return respond({error:'Your recent request is already recorded. Please check your email for our reply.'},429);
-  const id=crypto.randomUUID(),product=PRODUCTS[slug];
+  if(ms>=OFFER_END)return respond({error:'The Black Friday membership offer has ended.'},409);
+  const secret=randomToken(),id=await manualReceiptId(secret),product=MEMBERSHIP_NAME;
   const message='Hello Signal to Script,\n\nI would like to purchase '+product+
-   ' for the $'+OFFER+' USD manual-request offer. I cannot use cryptocurrency checkout.\n\n'+
-   'Please reply with an available payment option and the steps to receive the Pine Script file.\n\nThank you.';
-  const entry={id,email,slug,product,priceUsd:OFFER,message,
+   ' for the $'+OFFER+' USD manual-request offer. My first download will be '+PRODUCTS[slug]+'.\n\n'+
+   'Please reply with an available payment option and the steps to activate lifetime access.\n\nThank you.';
+  const entry={id,email,slug:MEMBERSHIP,product,priceUsd:OFFER,message,
    country:meta.country,region:meta.region,city:meta.city,createdAtUtc:utcTime(ms)};
   await env.DB.prepare(`INSERT INTO premium_manual_requests (
    id,email,slug,product,price_usd,message,status,notify_status,
    session_id,visitor_country,visitor_region,visitor_city,visitor_timezone,browser_timezone,
    created_ms,created_at_utc,created_at_ist
   ) VALUES (?,?,?,?,?,?,'new','not_configured',?,?,?,?,?,?,?,?,?)`)
-   .bind(id,email,slug,product,OFFER,message,meta.sessionId,meta.country,meta.region,meta.city,
+   .bind(id,email,MEMBERSHIP,product,OFFER,message,meta.sessionId,meta.country,meta.region,meta.city,
     meta.timezone,meta.browserTimezone,ms,utcTime(ms),sriLankaTime(ms)).run();
   const notification=notifyOwner(env,env.DB,entry);
   if(typeof waitUntil==='function')waitUntil(notification);
   else await notification;
-  return respond({received:true,requestId:id,script:product},201);
+  return respond({received:true,requestId:id,secret,product},201);
  }catch(error){
   console.error('Manual request creation failed',error);
   return respond({error:'Could not submit your request. Please email support@signaltoscript.com.'},503);

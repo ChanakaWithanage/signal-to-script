@@ -141,7 +141,7 @@ try{
  assert.equal(first.amountUsd,PRICE_USD);
  assert.match(first.createdAtUtc,/Z$|UTC$/);
  assert.match(first.createdAtSriLanka,/\+05:30$/);
- assert.equal([...attempts.values()][0].status,'minimum_blocked','failed checkout attempt tracked');
+ assert.equal([...attempts.values()].filter(a=>a.status==='minimum_blocked').length,1,'failed checkout attempt tracked');
  assert.equal([...attempts.values()].filter(a=>a.status==='invoice_created').length,1);
  assert.equal(first.currency,'auto','widget coin changes may still be verified');
  assert.equal(orders.get(first.id).visitor_country,'GB','Cloudflare country is stored');
@@ -187,6 +187,12 @@ try{
  result=await post('download',auth);
  assert.equal(result.status,200);
  assert.equal(await result.text(),file);
+ assert.equal(first.slug,'lifetime');
+ assert.equal((await post('download',{...auth,slug:'supertrend-dema-reversal'})).status,200);
+ assert.equal((await post('download',{...auth,slug:'unknown'})).status,403);
+ orders.get(first.id).slug='gold-breakout-15m';
+ assert.equal((await post('download',{...auth,slug:'supertrend-dema-reversal'})).status,403);
+ orders.get(first.id).slug='lifetime';
  result=await callback({...event,payment_status:'finished'});
  assert.equal(result.status,200,'duplicate notification idempotent');
  result=await post('check',auth);

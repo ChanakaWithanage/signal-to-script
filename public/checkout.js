@@ -17,15 +17,14 @@ const manualReference=document.getElementById('premium-manual-reference');
 const manualWebsite=document.getElementById('premium-manual-website');
 function updateManualRequest(){
  const selected=Object.hasOwn(NAMES,productSelect.value)?productSelect.value:'gold-breakout-15m';
- manualMessage.textContent='I would like to purchase '+NAMES[selected]+
-  ' for the $4.99 USD manual offer. Please email me the available payment and delivery details.';
+ manualMessage.textContent='I would like lifetime access for $4.99 USD. Please email me the payment instructions.';
  manualSuccess.hidden=true;
  manualForm.hidden=false;
  manualStatus.textContent='';
 }
 
 const coinSelect=document.getElementById('premium-payment-choice');
-const NEW_PRICE_USD='12.49';
+const NEW_PRICE_USD='12.99';
 const buyerSessionId=(()=>{
  try{
   let id=sessionStorage.getItem('sts_checkout_session');
@@ -48,7 +47,7 @@ const check=document.getElementById('premium-check');
 const restart=document.getElementById('premium-restart');
 const payLink=document.getElementById('premium-pay-link');
 const download=document.getElementById('premium-download');
-const storageKey=()=> 'sts_nowpayments_order_'+slug;
+const storageKey=()=> order?.slug==='lifetime'?'sts_lifetime_invoice':'sts_nowpayments_order_'+slug;
 let order=null,checking=false;
 const setMessage=value=>{message.textContent=value};
 manualForm.addEventListener('submit',async event=>{
@@ -78,13 +77,14 @@ manualForm.addEventListener('submit',async event=>{
   manualForm.hidden=true;
   manualSuccess.hidden=false;
   manualConfirmedEmail.textContent=submittedEmail;
+  if(result.secret)rememberMembership({id:result.requestId,secret:result.secret,method:'manual'});
   manualReference.textContent=result.requestId?'Request ID: '+result.requestId:'';
   manualStatus.textContent='';
  }catch(error){
   manualStatus.textContent=error.message;
  }finally{
   manualSubmit.disabled=false;
-  manualSubmit.textContent='Send purchase request · $4.99 ↗';
+  manualSubmit.textContent='Request lifetime access · $4.99';
  }
 });
 async function api(action,extra={}){
@@ -108,8 +108,8 @@ function saveOrder(next){
 }
 function restoreOrder(){
  try{
-  const saved=JSON.parse(localStorage.getItem(storageKey())||'null');
-  if(saved?.slug===slug&&/^[a-f0-9]{24}$/.test(saved.id)&&/^[a-f0-9]{64}$/.test(saved.secret))
+  const saved=JSON.parse(localStorage.getItem('sts_lifetime_invoice')||localStorage.getItem('sts_nowpayments_order_'+slug)||'null');
+  if((saved?.slug==='lifetime'||saved?.slug===slug)&&/^[a-f0-9]{24}$/.test(saved.id)&&/^[a-f0-9]{64}$/.test(saved.secret))
    return saved;
  }catch{}
  return null;
@@ -123,11 +123,12 @@ function display(){
  newOrder.hidden=true;orderPanel.hidden=false;
  if(oldPending){
   widgetContainer.hidden=true;payLink.hidden=true;check.hidden=false;restart.hidden=false;download.hidden=true;
-  availability.textContent='This order uses an earlier price. Start a new checkout for the current $12.49 offer.';
+  availability.textContent='This order uses an earlier price. Start a new checkout for the current $12.99 offer.';
   setMessage('If you already paid for this order, you can still check its payment status here.');
   return;
  }
  if(order.status==='paid'){
+  if(order.slug==='lifetime'){rememberMembership({id:order.id,secret:order.secret,method:'crypto'});return;}
   widgetContainer.hidden=true;payLink.hidden=true;check.hidden=true;restart.hidden=true;download.hidden=false;
   availability.textContent='Payment confirmed! Your premium source is ready.';
   setMessage('Thank you for your purchase. Download your Pine Script below.');
@@ -154,7 +155,7 @@ productSelect.addEventListener('change',()=>{
  if(!Object.hasOwn(NAMES,productSelect.value))return;
  slug=productSelect.value;
  history.replaceState(null,'','/checkout?script='+encodeURIComponent(slug));
- title.textContent=NAMES[slug];
+ 
  updateManualRequest();
  order=restoreOrder();
  newOrder.hidden=!!order;orderPanel.hidden=!order;
@@ -241,7 +242,7 @@ download.addEventListener('click',async()=>{
 setInterval(()=>{if(order&&order.status==='pending')refresh(true)},20000);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&order)refresh(true)});
 async function loadAvailability(){
- title.textContent=NAMES[slug];
+ 
  reserve.disabled=true;
  try{
   const response=await fetch('/api/premium',{cache:'no-store'});
@@ -256,6 +257,8 @@ async function loadAvailability(){
   }
   newOrder.hidden=false;orderPanel.hidden=true;
   if(!state.offerActive){
+   manualForm.hidden=true;
+   manualStatus.textContent='This Black Friday offer has ended.';
    newOrder.hidden=true;
    availability.textContent='The early Black Friday promotion ended. New orders are paused.';
    return;
@@ -273,3 +276,58 @@ async function loadAvailability(){
 }
 updateManualRequest();
 loadAvailability();
+
+let membership=null;
+let catalog={};
+const memberBox=document.getElementById('member-library');
+const memberStatus=document.getElementById('member-status');
+const memberFiles=document.getElementById('member-files');
+function rememberMembership(receipt){
+ membership=receipt;
+ try{localStorage.setItem('sts_member_receipt',JSON.stringify(receipt))}catch{}
+ const link=new URL('/checkout',location.origin);
+ link.hash=new URLSearchParams(receipt).toString();
+ document.getElementById('member-bookmark').href=link.href;
+ memberBox.hidden=false;
+ showMembership().catch(error=>{memberStatus.textContent=error.message});
+}
+async function showMembership(){
+ const receipt=membership;
+ const status=await api('check',receipt);
+ if(membership!==receipt)return;
+ if(status.order.slug!=='lifetime')throw Error('This receipt is for a single script.');
+ if(status.order.status!=='paid'){
+  memberStatus.textContent='Request received. Your downloads will appear here after payment is confirmed.';
+  return;
+ }
+ const state=await fetch('/api/premium',{cache:'no-store'}).then(response=>response.json());
+ catalog={...state.products,...state.freeScripts};
+ memberStatus.textContent='Your lifetime pass is active. Choose a script to download.';
+ for(const id of ['manual-script-request','premium-crypto-details','premium-order'])document.getElementById(id).hidden=true;
+ document.querySelector('.premium-payment-divider').hidden=true;
+ document.getElementById('checkout-title').textContent='Member downloads';
+ memberFiles.replaceChildren();
+ for(const [key,name] of Object.entries(catalog)){
+  const button=document.createElement('button');
+  button.className='premium-copy-button';button.textContent='Download '+name;
+  button.addEventListener('click',async()=>{
+   button.disabled=true;
+   try{
+    const response=await api('download',{...receipt,slug:key});
+    const url=URL.createObjectURL(await response.blob());
+    const link=document.createElement('a');link.href=url;link.download=key+'.pine';link.click();
+    setTimeout(()=>URL.revokeObjectURL(url),5000);
+   }catch(error){memberStatus.textContent=error.message}finally{button.disabled=false}
+  });
+  memberFiles.append(button);
+ }
+}
+try{
+ const fragment=new URLSearchParams(location.hash.slice(1));
+ const receipt=fragment.has('secret')?Object.fromEntries(fragment):JSON.parse(localStorage.getItem('sts_member_receipt')||'null');
+ if(receipt&&['crypto','manual'].includes(receipt.method)&&/^[a-f0-9-]{24,36}$/.test(receipt.id)&&/^[a-f0-9]{64}$/.test(receipt.secret)){
+  rememberMembership({method:receipt.method,id:receipt.id,secret:receipt.secret});
+  if(fragment.has('secret'))history.replaceState(null,'',location.pathname+location.search);
+ }
+}catch{}
+setInterval(()=>{if(membership?.method==='manual'&&!document.hidden&&!memberFiles.childElementCount)showMembership().catch(error=>{memberStatus.textContent=error.message})},20000);

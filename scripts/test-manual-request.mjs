@@ -1,6 +1,7 @@
 // Mocked Cloudflare Pages request form tests; no real email or checkout activity.
 import assert from 'node:assert/strict';
 import {webcrypto} from 'node:crypto';
+import {onRequestPost as premium} from '../functions/api/premium.js';
 import {onRequestPost} from '../functions/api/manual-request.js';
 globalThis.crypto??=webcrypto;
 
@@ -11,7 +12,7 @@ const db={prepare(sql){
  const query={
   bind(...v){args=v;return query},
   async run(){
-   if(sql.startsWith('CREATE TABLE')||sql.startsWith('CREATE INDEX'))
+   if(sql.startsWith('ALTER TABLE')||sql.startsWith('UPDATE premium_nowpayments_orders SET')||sql.startsWith('CREATE TABLE')||sql.startsWith('CREATE INDEX'))
     return {meta:{changes:0}};
    if(sql.includes('INSERT INTO premium_manual_requests')){
     const [id,email,slug,product,price_usd,message,session_id,
@@ -30,6 +31,9 @@ const db={prepare(sql){
    throw Error('Unexpected SQL write: '+sql);
   },
   async first(){
+   if(sql.startsWith('SELECT id,slug,status,price_usd,created_ms')){
+    const row=saved.get(args[0]);return row?.slug===args[1]?row:null;
+   }
    if(sql.includes('SELECT COUNT(*) AS total')){
     const [email,since]=args;
     const matches=[...saved.values()].filter(x=>x.email===email&&x.created_ms>since);
@@ -74,8 +78,13 @@ try{
  assert.equal(saved.size,1);
  const row=saved.get(body.requestId);
  assert.equal(row.email,'customer@example.com');
- assert.equal(row.product,'Gold Breakout 15M Strategy');
+ assert.equal(row.product,'Signal to Script Lifetime Membership');
  assert.equal(row.price_usd,'4.99');
+ const download=secret=>premium({request:request({method:'manual',action:'download',id:row.id,secret,slug:'supertrend-dema-reversal'}),env:{DB:db,PREMIUM_BUCKET:{get:async key=>({body:key})}}});
+ assert.equal((await download(body.secret)).status,403);
+ row.status='paid';
+ assert.equal(await (await download(body.secret)).text(),'supertrend-dema-reversal.pine');
+ assert.equal((await download('0'.repeat(64))).status,403);
  assert.match(row.message,/Gold Breakout 15M Strategy/);
  assert.equal(row.visitor_country,'US');
  assert.equal(row.visitor_region,'California');
@@ -102,6 +111,6 @@ try{
  assert.equal(response.status,201,'notification configured request stored');
  const second=saved.get((await response.json()).requestId);
  assert.equal(second.notify_status,'sent');
- assert.equal(second.slug,'supertrend-dema-reversal');
+ assert.equal(second.slug,'lifetime');
  console.log('Manual request tests passed: validation, honeypot, D1 persistence, location/timezones, rate limit and optional email.');
 }finally{globalThis.fetch=originalFetch}

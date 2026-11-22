@@ -25,7 +25,7 @@ for page in public.rglob("*.html"):
     assert len(downloads) == html.count('data-download-script='), f"Each download link needs a working JS hook: {page}"
 
 for slug in slugs:
-    for name in ("download","count"):
+    for name in ("../_lib/free-scripts","count"):
         source=(root/f"functions/api/{name}.js").read_text(encoding="utf-8")
         assert f"'{slug}'" in source, f"Missing {slug} in {name}"
 for path in ("public/site.js","public/join.js","public/join.html","public/privacy.html",
@@ -66,7 +66,7 @@ assert "if(!env.DB)" in download, "Downloads must fail closed without D1"
 assert "await isMember(env.DB,request)" in guard
 assert "await next()" in guard and "SIGN_IN_REQUIRED" in guard
 assert "status:401" in guard and "Cache-Control" in guard
-assert "SCRIPT_BUCKET" in download and "SCRIPT_BUCKET" in guard, "Private R2 source must fail closed when enabled"
+assert "SCRIPT_BUCKET" in (root/"functions/_lib/free-scripts.js").read_text(encoding="utf-8") and "SCRIPT_BUCKET" in guard, "Private R2 source must fail closed when enabled"
 assert "gate-retry" in site and "gate-privacy" in site and "gate-full" in site
 assert "if(valid)downloadSelected();return" in join
 assert "Gmail" in site and "Google Drive" in (public/"privacy.html").read_text(encoding="utf-8")

@@ -19,20 +19,20 @@ for slug in slugs:
     assert not (public/"scripts"/(slug+".pine")).exists(), f"Paid source publicly accessible: {slug}"
     assert f"'{slug}'" not in free, f"Paid slug in free API: {slug}"
     assert f"'{slug}.pine'" in guard, f"Direct premium URL not blocked: {slug}"
-    assert f'href="/checkout.html?script={slug}"' in home, f"Missing checkout link: {slug}"
+    assert f'href="/checkout?script={slug}' in home, f"Missing checkout link: {slug}"
     assert f'data-buy-script="{slug}"' in home, f"Missing buy tracker: {slug}"
     assert f'data-download-script="{slug}"' not in home, f"Paid CTA marked as free: {slug}"
 assert home.index('id="premium-scripts"')<home.index('id="free-scripts"')
-assert "$1.99 USD" in home and "Planned regular $4.99 USD" in home
+assert "$4.99 manual" in home and "$12.99 crypto" in home and "<s>$49</s>" in home
 assert "Black Friday" in home
 assert "CURRENT_USER_PASSWORD" not in premium
 assert 'name="robots" content="noindex, nofollow"' in checkout
-assert "Planned regular $4.99" in checkout and "~60% launch saving" in checkout
-assert "November 30, 2026" in checkout
+assert "Planned regular price" in checkout and "$12.99 crypto" in checkout
+assert "november 30, 2026" in checkout.lower()
 assert "NOWPayments" in checkout and "NOWPayments" in premium
 assert "NOWPAYMENTS_API_KEY" in provider and "NOWPAYMENTS_IPN_SECRET" in provider
 assert "PREMIUM_CHECKOUT_ENABLED" in provider, "Checkout must be disabled until explicitly enabled"
-assert 'storageAvailable(env,slug)' in premium and "PREMIUM_BUCKET.get" in premium
+assert 'storageAvailable(env,slug)' in premium and "PREMIUM_BUCKET?.get" in premium
 assert "checkMinimum" in premium and "min-amount?" in provider, "Minimum must be checked before invoice"
 assert "invoice" in premium and "invoice_url" in provider
 assert "validInvoiceUrl" in premium, "Invoice URL host must be validated"

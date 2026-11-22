@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
-<title>Premium Pine Script Checkout | Crypto or $4.99 Direct Request | Signal to Script</title>
-<meta name="description" content="Buy premium Pine Script source via NOWPayments or request a $4.99 manual purchase if you need another payment method.">
+<title>Lifetime Membership | Signal to Script</title>
+<meta name="description" content="Join once for unlimited Pine Script downloads, future releases and help testing your strategies.">
 <link rel="canonical" href="https://signaltoscript.com/checkout">
 <link rel="icon" href="/favicon.svg">
 <link rel="stylesheet" href="/styles.css?v=20261120-request-form-v2">
@@ -21,33 +21,31 @@
 <div class="premium-checkout-top"><a href="/#premium-scripts">← Back to premium strategies</a><span>Secure checkout right here · No account required</span></div>
 <div class="premium-checkout-grid">
 <section class="premium-checkout-product">
- <span class="deal-eyebrow">EARLY BLACK FRIDAY · LIMITED-TIME LAUNCH</span>
- <h1 id="premium-product-name">Premium Pine Script</h1>
- <p>Get the complete TradingView Pine Script v6 source and installation guidance. Choose an instant crypto payment or request a manually arranged purchase if crypto isn't convenient.</p>
- <div class="premium-pricing"><span class="premium-old-price"><s>$49.49</s><small> Regular price</small></span><strong class="premium-price">$12.49 <small>USD</small></strong><span class="deal-discount">SAVE 75%</span></div>
- <p class="premium-price-clarity">Black Friday deal through November 30, 2026 (UTC). One payment. Yours to download.</p><div class="premium-trust-row"><span>✓ Complete Pine Script v6 source</span><span>✓ No account required</span><span>✓ Verified order-based delivery</span></div>
- <div class="premium-deliverables"><strong>What you receive</strong><p>The full source-code file, strategy settings documented in the article, and installation support if needed.</p></div>
- <p class="premium-terms">Pay instantly with crypto, or request a manually arranged payment method and file delivery.</p>
+ <span class="deal-eyebrow">BLACK FRIDAY · THROUGH NOVEMBER 30, 2026 (UTC)</span>
+ <h1 id="premium-product-name">The Lifetime Script Pass</h1>
+ <p>Start with Gold Breakout or Supertrend + DEMA. Download both, test them on your charts, and come back for every strategy we release.</p>
+ <div class="premium-pricing"><span class="premium-old-price"><s>$49</s><small>Planned regular price</small></span><strong class="premium-price">From $4.99</strong></div>
+ <p>One payment for lifetime access. Choose a $4.99 manual payment or $12.99 crypto checkout.</p>
+ <div class="premium-deliverables"><strong>Included in your pass</strong><ul>
+ <li>Unlimited downloads from the premium and free script libraries</li><li>Every future script and strategy added to the library</li>
+ <li>Free help installing scripts, connecting integrations and testing strategies</li></ul></div>
 </section>
 <section class="premium-checkout-card" aria-labelledby="checkout-title">
  <div class="premium-checkout-badges"><span>✓ No account needed</span><span>✓ Select your preferred purchase method</span></div>
- <h2 id="checkout-title">Complete your order</h2>
- <p>Select your script, then send a quick request or pay instantly with crypto.</p>
- <div class="premium-product-picker">
-  <label class="premium-tx-label" for="premium-script">Choose your Pine Script</label>
-  <select id="premium-script" class="premium-currency-select"><option value="gold-breakout-15m">Gold Breakout 15M Strategy</option><option value="supertrend-dema-reversal">Supertrend + DEMA Reversal Strategy</option></select>
- </div>
-
+ <h2 id="checkout-title">Join for life</h2>
+ <p>Both payment options unlock the same library.</p>
+ <div id="member-library" hidden><h3>Your membership</h3><p id="member-status" role="status"></p><a id="member-bookmark">Private membership link</a><p>Save this link to open your library on another device.</p><div id="member-files"></div></div>
+ <div class="premium-product-picker" hidden><label for="premium-script">First download</label><select id="premium-script"><option value="gold-breakout-15m">Gold Breakout</option><option value="supertrend-dema-reversal">Supertrend + DEMA</option></select></div>
  <section id="manual-script-request" class="premium-manual-offer" aria-labelledby="manual-request-title">
-  <div class="premium-manual-topline"><span class="premium-manual-eyebrow">REQUEST A SCRIPT</span><span class="premium-manual-badge">No crypto needed</span></div>
-  <div class="premium-manual-title-row"><div><h3 id="manual-request-title">Get your script with a simple request</h3><p>No email app, account or crypto wallet needed. Just enter your email — the request is ready to send.</p></div><div class="premium-manual-price"><strong>$4.99</strong><small>USD · manual offer</small></div></div>
+  <div class="premium-manual-topline"><span class="premium-manual-eyebrow">MANUAL PAYMENT</span><span class="premium-manual-badge">No crypto needed</span></div>
+  <div class="premium-manual-title-row"><div><h3 id="manual-request-title">Join for $4.99</h3><p>Enter your email and we’ll reply with payment instructions.</p></div><div class="premium-manual-price"><strong>$4.99</strong><small>USD · manual offer</small></div></div>
   <form id="premium-manual-form" class="premium-request-form">
    <label for="premium-manual-email">Your email address</label>
    <input id="premium-manual-email" name="email" type="email" autocomplete="email" inputmode="email" placeholder="you@example.com" maxlength="254" required>
-   <div class="premium-manual-preview"><span>YOUR REQUEST</span><p id="premium-manual-message">I would like to request the selected Pine Script for $4.99 USD. Please reply with the available payment options and delivery details.</p></div>
+   <div class="premium-manual-preview"><span>YOUR REQUEST</span><p id="premium-manual-message">I would like to join for lifetime access for $4.99 USD. Please reply with the available payment options and delivery details.</p></div>
    <div class="premium-request-trap" aria-hidden="true"><label for="premium-manual-website">Website</label><input id="premium-manual-website" name="website" type="text" autocomplete="off" tabindex="-1"></div>
-   <button type="submit" id="premium-manual-submit" class="premium-manual-button">Send purchase request · $4.99 <span aria-hidden="true">↗</span></button>
-   <p class="premium-manual-caption">We'll contact you by email to confirm an available payment method. The script is sent manually after payment is verified.</p>
+   <button type="submit" id="premium-manual-submit" class="premium-manual-button">Request lifetime access · $4.99 <span aria-hidden="true">↗</span></button>
+   <p class="premium-manual-caption">We'll contact you by email to confirm an available payment method. We activate your membership after confirming payment.</p>
   </form>
   <div id="premium-manual-success" class="premium-manual-success" role="status" aria-live="polite" hidden>
    <div class="premium-manual-success-icon" aria-hidden="true">✓</div>
@@ -58,7 +56,7 @@
 
  <div class="premium-payment-divider" role="separator"><span>OR PAY INSTANTLY</span></div>
  <section id="premium-crypto-details" class="premium-crypto-details" aria-labelledby="premium-crypto-title">
-  <div class="premium-crypto-header"><h3 id="premium-crypto-title">Pay with cryptocurrency</h3><span>USDT BSC recommended · Automatic delivery</span></div>
+  <div class="premium-crypto-header"><h3 id="premium-crypto-title">Join with crypto · $12.99</h3><span>USDT BSC recommended · Automatic delivery</span></div>
   <div class="premium-crypto-content">
    <div class="premium-provider-brand"><span class="premium-provider-dot">●</span><span>Crypto processed by <strong>NOWPayments</strong></span></div>
    <p id="premium-availability" role="status" aria-live="polite">Checking crypto checkout availability...</p>
@@ -73,7 +71,7 @@
     <button type="button" id="premium-reserve" class="btn premium-primary-button" disabled>Continue to crypto payment</button>
    </div>
    <div id="premium-order" hidden>
-    <div class="premium-order-amount"><span>Order total</span><strong id="premium-exact-amount">$12.49 USD</strong><small id="premium-pay-coin"></small></div>
+    <div class="premium-order-amount"><span>Order total</span><strong id="premium-exact-amount">$12.99 USD</strong><small id="premium-pay-coin"></small></div>
     <div class="premium-order-wallet"><span>Your order reference</span><code id="premium-order-id"></code></div>
     <section class="premium-payment-guide" aria-labelledby="payment-guide-heading">
      <div class="premium-guide-heading"><div><span>YOUR 3-STEP CHECKOUT</span><h3 id="payment-guide-heading">How to complete your payment</h3></div><span class="premium-guide-count">3 easy steps</span></div>
@@ -104,5 +102,5 @@
 <footer class="footer"><div class="wrap foot"><div>© 2026 Signal to Script · by CW.</div><div>Pine Script strategies and tools.</div></div>
 <nav class="policy-links" aria-label="Legal and business policies"><a href="/terms.html">Terms &amp; Conditions</a><a href="/refunds.html">Refund &amp; Cancellation</a><a href="/privacy.html">Privacy Policy</a><a href="mailto:support@signaltoscript.com">support@signaltoscript.com</a></nav></footer>
 <script defer src="/site.js"></script>
-<script defer src="/checkout.js?v=20261120-request-form-v2"></script>
+<script defer src="/checkout.js?v=20261122-lifetime"></script>
 </body></html>

@@ -3,7 +3,9 @@ import {randomToken,hashToken} from './download-access.js';
 import {utcTime,sriLankaTime,ensureCheckoutTracking} from './checkout-tracking.js';
 
 export const OFFER_END=Date.parse('2026-12-01T00:00:00Z');
-export const PRICE_USD='12.49';
+export const PRICE_USD='12.99';
+export const MEMBERSHIP='lifetime';
+export const MEMBERSHIP_NAME='Signal to Script Lifetime Membership';
 export const PRODUCTS=Object.freeze({
  'gold-breakout-15m':'Gold Breakout 15M Strategy',
  'supertrend-dema-reversal':'Supertrend + DEMA Reversal Strategy'
@@ -67,7 +69,7 @@ export async function lookupOrder(db,id,secret){
   .bind(id,await hashToken(secret)).first();
 }
 export function publicOrder(row){
- return {id:row.id,slug:row.slug,product:PRODUCTS[row.slug],
+ return {id:row.id,slug:row.slug,product:row.slug===MEMBERSHIP?MEMBERSHIP_NAME:PRODUCTS[row.slug],
   amountUsd:row.amount_usd,currency:row.currency,
   status:row.status==='paid'?'paid':row.status==='failed'?'failed':'pending',
   createdAt:row.created_ms,createdAtUtc:row.created_at_utc||utcTime(row.created_ms),
@@ -103,7 +105,7 @@ export async function checkMinimum(env,currency){
   return {ok:false,error:'NOWPayments did not return a reliable USD minimum. Checkout is unavailable for this currency.'};
  if(minimum>Number(PRICE_USD))
   return {ok:false,error:'NOWPayments currently requires approximately $'+minimum.toFixed(2)+
-   ' for '+currency.toUpperCase()+'. The $12.49 launch price is below that minimum. Choose another coin.'};
+   ' for '+currency.toUpperCase()+'. The $12.99 launch price is below that minimum. Choose another coin.'};
  return {ok:true,minimumUsd:minimum};
 }
 export function validInvoiceUrl(value){

@@ -1,6 +1,8 @@
-import {PRODUCTS,CURRENCIES,OFFER_END,PRICE_USD,ensurePremiumSchema,ready,
+import {FREE_SCRIPTS,freeScriptFile} from '../_lib/free-scripts.js';
+import {MEMBERSHIP,MEMBERSHIP_NAME,PRODUCTS,CURRENCIES,OFFER_END,PRICE_USD,ensurePremiumSchema,ready,
  storageAvailable,lookupOrder,publicOrder,createCredentials,provider,checkMinimum,
  validInvoiceUrl,noCache} from '../_lib/premium.js';
+import {manualReceiptId} from './manual-request.js';
 import {hashToken} from '../_lib/download-access.js';
 import {trackCheckout,updateCheckoutAttempt,utcTime,sriLankaTime} from '../_lib/checkout-tracking.js';
 
@@ -19,7 +21,7 @@ export async function onRequestGet({env}){
   catch{available[slug]=false}
  }
  return Response.json({
-  products:PRODUCTS,ready:available,
+  products:PRODUCTS,freeScripts:FREE_SCRIPTS,ready:available,
   offerActive:Date.now()<OFFER_END,offerEndsAt:OFFER_END,
   salePrice:PRICE_USD,priceCurrency:'USD',
   paymentProvider:'NOWPayments',currencies:CURRENCIES,
@@ -74,7 +76,7 @@ export async function onRequestPost({request,env}){
    const o=createCredentials(slug,'auto');
    await env.DB.prepare(
     "INSERT INTO premium_nowpayments_orders(id,secret_hash,slug,currency,amount_usd,created_ms,created_at_utc,created_at_ist,visitor_session_id,visitor_country,visitor_region,visitor_city,visitor_timezone,visitor_browser_timezone,status) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,'creating')"
-   ).bind(o.id,await hashToken(o.secret),slug,'auto',PRICE_USD,o.createdAt,
+   ).bind(o.id,await hashToken(o.secret),MEMBERSHIP,'auto',PRICE_USD,o.createdAt,
      utcTime(o.createdAt),sriLankaTime(o.createdAt),attempt.sessionId,
      attempt.country,attempt.region,attempt.city,attempt.timezone,attempt.browserTimezone).run();
    let invoice;
@@ -82,7 +84,7 @@ export async function onRequestPost({request,env}){
     invoice=await provider(env,'invoice',{method:'POST',body:{
      price_amount:Number(PRICE_USD),price_currency:'usd',
      ...(currency==='auto'?{}:{pay_currency:currency}),
-     order_id:o.id,order_description:PRODUCTS[slug]+' | Pine Script v6 source',
+     order_id:o.id,order_description:MEMBERSHIP_NAME,
      ipn_callback_url:'https://signaltoscript.com/api/nowpayments-ipn',
      success_url:'https://signaltoscript.com/checkout.html?script='+encodeURIComponent(slug),
      cancel_url:'https://signaltoscript.com/checkout.html?script='+encodeURIComponent(slug)
@@ -107,16 +109,25 @@ export async function onRequestPost({request,env}){
 
   if(!['check','download'].includes(body.action))return failure('Unknown action.',400);
   await ensurePremiumSchema(env.DB);
-  const row=await lookupOrder(env.DB,body.id,body.secret);
+  let row;
+  if(body.method==='manual'){
+   if(typeof body.secret!=='string'||!/^[a-f0-9]{64}$/.test(body.secret)||await manualReceiptId(body.secret)!==body.id)
+    return failure('Invalid membership link.',403);
+   const manual=await env.DB.prepare('SELECT id,slug,status,price_usd,created_ms FROM premium_manual_requests WHERE id=? AND slug=?').bind(body.id,MEMBERSHIP).first();
+   if(manual)row={...manual,amount_usd:manual.price_usd};
+  }else row=await lookupOrder(env.DB,body.id,body.secret);
   if(!row)return failure('Order not found in this browser. Contact support with your order ID.',403,'NOT_AUTHORIZED');
   if(body.action==='check')return Response.json({order:publicOrder(row)},{headers});
   if(row.status!=='paid')return failure('Payment must be finished before downloading.',403,'NOT_PAID');
-  if(!env.PREMIUM_BUCKET)return failure('Purchased file temporarily unavailable. Contact support with order ID.',503,'FILE_UNAVAILABLE');
-  const file=await env.PREMIUM_BUCKET.get(row.slug+'.pine');
+  const requested=body.slug??(row.slug===MEMBERSHIP?Object.keys(PRODUCTS)[0]:row.slug);
+  const free=row.slug===MEMBERSHIP&&Object.hasOwn(FREE_SCRIPTS,requested);
+  if(!free&&(!Object.hasOwn(PRODUCTS,requested)||(row.slug!==MEMBERSHIP&&row.slug!==requested)))
+   return failure('Script unavailable for this receipt.',403);
+  const file=free?await freeScriptFile(env,request,requested):await env.PREMIUM_BUCKET?.get(requested+'.pine');
   if(!file)return failure('Purchased file temporarily unavailable. Contact support with order ID.',503,'FILE_UNAVAILABLE');
   return new Response(file.body,{status:200,headers:{
    ...headers,'Content-Type':'text/plain; charset=utf-8',
-   'Content-Disposition':'attachment; filename="'+row.slug+'.pine"'
+   'Content-Disposition':'attachment; filename="'+requested+'.pine"'
   }});
  }catch(error){
   console.error('Premium checkout error',body.action,error);

@@ -1,11 +1,11 @@
 import {ensureAccessSchema,isMember,claimGuestDownload} from '../_lib/download-access.js';
 
-const AVAILABLE = new Set(['1r-bear-breakout-achievements','goat-trap-pinbar-3ls-combo','supertrend-visual-bridge','no-wick-ema-retest-strategy']);
+import {FREE_SCRIPTS,freeScriptFile} from '../_lib/free-scripts.js';
 const HEADERS = {'Cache-Control':'no-store'};
 
 export async function onRequestGet({request,env}) {
   const slug=new URL(request.url).searchParams.get('script');
-  if(!AVAILABLE.has(slug))return new Response('Script not found',{status:404,headers:HEADERS});
+  if(!Object.hasOwn(FREE_SCRIPTS,slug))return new Response('Script not found',{status:404,headers:HEADERS});
   if(!env.DB)return Response.json({error:'Downloads are temporarily unavailable.'},{status:503,headers:HEADERS});
   let member;
   try{
@@ -19,21 +19,11 @@ export async function onRequestGet({request,env}) {
   // When SCRIPT_BUCKET is configured, private R2 objects are the only source.
   // Otherwise retain the authenticated static-asset flow until R2 is populated.
   let fileBody;
-  if(env.SCRIPT_BUCKET){
-    try{
-      const object=await env.SCRIPT_BUCKET.get(slug+'.pine');
-      if(!object)return Response.json({error:'This script is temporarily unavailable.'},{status:503,headers:HEADERS});
-      fileBody=object.body;
-    }catch(error){
-      console.error('Private script storage unavailable',error);
-      return Response.json({error:'Downloads are temporarily unavailable.'},{status:503,headers:HEADERS});
-    }
-  }else{
-    const assetUrl=new URL('/scripts/'+slug+'.pine',request.url);
-    const assetResponse=await env.ASSETS.fetch(new Request(assetUrl));
-    if(!assetResponse.ok)return new Response('Script unavailable',{status:404,headers:HEADERS});
-    fileBody=assetResponse.body;
-  }
+  try{
+    const file=await freeScriptFile(env,request,slug);
+    if(!file)return Response.json({error:'This script is temporarily unavailable.'},{status:503,headers:HEADERS});
+    fileBody=file.body;
+  }catch{return Response.json({error:'Downloads are temporarily unavailable.'},{status:503,headers:HEADERS})}
   // Claim the one guest download only after the requested file is available.
   // Signed-in Google members keep unlimited free access.
   let guestCookie=null;

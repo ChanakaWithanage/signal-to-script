@@ -36,7 +36,7 @@ dialog.innerHTML='<div class="gate-head"><span class="eyebrow">Free Pine Script 
   '<section class="gate-google-primary" aria-label="Recommended free sign-in">'+
   '<span class="gate-recommended">Recommended · Unlimited downloads</span>'+
   '<h3>Continue with Google</h3>'+
-  '<p>Free access to every script. No extra password or payment.</p>'+
+  '<p>Free access to every free script. No extra password or payment.</p>'+
   '<div class="gate-google-button" id="gate-google-button" aria-label="Official Google sign-in button"></div>'+
   '</section>'+
   '<div class="gate-separator"><span>Just want one script?</span></div>'+
@@ -44,6 +44,7 @@ dialog.innerHTML='<div class="gate-head"><span class="eyebrow">Free Pine Script 
   '<p class="gate-guest-note">One free guest download per browser. No sign-in needed.</p>'+
   '<p class="gate-feedback" role="status" aria-live="polite"></p>'+
   '<button type="button" class="btn gate-retry" hidden>Retry download</button>'+
+  '<div class="gate-selected"><strong>Black Friday lifetime pass</strong><p>Get Gold Breakout, Supertrend + DEMA and every future release. Includes help with integrations and testing.</p><a class="btn" href="/checkout.html">Get lifetime access from $4.99</a><small>$4.99 by manual request · $12.99 with crypto · Pay once</small></div>'+
   '<div class="gate-trust"><span>✓ Free, no credit card</span><span>✓ No marketing signup</span></div>'+
   '<div class="gate-privacy"><strong>Only your Google account ID and email are used for sign-in.</strong> We do not request access to Gmail, Google Drive, or trading accounts. <a href="/privacy.html">How we handle your data</a>.</div>'+
   '<p class="gate-help">Google button not loading? <a class="gate-full" href="/join.html">Open the sign-in page</a>.</p>';
@@ -193,6 +194,9 @@ async function choose(slug){
 }
 // Make the sign-in requirement visible on article download buttons too.
 document.querySelectorAll('a[data-download-script]').forEach(a=>{
+  const pass=document.createElement('a');
+  pass.href='/checkout.html';pass.className='download-requirement';pass.textContent='Explore lifetime access';
+  a.parentElement.append(pass);
   if(!a.nextElementSibling?.classList.contains('download-requirement')){
     const note=document.createElement('span');
     note.className='download-requirement';

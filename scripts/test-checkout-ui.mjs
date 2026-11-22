@@ -10,7 +10,7 @@ assert(html.includes('id="premium-manual-form"'), 'Form is directly inside check
 assert(html.includes('id="premium-manual-email"') && html.includes('type="email"'),
  'Email address is the only required buyer input');
 assert(html.includes('id="premium-manual-message"'), 'Show generated request preview');
-assert(html.includes('Send purchase request · $4.99'), 'Show the manual offer and submit action');
+assert(html.includes('Request lifetime access · $4.99'), 'Show the manual offer and submit action');
 assert(html.indexOf('id="premium-manual-form"')<html.indexOf('id="premium-crypto-details"'),
  'Manual form appears above crypto');
 assert(html.includes('<section id="premium-crypto-details"'),
