@@ -4,11 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>30-Symbol Portfolio Trend Dashboard for TradingView | Signal to Script</title>
-<meta name="description" content="Scan up to 30 TradingView symbols for confirmed daily trend changes. See why Microsoft turned yellow while Starbucks stayed green, then get the dashboard with lifetime access.">
+<meta name="description" content="On November 2, NVIDIA was the only stock on a four-name chip watchlist to change color. See the alert, the brief recovery, and what happened after the second break.">
 <meta name="robots" content="index, follow">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Four Stocks. One Trend Change. Which Chart Would You Open?">
-<meta property="og:description" content="Scan up to 30 TradingView symbols for confirmed daily trend changes. See why Microsoft turned yellow while Starbucks stayed green, then get the dashboard with lifetime access.">
+<meta property="og:title" content="NVIDIA Turned Red Twice. Here’s What the Dashboard Saw.">
+<meta property="og:description" content="On November 2, NVIDIA was the only stock on a four-name chip watchlist to change color. See the alert, the brief recovery, and what happened after the second break.">
 <meta property="og:image" content="https://signaltoscript.com/images/portfolio-trend-dashboard.webp">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <link rel="stylesheet" href="/styles.css">
@@ -27,26 +27,32 @@
 <main id="main"><div class="read-wrap article-top">
 <div class="breadcrumb"><a href="/">Home</a> / <a href="/#articles">Articles</a> / Portfolio Trend Dashboard</div>
 <div class="eyebrow">Watchlist tools · TradingView · Pine Script v6</div>
-<h1>Four Stocks. One Trend Change. Which Chart Would You Open?</h1>
-<p class="lead">On February 2, 2016, Apple and IBM both showed red. Starbucks was green. Microsoft was yellow. If I had time to open one chart that evening, I’d pick Microsoft. It was the only one of the four that had changed color since the previous close.</p>
+<h1>NVIDIA Turned Red Twice. Here’s What the Dashboard Saw.</h1>
+<p class="lead">Four chip stocks were on the watchlist going into Monday, November 2. AMD held yellow. Broadcom and Qualcomm stayed red. Only NVIDIA changed color. It had closed just above its 200-day average on Friday. On Monday, it closed below it. That put NVIDIA at the top of the list of charts worth opening.</p>
 <div class="article-meta">By CW · November 22, 2026 · Premium indicator</div>
-<figure class="article-lead-chart"><a href="/images/portfolio-trend-dashboard.webp"><img src="/images/portfolio-trend-dashboard.webp" width="1300" height="663" fetchpriority="high" alt="February 2 daily trend snapshot. Microsoft is yellow at 52.62, IBM and Apple are red, and Starbucks is green."></a>
-<figcaption>Four rows reconstructed from historical daily prices using the dashboard’s default 50- and 200-session averages. Values are rounded for display. <a href="https://github.com/plotly/datasets/blob/master/stockdata.csv">View the price series</a>.</figcaption></figure>
+<figure class="article-lead-chart"><a href="/images/portfolio-trend-dashboard.webp"><img src="/images/portfolio-trend-dashboard.webp" width="1500" height="775" fetchpriority="high" alt="NVIDIA daily closes show a break below the 200-day average on November 2, a recovery on November 3, and a second break on November 4 before falling to $125.53 on November 20."></a>
+<figcaption>NVIDIA’s daily closes and 200-day simple moving average. The dashboard states were reconstructed from the historical close series. <a href="https://finance.yahoo.com/quote/NVDA/history/">Historical prices via Yahoo Finance</a>.</figcaption></figure>
 </div><section class="article"><div class="read-wrap article-body">
-<h2>Why Microsoft was the interesting row</h2>
-<p>Microsoft closed at 52.62. Its 50-day average was 53.63, and its 200-day average was 47.87. A session earlier, it had closed above both averages. Now the shorter average was overhead while the longer one was still below price. That single change took the row from green to yellow.</p>
-<p>Starbucks closed at 60.70, above both 59.72 and 56.31, so it stayed green. Apple and IBM had already closed below their respective 200-day averages the previous session. Their red rows gave me context. Microsoft gave me a reason to open a chart.</p>
-<h2>How the 30-symbol dashboard reads a watchlist</h2>
-<p>The Pine indicator puts up to 30 exchange-qualified symbols in one table. Each enabled row uses the last fully closed daily candle. You can keep a 15-minute chart open during the session and still see the same daily trend reading until another daily candle is confirmed.</p>
-<ul>
-<li><strong>Green</strong> means the daily close is above both moving averages.</li>
-<li><strong>Yellow</strong> means the close is above the 200-day average and at or below the 50-day average.</li>
-<li><strong>Red</strong> means the close is at or below the 200-day average. A bounce above the 50-day average alone can still leave the row red.</li>
-</ul>
-<p>Each row also shows RSI, MACD and its signal line, and daily volume alongside its percentage difference from the 20-day average. If a row changes color, I can check whether volume picked up before opening the chart. The moving averages and close determine the status color.</p>
-<h2>One alert for the symbols you follow</h2>
-<p>I’d start with a group I already review together, such as tech holdings or gold miners. In the indicator settings, name the group, select the exchange and ticker for each holding, and switch off unused slots. For a small watchlist, a handful of rows is enough.</p>
-<p>With status-change alerts enabled, create a TradingView alert for the dashboard and choose <strong>Any alert() function call</strong>. When the script sees a newly confirmed daily value in real time, it reports the symbols that changed and their old and new colors. In the historical example above, the change to investigate would have been <strong>MSFT · GREEN → YELLOW</strong>.</p>
+<h2>Monday’s close put NVIDIA on the radar</h2>
+<p>On October 30, NVIDIA closed at $204.64, just 26 cents above its 200-day simple moving average. It was already below its 50-day average. That combination put the row in yellow. On November 2, the stock opened higher at $207.53, but finished at $202.06. The 200-day average had edged up to $204.46. Once the daily close was available to the indicator, the row would have turned red.</p>
+<table>
+<thead><tr><th scope="col">Chip watchlist</th><th scope="col">Oct 30 close</th><th scope="col">Nov 2 close</th></tr></thead>
+<tbody>
+<tr><th scope="row">NVIDIA · NVDA</th><td>Yellow</td><td><strong>Red ↓</strong></td></tr>
+<tr><th scope="row">AMD</th><td>Yellow</td><td>Yellow</td></tr>
+<tr><th scope="row">Broadcom · AVGO</th><td>Red</td><td>Red</td></tr>
+<tr><th scope="row">Qualcomm · QCOM</th><td>Red</td><td>Red</td></tr>
+</tbody>
+</table>
+<p>With the status-change alert enabled, the change would show up as <strong>NASDAQ:NVDA · YELLOW → RED</strong>. The alert is tied to when TradingView makes the latest closed daily candle available to the script. The watchlist also showed two stocks already in red, but those rows had no new alert to investigate.</p>
+<h2>Tuesday’s bounce was the first test</h2>
+<p>Once I had opened the chart, the question was whether NVIDIA could get back above its 200-day average and stay there. In this replay, I’d wait for a second close above that line before reconsidering a planned add. On Tuesday, NVIDIA closed at $206.69, above its $204.56 average, and flipped back to yellow. That gave the bounce one confirmed close.</p>
+<p>Wednesday was the second test. NVIDIA slipped to $200.13 against a $204.67 average, turning the row red again. On Thursday it closed at $181.60, down 9.3% on the day, on roughly 2.7 times its 20-day average volume. The one-day recovery had already failed before that larger drop arrived.</p>
+<h2>What waiting changed</h2>
+<p>By November 20, NVIDIA closed at $125.53, 37.3% below its November 4 close. In this example, the two-close rule would have kept the planned add on hold when Tuesday’s bounce failed. The dashboard helped choose which chart to review. The daily-close rule gave that review a decision you could check the next day.</p>
+<h2>Set up the same review on your watchlist</h2>
+<p>Add up to 30 exchange-qualified symbols and give the group a name. The default 50- and 200-day averages define three states. Green means the close is above both. Yellow means it’s above the 200-day average and at or below the 50-day average. Red means it’s at or below the 200-day average.</p>
+<p>Enable status-change alerts and create one TradingView alert using <strong>Any alert() function call</strong>. When a row changes, you can inspect the price, both averages, RSI, MACD and relative volume in the same table before opening the chart.</p>
 <div class="download" id="download"><div class="release-label">Premium Pine Script v6 · Lifetime membership</div>
 <h2>Get the Portfolio Trend Dashboard</h2>
 <p>The lifetime pass includes the dashboard source, the rest of the script library, future additions, and help getting your scripts set up and tested. The Black Friday offer runs through November 30, 2026 UTC. Join once for $4.99 by manual request or $12.99 with crypto.</p>
