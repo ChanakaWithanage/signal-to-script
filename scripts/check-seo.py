@@ -7,6 +7,7 @@ import xml.etree.ElementTree as ET
 public = Path(__file__).resolve().parents[1] / "public"
 domain = "https://signaltoscript.com"
 pages = {
+    "articles/portfolio-trend-dashboard.html": "/articles/portfolio-trend-dashboard.html",
     "index.html": "/",
     "articles/no-wick-ema-retest-strategy.html": "/articles/no-wick-ema-retest-strategy.html",
     "articles/free-pine-script-backtester-tradingview-alternative.html": "/articles/free-pine-script-backtester-tradingview-alternative.html",

@@ -1,5 +1,6 @@
 // Each buyer receives an embedded NOWPayments widget for their own tracked invoice.
 const NAMES={
+ 'portfolio-trend-dashboard':'Portfolio Trend Dashboard',
  'gold-breakout-15m':'Gold Breakout 15M Strategy',
  'supertrend-dema-reversal':'Supertrend + DEMA Reversal Strategy'
 };

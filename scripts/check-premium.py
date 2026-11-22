@@ -4,7 +4,7 @@ from pathlib import Path
 
 root=Path(__file__).resolve().parents[1]
 public=root/"public"
-slugs=["gold-breakout-15m","supertrend-dema-reversal"]
+slugs=["portfolio-trend-dashboard","gold-breakout-15m","supertrend-dema-reversal"]
 home=(public/"index.html").read_text(encoding="utf-8")
 free=(root/"functions/api/download.js").read_text(encoding="utf-8")
 guard=(root/"functions/scripts/_middleware.js").read_text(encoding="utf-8")

@@ -7,6 +7,7 @@ export const PRICE_USD='12.99';
 export const MEMBERSHIP='lifetime';
 export const MEMBERSHIP_NAME='Signal to Script Lifetime Membership';
 export const PRODUCTS=Object.freeze({
+ 'portfolio-trend-dashboard':'Portfolio Trend Dashboard',
  'gold-breakout-15m':'Gold Breakout 15M Strategy',
  'supertrend-dema-reversal':'Supertrend + DEMA Reversal Strategy'
 });

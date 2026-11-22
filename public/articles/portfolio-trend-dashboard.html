@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>30-Symbol Portfolio Trend Dashboard for TradingView | Signal to Script</title>
+<meta name="description" content="Scan up to 30 TradingView symbols for confirmed daily trend changes. See why Microsoft turned yellow while Starbucks stayed green, then get the dashboard with lifetime access.">
+<meta name="robots" content="index, follow">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Four Stocks. One Trend Change. Which Chart Would You Open?">
+<meta property="og:description" content="Scan up to 30 TradingView symbols for confirmed daily trend changes. See why Microsoft turned yellow while Starbucks stayed green, then get the dashboard with lifetime access.">
+<meta property="og:image" content="https://signaltoscript.com/images/portfolio-trend-dashboard.webp">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="stylesheet" href="/styles.css">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9855777255503695" crossorigin="anonymous"></script>
+<link rel="canonical" href="https://signaltoscript.com/articles/portfolio-trend-dashboard.html">
+<meta property="og:url" content="https://signaltoscript.com/articles/portfolio-trend-dashboard.html">
+<meta name="twitter:card" content="summary_large_image">
+</head>
+<body data-premium-article="portfolio-trend-dashboard">
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header"><div class="wrap head">
+<a class="brand" href="/"><span class="brand-mark">CW.</span><span class="brand-wordmark"><span class="brand-name">Signal to Script</span><span class="brand-by">by CW</span></span></a>
+<button aria-expanded="false" aria-label="Open menu" class="menu-toggle" id="menu" type="button">☰</button>
+<nav aria-label="Main navigation" class="nav" id="nav"><a href="/#free-scripts">Free scripts</a><a href="/#articles">Articles</a><a href="/#about">About CW</a><a href="/#support">Get help</a><a href="/join.html">Join free</a></nav>
+</div></header>
+<main id="main"><div class="read-wrap article-top">
+<div class="breadcrumb"><a href="/">Home</a> / <a href="/#articles">Articles</a> / Portfolio Trend Dashboard</div>
+<div class="eyebrow">Watchlist tools · TradingView · Pine Script v6</div>
+<h1>Four Stocks. One Trend Change. Which Chart Would You Open?</h1>
+<p class="lead">On February 2, 2016, Apple and IBM both showed red. Starbucks was green. Microsoft was yellow. If I had time to open one chart that evening, I’d pick Microsoft. It was the only one of the four that had changed color since the previous close.</p>
+<div class="article-meta">By CW · November 22, 2026 · Premium indicator</div>
+<figure class="article-lead-chart"><a href="/images/portfolio-trend-dashboard.webp"><img src="/images/portfolio-trend-dashboard.webp" width="1300" height="663" fetchpriority="high" alt="February 2 daily trend snapshot. Microsoft is yellow at 52.62, IBM and Apple are red, and Starbucks is green."></a>
+<figcaption>Four rows reconstructed from historical daily prices using the dashboard’s default 50- and 200-session averages. Values are rounded for display. <a href="https://github.com/plotly/datasets/blob/master/stockdata.csv">View the price series</a>.</figcaption></figure>
+</div><section class="article"><div class="read-wrap article-body">
+<h2>Why Microsoft was the interesting row</h2>
+<p>Microsoft closed at 52.62. Its 50-day average was 53.63, and its 200-day average was 47.87. A session earlier, it had closed above both averages. Now the shorter average was overhead while the longer one was still below price. That single change took the row from green to yellow.</p>
+<p>Starbucks closed at 60.70, above both 59.72 and 56.31, so it stayed green. Apple and IBM had already closed below their respective 200-day averages the previous session. Their red rows gave me context. Microsoft gave me a reason to open a chart.</p>
+<h2>How the 30-symbol dashboard reads a watchlist</h2>
+<p>The Pine indicator puts up to 30 exchange-qualified symbols in one table. Each enabled row uses the last fully closed daily candle. You can keep a 15-minute chart open during the session and still see the same daily trend reading until another daily candle is confirmed.</p>
+<ul>
+<li><strong>Green</strong> means the daily close is above both moving averages.</li>
+<li><strong>Yellow</strong> means the close is above the 200-day average and at or below the 50-day average.</li>
+<li><strong>Red</strong> means the close is at or below the 200-day average. A bounce above the 50-day average alone can still leave the row red.</li>
+</ul>
+<p>Each row also shows RSI, MACD and its signal line, and daily volume alongside its percentage difference from the 20-day average. If a row changes color, I can check whether volume picked up before opening the chart. The moving averages and close determine the status color.</p>
+<h2>One alert for the symbols you follow</h2>
+<p>I’d start with a group I already review together, such as tech holdings or gold miners. In the indicator settings, name the group, select the exchange and ticker for each holding, and switch off unused slots. For a small watchlist, a handful of rows is enough.</p>
+<p>With status-change alerts enabled, create a TradingView alert for the dashboard and choose <strong>Any alert() function call</strong>. When the script sees a newly confirmed daily value in real time, it reports the symbols that changed and their old and new colors. In the historical example above, the change to investigate would have been <strong>MSFT · GREEN → YELLOW</strong>.</p>
+<div class="download" id="download"><div class="release-label">Premium Pine Script v6 · Lifetime membership</div>
+<h2>Get the Portfolio Trend Dashboard</h2>
+<p>The lifetime pass includes the dashboard source, the rest of the script library, future additions, and help getting your scripts set up and tested. The Black Friday offer runs through November 30, 2026 UTC. Join once for $4.99 by manual request or $12.99 with crypto.</p>
+<a class="btn" href="/checkout?script=portfolio-trend-dashboard" data-buy-script="portfolio-trend-dashboard">Get the dashboard with lifetime access</a>
+<p>Already a member? Open your saved membership link and choose <strong>Download Portfolio Trend Dashboard</strong>.</p></div>
+</div></section></main>
+<footer class="footer"><div class="wrap foot"><div>© 2026 Signal to Script · by CW. Independent Pine Script guides and examples.</div><div>TradingView is a trademark of its respective owner. Not financial advice.</div></div><nav class="policy-links" aria-label="Legal and business policies"><a href="/terms.html">Terms &amp; Conditions</a><a href="/refunds.html">Refund &amp; Cancellation</a><a href="/privacy.html">Privacy Policy</a><a href="mailto:support@signaltoscript.com">support@signaltoscript.com</a></nav></footer>
+<script defer src="/site.js"></script></body></html>

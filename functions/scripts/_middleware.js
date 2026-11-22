@@ -3,7 +3,7 @@
 import {ensureAccessSchema,isMember} from '../_lib/download-access.js';
 
 const headers={'Cache-Control':'no-store','X-Content-Type-Options':'nosniff'};
-const PAID_FILES=new Set(['gold-breakout-15m.pine','supertrend-dema-reversal.pine']);
+const PAID_FILES=new Set(['portfolio-trend-dashboard.pine','gold-breakout-15m.pine','supertrend-dema-reversal.pine']);
 export async function onRequest({request,env,next}){
   const path=new URL(request.url).pathname;
   if(!/^\/scripts\/[a-z0-9-]+\.pine$/.test(path)){
