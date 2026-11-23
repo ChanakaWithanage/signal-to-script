@@ -591,3 +591,50 @@
 .premium-crypto-content{border-top:1px solid #e1e9e2}
 .premium-widget-container iframe{height:696px;min-height:696px}
 @media(max-width:580px){.premium-request-form input[type=email]{font-size:16px}.premium-manual-preview{padding:10px 11px}.premium-crypto-header{padding:14px 12px}.premium-crypto-header h3{font-size:18px}.premium-crypto-header span{font-size:10px;max-width:130px}}
+
+.article-layout .article-top {
+  padding-inline: 30px;
+}
+
+.article-layout .article-body {
+  max-width: 820px;
+}
+
+.article-layout .article-body > h2:first-child {
+  margin-top: 0;
+}
+
+.article-body .article-table {
+  overflow-x: auto;
+  margin: 22px 0 28px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+}
+
+.article-body .article-table table {
+  margin: 0;
+}
+
+.article-body .article-table tbody th {
+  background: var(--white);
+}
+
+.article-body .article-table tbody tr:last-child > * {
+  border-bottom: 0;
+}
+
+.article-body .article-offer {
+  margin: 34px 0 0;
+}
+
+@media (max-width: 580px) {
+  .article-layout .article-top {
+    padding-inline: 20px;
+  }
+
+  .article-body .article-table th,
+  .article-body .article-table td {
+    padding: 9px 7px;
+    font-size: 12px;
+  }
+}

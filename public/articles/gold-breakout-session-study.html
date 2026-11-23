@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gold Breakout 15M Session Study | Signal to Script</title>
+<meta name="description" content="A four-year Gold Breakout 15M study compares the original overnight range with 07:00–11:00 and shows how the change affected net results and drawdown.">
+<meta name="robots" content="index, follow">
+<meta property="og:type" content="article">
+<meta property="og:title" content="My Gold Breakout Lost $198. Then I Moved the Clock.">
+<meta property="og:description" content="A four-year Gold Breakout 15M study compares the original overnight range with 07:00–11:00 and shows how the change affected net results and drawdown.">
+<meta property="og:image" content="https://signaltoscript.com/images/gold-breakout-annual-comparison.webp">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="stylesheet" href="/styles.css?v=20261123-article-layout">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9855777255503695" crossorigin="anonymous"></script>
+<link rel="canonical" href="https://signaltoscript.com/articles/gold-breakout-session-study.html">
+<meta property="og:url" content="https://signaltoscript.com/articles/gold-breakout-session-study.html">
+<meta name="twitter:card" content="summary_large_image">
+</head>
+<body data-premium-article="gold-breakout-15m">
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header"><div class="wrap head">
+<a class="brand" href="/"><span class="brand-mark">CW.</span><span class="brand-wordmark"><span class="brand-name">Signal to Script</span><span class="brand-by">by CW</span></span></a>
+<button aria-expanded="false" aria-label="Open menu" class="menu-toggle" id="menu" type="button">☰</button>
+<nav aria-label="Main navigation" class="nav" id="nav"><a href="/#free-scripts">Free scripts</a><a href="/#articles">Articles</a><a href="/#about">About CW</a><a href="/#support">Get help</a><a href="/join.html">Join free</a></nav>
+</div></header>
+<main id="main" class="article-layout"><div class="read-wrap article-top">
+<div class="breadcrumb"><a href="/">Home</a> / <a href="/#articles">Articles</a> / Gold Breakout Session Study</div>
+<div class="eyebrow">XAUUSD · 15-minute breakout · Pine Script v6</div>
+<h1>My Gold Breakout Lost $198. Then I Moved the Clock.</h1>
+<p class="lead">When I laid out four years of Gold Breakout tests, the 2019 column was the one I kept coming back to. The other three years were positive. This one had lost $197.94. Before touching the stop or adding another filter, I wanted to see what happened if I changed when the strategy started watching gold.</p>
+<div class="article-meta">By CW · November 23, 2026 · Strategy research</div>
+<figure class="article-lead-chart">
+  <a href="/images/gold-breakout-annual-comparison.webp"><img src="/images/gold-breakout-annual-comparison.webp" width="1350" height="700" fetchpriority="high" alt="Annual Gold Breakout net results. In 2019, the original settings lost $197.94 and the morning settings gained $47.76."></a>
+  <figcaption>Net P&amp;L for the original settings and the morning variant. Each year starts with the same balance.</figcaption>
+</figure>
+</div><section class="article"><div class="read-wrap article-body">
+<h2>At 07:00, the two versions start doing different things</h2>
+<p>On the 15-minute chart, the original version has just finished marking the overnight high and low. Its breakout orders can go live. The morning version is only now starting to build its range. If gold runs through the overnight high at 08:00, that move can trigger the original. For the morning version, that same move helps set the high it will watch after 11:00.</p>
+<p>That changes both the price that can trigger an entry and when the first trade can happen. The morning test also moves the scheduled exit from 20:00 to 21:00. The one-entry-per-day rule and the 1% stop stay the same.</p>
+<p>Read the full entry and exit rules in the <a href="/articles/gold-breakout-15m-strategy.html">Gold Breakout 15M strategy guide</a>.</p>
+<h2>The 2019 loss flipped. Would the settings also hold up in 2023?</h2>
+<p>The morning version turned the 2019 result from a $197.94 loss into a $47.76 gain. The same configuration made $100.67 in 2018 and $359.31 in 2022. I used those three years to select it, then checked the same settings in 2023. It made $52.12 there, compared with $31.51 for the original.</p>
+<div class="article-table" role="region" aria-label="Gold Breakout settings and backtest results" tabindex="0">
+<table>
+  <thead><tr><th scope="col">Range / scheduled exit (GMT+3)</th><th scope="col">2019 net</th><th scope="col">Four-year net sum</th><th scope="col">Largest annual drawdown</th></tr></thead>
+  <tbody>
+    <tr><th scope="row">00:00–07:00 / 20:00</th><td>−$197.94</td><td>−$17.96</td><td>$249.37</td></tr>
+    <tr><th scope="row">07:00–11:00 / 21:00</th><td>+$47.76</td><td>+$559.86</td><td>$340.82</td></tr>
+    <tr><th scope="row">08:00–18:00 / 23:00</th><td>+$50.94</td><td>+$284.65</td><td>$65.83</td></tr>
+  </tbody>
+</table>
+</div>
+<h2>The drawdown changed what I’d compare next</h2>
+<p>The morning version had the higher four-year net of these three settings. It also had the deepest drawdown in any single test year, at $340.82 with one-ounce sizing. The 08:00–18:00 window had a smaller net sum, at $284.65, and its largest annual drawdown was $65.83. I’d put both in the next test. One gives me a higher-net benchmark. The other gives me a much lower drawdown to compare it with.</p>
+<figure class="chart-figure">
+  <a href="/images/gold-breakout-drawdown-comparison.webp"><img src="/images/gold-breakout-drawdown-comparison.webp" width="1350" height="700" loading="lazy" alt="Largest annual drawdown was $340.82 for the morning window, $249.37 for the original, and $65.83 for the 08:00–18:00 window."></a>
+  <figcaption>The deepest drawdown recorded in any one of the four annual runs for each configuration.</figcaption>
+</figure>
+<h2>How the comparison was run</h2>
+<p>I screened 1,620 schedules and validated 28 configurations against the Pine trade logic in PineTS. The runs used Dukascopy XAUUSD BID 15-minute candles for 2018, 2019, 2022 and 2023. Each year started independently at $300 with fixed one-ounce sizing and a modeled $0.30 round-trip spread per trade, with no additional commission. Four-year net sums add the individual year results.</p>
+<div class="gold-early-download article-offer" id="download">
+  <div><div class="release-label">Premium Pine Script v6 · Lifetime membership</div>
+  <h2>Run the three windows in the same script</h2>
+  <p>Gold Breakout 15M lets you change the range start, range end, and scheduled exit from the strategy inputs. The lifetime pass includes the full source, the rest of the library, and setup and testing help.</p></div>
+  <div class="gold-download-action"><a class="btn" href="/checkout?script=gold-breakout-15m" data-buy-script="gold-breakout-15m">Get Gold Breakout</a>
+  <span class="gold-download-trust">Included in the lifetime pass</span></div>
+</div>
+</div></section></main>
+<footer class="footer"><div class="wrap foot"><div>© 2026 Signal to Script · by CW. Independent Pine Script guides and examples.</div><div>TradingView is a trademark of its respective owner. Not financial advice.</div></div><nav class="policy-links" aria-label="Legal and business policies"><a href="/terms.html">Terms &amp; Conditions</a><a href="/refunds.html">Refund &amp; Cancellation</a><a href="/privacy.html">Privacy Policy</a><a href="mailto:support@signaltoscript.com">support@signaltoscript.com</a></nav></footer>
+<script defer src="/site.js"></script></body></html>

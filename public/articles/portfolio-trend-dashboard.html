@@ -11,7 +11,7 @@
 <meta property="og:description" content="On November 2, NVIDIA was the only stock on a four-name chip watchlist to change color. See the alert, the brief recovery, and what happened after the second break.">
 <meta property="og:image" content="https://signaltoscript.com/images/portfolio-trend-dashboard.webp">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/styles.css?v=20261123-article-layout">
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9855777255503695" crossorigin="anonymous"></script>
 <link rel="canonical" href="https://signaltoscript.com/articles/portfolio-trend-dashboard.html">
 <meta property="og:url" content="https://signaltoscript.com/articles/portfolio-trend-dashboard.html">
@@ -24,7 +24,7 @@
 <button aria-expanded="false" aria-label="Open menu" class="menu-toggle" id="menu" type="button">☰</button>
 <nav aria-label="Main navigation" class="nav" id="nav"><a href="/#free-scripts">Free scripts</a><a href="/#articles">Articles</a><a href="/#about">About CW</a><a href="/#support">Get help</a><a href="/join.html">Join free</a></nav>
 </div></header>
-<main id="main"><div class="read-wrap article-top">
+<main id="main" class="article-layout"><div class="read-wrap article-top">
 <div class="breadcrumb"><a href="/">Home</a> / <a href="/#articles">Articles</a> / Portfolio Trend Dashboard</div>
 <div class="eyebrow">Watchlist tools · TradingView · Pine Script v6</div>
 <h1>NVIDIA Turned Red Twice. Here’s What the Dashboard Saw.</h1>
@@ -35,6 +35,7 @@
 </div><section class="article"><div class="read-wrap article-body">
 <h2>Monday’s close put NVIDIA on the radar</h2>
 <p>On October 30, NVIDIA closed at $204.64, just 26 cents above its 200-day simple moving average. It was already below its 50-day average. That combination put the row in yellow. On November 2, the stock opened higher at $207.53, but finished at $202.06. The 200-day average had edged up to $204.46. Once the daily close was available to the indicator, the row would have turned red.</p>
+<div class="article-table" role="region" aria-label="Semiconductor watchlist status by session" tabindex="0">
 <table>
 <thead><tr><th scope="col">Chip watchlist</th><th scope="col">Oct 30 close</th><th scope="col">Nov 2 close</th></tr></thead>
 <tbody>
@@ -44,6 +45,7 @@
 <tr><th scope="row">Qualcomm · QCOM</th><td>Red</td><td>Red</td></tr>
 </tbody>
 </table>
+</div>
 <p>With the status-change alert enabled, the change would show up as <strong>NASDAQ:NVDA · YELLOW → RED</strong>. The alert is tied to when TradingView makes the latest closed daily candle available to the script. The watchlist also showed two stocks already in red, but those rows had no new alert to investigate.</p>
 <h2>Tuesday’s bounce was the first test</h2>
 <p>Once I had opened the chart, the question was whether NVIDIA could get back above its 200-day average and stay there. In this replay, I’d wait for a second close above that line before reconsidering a planned add. On Tuesday, NVIDIA closed at $206.69, above its $204.56 average, and flipped back to yellow. That gave the bounce one confirmed close.</p>
@@ -53,11 +55,15 @@
 <h2>Set up the same review on your watchlist</h2>
 <p>Add up to 30 exchange-qualified symbols and give the group a name. The default 50- and 200-day averages define three states. Green means the close is above both. Yellow means it’s above the 200-day average and at or below the 50-day average. Red means it’s at or below the 200-day average.</p>
 <p>Enable status-change alerts and create one TradingView alert using <strong>Any alert() function call</strong>. When a row changes, you can inspect the price, both averages, RSI, MACD and relative volume in the same table before opening the chart.</p>
-<div class="download" id="download"><div class="release-label">Premium Pine Script v6 · Lifetime membership</div>
+<div class="gold-early-download article-offer" id="download">
+<div><div class="release-label">Premium Pine Script v6 · Lifetime membership</div>
 <h2>Get the Portfolio Trend Dashboard</h2>
-<p>The lifetime pass includes the dashboard source, the rest of the script library, future additions, and help getting your scripts set up and tested. The Black Friday offer runs through November 30, 2026 UTC. Join once for $4.99 by manual request or $12.99 with crypto.</p>
+<p>The lifetime pass includes the dashboard source, the rest of the script library, future additions, and help getting your scripts set up and tested. The Black Friday offer runs through November 30, 2026 UTC. Join once for $4.99 by manual request or $12.99 with crypto.</p></div>
+<div class="gold-download-action">
 <a class="btn" href="/checkout?script=portfolio-trend-dashboard" data-buy-script="portfolio-trend-dashboard">Get the dashboard with lifetime access</a>
-<p>Already a member? Open your saved membership link and choose <strong>Download Portfolio Trend Dashboard</strong>.</p></div>
+<span class="gold-download-trust">Members can download it from their saved membership link.</span>
+</div>
+</div>
 </div></section></main>
 <footer class="footer"><div class="wrap foot"><div>© 2026 Signal to Script · by CW. Independent Pine Script guides and examples.</div><div>TradingView is a trademark of its respective owner. Not financial advice.</div></div><nav class="policy-links" aria-label="Legal and business policies"><a href="/terms.html">Terms &amp; Conditions</a><a href="/refunds.html">Refund &amp; Cancellation</a><a href="/privacy.html">Privacy Policy</a><a href="mailto:support@signaltoscript.com">support@signaltoscript.com</a></nav></footer>
 <script defer src="/site.js"></script></body></html>
