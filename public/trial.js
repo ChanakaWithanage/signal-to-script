@@ -4,7 +4,6 @@ const $=id=>document.getElementById(id);
 const workspace=$('trial-workspace'),flash=$('trial-flash');
 const accessDialog=$('trial-access-dialog'),upgradeDialog=$('trial-upgrade-dialog');
 const fmtPrice=n=>typeof n==='number'?new Intl.NumberFormat('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}).format(n):'—';
-const fmtMoney=n=>Number.isFinite(n)?new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(n):'—';
 const fmtTime=t=>t?new Date(t).toLocaleString('en-GB',{timeZone:'UTC',day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit',hour12:false})+' UTC':'—';
 const DAY_MS=86400000;
 let session=null,model=null,chart=null,candles=null,highLine=null,lowLine=null,loading=false,days=30;
@@ -29,9 +28,7 @@ function updateSignalInvites(){
  // Show the conversion invitation only while alerts have not been activated.
  // Historical chart and performance remain visible without registration.
  const canSubscribe=!session?.signedIn;
- $('trial-chart-invite').hidden=!canSubscribe;
  $('trial-results-invite').hidden=!canSubscribe;
- $('trial-performance-cta').hidden=!canSubscribe;
  if(!canSubscribe)return;
  const stats=model?.stats;
  if(!stats)return;
@@ -156,41 +153,26 @@ function currentDetails(item){
  $('trial-last-time').textContent=event?fmtTime(event.time):'Waiting for confirmed signals';
 }
 function writeMetrics(item){
- const coverage=Math.max(1,Math.min(days,Math.floor(item.market?.availableDays||days)));
- $('trial-period-title').textContent=coverage;
- const ids=['trial-metric-trades','trial-metric-win','trial-metric-net','trial-metric-pf',
-  'trial-metric-dd','trial-metric-profit','trial-metric-return'];
+ const availableDays=Math.max(1,Math.min(days,Math.floor(item.market?.availableDays||days)));
+ $('trial-period-title').textContent=availableDays;
+ const ids=['trial-metric-trades','trial-metric-win','trial-metric-net','trial-metric-pf','trial-metric-dd'];
  if(item.preview||!item.stats){
-  for(const id of ids)$(id).textContent='—';
-  $('trial-metric-profit').className='';
-  $('trial-metric-return').className='';
+  for(const id of ids)$(id).textContent='–';
   $('trial-metric-net').className='';
-  $('trial-metric-dd-note').textContent='From historical trades';
-  $('trial-performance-coverage').textContent='Waiting for completed backtest results.';
+  $('trial-performance-coverage').textContent='Waiting for completed historical trades.';
   $('trial-trades-caption').textContent='Historical trade results';
   return;
  }
  const stats=item.stats;
- const example=item.exampleAccount;
  $('trial-metric-trades').textContent=stats.trades;
- $('trial-metric-win').textContent=stats.trades?stats.winRate.toFixed(1)+'%':'—';
- $('trial-metric-pf').textContent=stats.profitFactor===null?'—':stats.profitFactor.toFixed(2);
- const hasResults=stats.trades>0&&example&&Number.isFinite(example.netUsd);
- const deltaClass=hasResults?(example.netUsd>0?'trial-positive':example.netUsd<0?'trial-negative':''):'';
- $('trial-metric-profit').textContent=hasResults?
-  (example.netUsd>0?'+':'')+fmtMoney(example.netUsd):'—';
- $('trial-metric-profit').className=deltaClass;
- $('trial-metric-return').textContent=hasResults?
-  (example.returnPercent>0?'+':'')+example.returnPercent.toFixed(2)+'%':'—';
- $('trial-metric-return').className=deltaClass;
- $('trial-metric-net').textContent=hasResults?
-  (stats.netR>0?'+':'')+stats.netR.toFixed(2)+'R':'—';
- $('trial-metric-net').className=deltaClass;
- $('trial-metric-dd').textContent=hasResults?fmtMoney(example.maxDrawdownUsd):'—';
- $('trial-metric-dd-note').textContent=hasResults?
-  stats.maxDrawdownR.toFixed(2)+'R drawdown':'From historical trades';
- $('trial-performance-coverage').textContent='Actual strategy backtest over available 15-minute candles · '+
-  'Illustrative fixed $1,000 risk per trade · $0.30/oz spread included';
+ $('trial-metric-win').textContent=stats.trades?stats.winRate.toFixed(1)+'%':'–';
+ $('trial-metric-pf').textContent=stats.profitFactor===null?'–':stats.profitFactor.toFixed(2);
+ $('trial-metric-net').textContent=stats.trades?
+  (stats.netR>0?'+':'')+stats.netR.toFixed(2)+'R':'–';
+ $('trial-metric-net').className=stats.trades?
+  stats.netR>0?'trial-positive':stats.netR<0?'trial-negative':'':'';
+ $('trial-metric-dd').textContent=stats.trades?stats.maxDrawdownR.toFixed(2)+'R':'–';
+ $('trial-performance-coverage').textContent='Historical completed trades · 15-minute Gold strategy · $0.30/oz spread included';
  $('trial-trades-caption').textContent='Latest completed trades first';
 }
 function showTrades(rows,preview=false){
@@ -393,9 +375,7 @@ async function loadData(){
  }
  finally{loading=false;$('trial-refresh').disabled=false}
 }
-$('trial-chart-invite-button').addEventListener('click',openEmailDialog);
 $('trial-results-invite-button').addEventListener('click',openEmailDialog);
-$('trial-performance-cta').addEventListener('click',openEmailDialog);
 document.querySelectorAll('[data-days]').forEach(button=>button.addEventListener('click',async()=>{
  const next=Number(button.dataset.days);
  if(next===60&&!session?.lifetime){
