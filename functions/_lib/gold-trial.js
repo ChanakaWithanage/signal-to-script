@@ -56,18 +56,32 @@ export async function ensureTrialSchema(db){
   await db.prepare(`CREATE TABLE IF NOT EXISTS gold_trial_offer_prompts(
     email TEXT PRIMARY KEY,last_shown_ms INTEGER NOT NULL,shown_count INTEGER NOT NULL DEFAULT 1
    )`).run();
+  // New zero-verification subscriptions are browser-bound until a paid receipt
+  // or the legacy secure email link proves ownership. This keeps paid access safe.
+  await db.prepare(`CREATE TABLE IF NOT EXISTS gold_trial_instant_sessions(
+    token_hash TEXT PRIMARY KEY,email TEXT NOT NULL,proven INTEGER NOT NULL DEFAULT 0,
+    created_ms INTEGER NOT NULL
+   )`).run();
+  await db.prepare(`CREATE TABLE IF NOT EXISTS gold_trial_subscribers(
+    email TEXT PRIMARY KEY,first_signup_ms INTEGER NOT NULL,last_signup_ms INTEGER NOT NULL,
+    signup_count INTEGER NOT NULL DEFAULT 1,source TEXT,country TEXT,region TEXT,city TEXT,
+    timezone TEXT,referrer TEXT,utm_source TEXT,utm_medium TEXT,utm_campaign TEXT
+   )`).run();
+  await db.prepare('CREATE INDEX IF NOT EXISTS idx_gold_trial_subscribers_last ON gold_trial_subscribers(last_signup_ms DESC)').run();
  })();
  try{await schema}catch(e){schema=null;throw e}
 }
 export async function signedIn(db,request){
  const token=getToken(request);if(!token)return null;
- const row=await db.prepare(`SELECT a.email,a.created_ms,a.expires_ms,a.lifetime
+ const row=await db.prepare(`SELECT a.email,a.created_ms,a.expires_ms,a.lifetime,
+   i.token_hash AS instant_token,i.proven AS session_proven
  FROM gold_trial_sessions s JOIN gold_trial_accounts a ON a.email=s.email
+ LEFT JOIN gold_trial_instant_sessions i ON i.token_hash=s.token_hash
  WHERE s.token_hash=? AND s.expires_ms>? LIMIT 1`)
   .bind(await hashToken(token),Date.now()).first();
  if(!row)return null;
  // Manual purchases are made using the same email; activate automatically once staff confirms payment.
- if(row.lifetime!==1){
+ if(row.lifetime!==1&&(!row.instant_token||row.session_proven===1)){
   try{
    const paid=await db.prepare("SELECT id FROM premium_manual_requests WHERE email=? AND slug='lifetime' AND status='paid' LIMIT 1")
     .bind(row.email).first();
@@ -77,9 +91,10 @@ export async function signedIn(db,request){
    }
   }catch(error){if(!/no such table/i.test(String(error)))throw error}
  }
+ const entitled=(!row.instant_token||row.session_proven===1)&&row.lifetime===1;
  return {email:row.email,createdAt:row.created_ms,expiresAt:row.expires_ms,
-   lifetime:row.lifetime===1,active:row.lifetime===1||row.expires_ms>Date.now(),
-   remainingDays:row.lifetime===1?null:Math.max(0,Math.ceil((row.expires_ms-Date.now())/86400000))};
+   lifetime:entitled,active:entitled||row.expires_ms>Date.now(),
+   remainingDays:entitled?null:Math.max(0,Math.ceil((row.expires_ms-Date.now())/86400000))};
 }
 export const emailSender=env=>env.TRIAL_EMAIL_FROM||env.MANUAL_REQUEST_FROM||'';
 export async function sendEmail(env,{to,subject,text,html}){
@@ -129,6 +144,49 @@ export async function verifyAccess(db,token){
  await db.prepare('INSERT INTO gold_trial_sessions(token_hash,email,expires_ms,created_ms) VALUES(?,?,?,?)')
   .bind(await hashToken(session),pending.email,now+30*86400000,now).run();
  return session;
+}
+const cleanInfo=(value,n=80)=>typeof value==='string'?value.trim().slice(0,n)||null:null;
+export async function instantSubscribe(db,email,metadata={}){
+ await ensureTrialSchema(db);
+ const now=Date.now();
+ // Account clock is keyed to email and never restarts for repeat signups.
+ await db.prepare(`INSERT INTO gold_trial_accounts(email,created_ms,expires_ms)
+  VALUES(?,?,?) ON CONFLICT(email) DO NOTHING`).bind(email,now,now+TRIAL_MS).run();
+ await db.prepare(`INSERT INTO gold_trial_preferences(email,updated_ms)
+  VALUES(?,?) ON CONFLICT(email) DO NOTHING`).bind(email,now).run();
+ const token=randomToken(),digest=await hashToken(token);
+ await db.prepare('INSERT INTO gold_trial_sessions(token_hash,email,expires_ms,created_ms) VALUES(?,?,?,?)')
+  .bind(digest,email,now+30*86400000,now).run();
+ await db.prepare('INSERT INTO gold_trial_instant_sessions(token_hash,email,created_ms) VALUES(?,?,?)')
+  .bind(digest,email,now).run();
+ await db.prepare(`INSERT INTO gold_trial_subscribers(
+    email,first_signup_ms,last_signup_ms,signup_count,source,country,region,city,
+    timezone,referrer,utm_source,utm_medium,utm_campaign)
+   VALUES(?,?,?,1,?,?,?,?,?,?,?,?,?)
+   ON CONFLICT(email) DO UPDATE SET
+    last_signup_ms=excluded.last_signup_ms,
+    signup_count=gold_trial_subscribers.signup_count+1,
+    source=COALESCE(excluded.source,gold_trial_subscribers.source),
+    country=COALESCE(excluded.country,gold_trial_subscribers.country),
+    region=COALESCE(excluded.region,gold_trial_subscribers.region),
+    city=COALESCE(excluded.city,gold_trial_subscribers.city),
+    timezone=COALESCE(excluded.timezone,gold_trial_subscribers.timezone),
+    referrer=COALESCE(excluded.referrer,gold_trial_subscribers.referrer),
+    utm_source=COALESCE(excluded.utm_source,gold_trial_subscribers.utm_source),
+    utm_medium=COALESCE(excluded.utm_medium,gold_trial_subscribers.utm_medium),
+    utm_campaign=COALESCE(excluded.utm_campaign,gold_trial_subscribers.utm_campaign)`)
+  .bind(email,now,now,cleanInfo(metadata.source,40),cleanInfo(metadata.country,2),
+   cleanInfo(metadata.region),cleanInfo(metadata.city),cleanInfo(metadata.timezone),
+   cleanInfo(metadata.referrer,160),cleanInfo(metadata.utmSource,80),
+   cleanInfo(metadata.utmMedium,80),cleanInfo(metadata.utmCampaign,80)).run();
+ return {token,created:now};
+}
+export async function proveCurrentSession(db,request){
+ const token=getToken(request);
+ if(!token)return false;
+ const result=await db.prepare('UPDATE gold_trial_instant_sessions SET proven=1 WHERE token_hash=?')
+  .bind(await hashToken(token)).run();
+ return result.meta?.changes===1;
 }
 export async function preferences(db,email){
  return await db.prepare('SELECT email_alerts,discord_webhook_cipher,telegram_chat_id FROM gold_trial_preferences WHERE email=?')
