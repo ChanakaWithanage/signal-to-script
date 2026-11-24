@@ -6,7 +6,7 @@
 <title>Gold Breakout Alerts | Live 15-Minute Chart and Strategy Results</title>
 <meta name="description" content="Explore the Gold Breakout chart, confirmed entry and exit signals and strategy backtests. Get alerts by email, Discord and Telegram for free.">
 <link rel="canonical" href="https://signaltoscript.com/trial.html">
-<link rel="icon" href="/favicon.svg"><link rel="stylesheet" href="/styles.css"><link rel="stylesheet" href="/trial.css?v=20261124-usd-order-v1">
+<link rel="icon" href="/favicon.svg"><link rel="stylesheet" href="/styles.css"><link rel="stylesheet" href="/trial.css?v=20261124-signup-engagement-v1">
 <meta property="og:type" content="website"><meta property="og:title" content="Free Gold Breakout Alerts | Signal to Script">
 <meta property="og:description" content="Open a live-updating gold chart, follow BUY, SELL and EXIT signals, and connect free alerts. No credit card or subscription.">
 <meta property="og:url" content="https://signaltoscript.com/trial.html"><meta property="og:image" content="https://signaltoscript.com/images/gold-breakout-15m-chart.webp">
@@ -109,14 +109,24 @@
 <dialog class="trial-access-dialog" id="trial-access-dialog" aria-labelledby="trial-modal-title" aria-describedby="trial-modal-desc">
  <button type="button" class="trial-dialog-close" id="trial-modal-close" aria-label="Close email dialog">×</button>
  <div class="trial-dialog-intro"><span class="trial-kicker"><span class="trial-live-dot" aria-hidden="true"></span> FREE GOLD BREAKOUT ALERTS</span>
-  <h2 id="trial-modal-title">Enter your email and start for free.</h2>
-  <p id="trial-modal-desc">You have seen the past signals and results. Enter your email to receive the next confirmed Gold Breakout entry and exit alerts. No verification step.</p>
+  <h2 id="trial-modal-title">Get the next Gold Breakout signal.</h2>
+  <p id="trial-modal-desc">Stop checking the chart for every setup. Get confirmed BUY, SELL and EXIT alerts delivered straight to you.</p>
  </div>
+ <div class="trial-modal-proof" id="trial-modal-proof" hidden>
+  <div class="trial-modal-proof-head"><span>RECENT HISTORICAL RESULTS</span><small id="trial-modal-proof-period">Available 15-minute history</small></div>
+  <div class="trial-modal-proof-grid">
+   <div><span>Net P&amp;L</span><strong id="trial-modal-profit">–</strong></div>
+   <div><span>Winning trades</span><strong id="trial-modal-wins">–</strong></div>
+   <div><span>Period return</span><strong id="trial-modal-return">–</strong></div>
+  </div>
+  <p>Based on the $100,000 backtest · 1% risk per trade.</p>
+ </div>
+ <p class="trial-modal-nudge">Don't miss the next confirmed entry or exit. Activate your 7-day free alerts with just your email.</p>
  <form id="trial-start-form">
   <label for="trial-email">Email address</label>
   <input type="email" id="trial-email" autocomplete="email" inputmode="email" maxlength="254" placeholder="you@example.com" required>
   <div class="trial-honeypot" aria-hidden="true"><input type="text" id="trial-website" tabindex="-1" autocomplete="off"></div>
-  <button type="submit" class="trial-primary" id="trial-start-button">Activate my free alerts →</button>
+  <button type="submit" class="trial-primary" id="trial-start-button">Start my 7-day free alerts →</button>
  </form>
  <p class="trial-dialog-assurance">No credit card · No name or phone number · No subscription</p>
  <small class="trial-dialog-terms">Free access runs for seven days from signup. Membership options appear later; there are no automatic charges.</small>
@@ -124,11 +134,11 @@
 </dialog>
 <dialog class="trial-upgrade-dialog" id="trial-upgrade-dialog" aria-labelledby="trial-upgrade-title" aria-describedby="trial-upgrade-desc">
  <button type="button" class="trial-dialog-close" id="trial-upgrade-close" aria-label="Close membership offer">×</button>
- <span class="trial-small-label">KEEP YOUR ALERTS GOING</span>
+ <span class="trial-small-label" id="trial-upgrade-kicker">KEEP YOUR ALERTS GOING</span>
  <h2 id="trial-upgrade-title">Your Gold Breakout workspace, for life.</h2>
  <p id="trial-upgrade-desc">Keep entry and exit alerts running, unlock longer backtests and access every current and future script with one lifetime membership.</p>
- <div class="trial-upgrade-benefits"><span>✓ All alerts</span><span>✓ More backtest history</span><span>✓ All scripts and future updates</span></div>
- <a class="trial-primary" href="/checkout.html?script=gold-breakout-15m">Explore lifetime access →</a>
+ <div class="trial-upgrade-benefits"><span>✓ 60-day backtesting</span><span>✓ Lifetime alerts</span><span>✓ All scripts and future updates</span></div>
+ <a class="trial-primary" href="/checkout.html?script=gold-breakout-15m" id="trial-upgrade-primary">Explore lifetime access →</a>
  <button id="trial-upgrade-later" type="button" class="trial-text-link">Continue exploring</button>
 </dialog>
 <section class="trial-bottom-info" id="trial-bottom-info"><div><strong>Trade the setup, not the guess.</strong><p>From the overnight range to the final exit, every event is visible.</p></div><a href="/articles/gold-breakout-15m-strategy.html">Read how Gold Breakout works →</a></section>
@@ -136,5 +146,5 @@
 <footer class="footer"><div class="wrap foot"><div>© 2026 Signal to Script · by CW.</div><div>Built for strategy research.</div></div><nav class="policy-links" aria-label="Legal and business policies"><a href="/terms.html">Terms &amp; Conditions</a><a href="/privacy.html">Privacy Policy</a><a href="/refunds.html">Refunds</a><a href="mailto:support@signaltoscript.com">Support</a></nav></footer>
 <script defer src="/site.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/lightweight-charts@4.2.3/dist/lightweight-charts.standalone.production.js"></script>
-<script defer src="/trial.js?v=20261124-usd-order-v1"></script>
+<script defer src="/trial.js?v=20261124-signup-engagement-v1"></script>
 </body></html>
