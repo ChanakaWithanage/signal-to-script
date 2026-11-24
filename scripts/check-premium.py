@@ -26,8 +26,10 @@ for slug in slugs:
         assert f'data-buy-script="{slug}"' in home, f"Missing buy tracker: {slug}"
     assert f'data-download-script="{slug}"' not in home, f"Paid CTA marked as free: {slug}"
 assert home.index('id="premium-scripts"')<home.index('id="free-scripts"')
-assert "$4.99 manual" in home and "$12.99 crypto" in home and "<s>$49</s>" in home
-assert "founders launch" in home.lower() and 'href="/trial.html"' in home
+assert "Get Gold Breakout alerts for free" in home and "7 days free" not in home
+assert "$4.99" not in home.split('class="gold-library-feature"')[1].split('</div><div class="feature">')[0]
+assert "$4.99" in checkout and "$12.99 crypto" in checkout
+assert 'href="/trial.html"' in home and "Try it before you buy" not in home
 assert "CURRENT_USER_PASSWORD" not in premium
 assert 'name="robots" content="noindex, nofollow"' in checkout
 assert "Planned regular price" in checkout and "$12.99 crypto" in checkout
