@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {runGoldBreakout,fetchGoldCandles,biquoteBars} from '../functions/_lib/gold-market.js';
 import {storeGoldCandles,getArchivedGold,mergeGoldCandles} from '../functions/_lib/gold-archive.js';
-import {illustrativeGoldResults,EXAMPLE_CAPITAL_USD,EXAMPLE_RISK_PERCENT} from '../functions/_lib/gold-performance.js';
+import {illustrativeGoldResults,goldTradeUsd,EXAMPLE_CAPITAL_USD,EXAMPLE_RISK_PERCENT} from '../functions/_lib/gold-performance.js';
 import {validEmail,normalizeEmail,discordUrl,TRIAL_DAYS,UPGRADE_AFTER_MS,upgradeEligible,claimUpgradePrompt,instantSubscribe,signedIn} from '../functions/_lib/gold-trial.js';
 import {onRequestPost as startTrial} from '../functions/api/trial/start.js';
 import {onRequestGet as listSubscribers} from '../functions/api/trial/subscribers.js';
@@ -372,6 +372,14 @@ test('Public trial response contains historical strategy results without a hypot
  assert.equal(typeof result.stats.netR,'number');
  assert.equal(typeof result.stats.maxDrawdownR,'number');
  assert.equal(Object.hasOwn(result,'exampleAccount'),false);
+ assert.equal(result.performanceUsd.capitalUsd,100000);
+ assert.equal(result.performanceUsd.riskUsd,1000);
+ assert.equal(result.performanceUsd.netUsd,Math.round(result.stats.netR*100000)/100);
+ assert.equal(result.performanceUsd.maxDrawdownUsd,
+  Math.round(result.stats.maxDrawdownR*100000)/100);
+ for(const trade of result.trades){
+  assert.equal(trade.resultUsd,goldTradeUsd(trade.r,1000));
+ }
 });
 test('Workspace orders signup, 15m chart, performance and completed trade history',async()=>{
  const {readFile}=await import('node:fs/promises');
@@ -381,16 +389,38 @@ test('Workspace orders signup, 15m chart, performance and completed trade histor
  const signup=html.indexOf('id="trial-activate"');
  const chart=html.indexOf('id="trial-chart"');
  const performance=html.indexOf('id="trial-performance"');
+ const status=html.indexOf('class="trial-status-card"');
+ const alerts=html.indexOf('class="trial-alerts-card"');
  const trades=html.indexOf('id="trial-trade-history"');
- assert.ok(signup>=0&&signup<chart&&chart<performance&&performance<trades);
+ assert.ok(signup>=0&&signup<chart&&chart<performance&&performance<status);
+ assert.ok(status<alerts&&alerts<trades);
  assert.match(html,/id="trial-metric-net"/);
  assert.match(html,/id="trial-metric-win"/);
  assert.match(html,/id="trial-metric-dd"/);
- assert.doesNotMatch(html,/\$100,000|\$1,000|No compounding|Illustrative net P|trial-performance-cta/);
- assert.doesNotMatch(html,/trial-metric-profit|trial-metric-return|trial-chart-invite/);
- assert.doesNotMatch(js,/trial-metric-profit|trial-metric-return|example\.netUsd|trial-performance-cta/);
- assert.match(js,/stats\.netR\.toFixed\(2\)\+'R'/);
+ assert.match(html,/\$100,000/);
+ assert.match(html,/1% risk per trade/);
+ assert.match(html,/id="trial-metric-return"/);
+ assert.match(html,/Result \(USD\)/);
+ assert.doesNotMatch(html,/No compounding|Illustrative net P|trial-performance-cta|example account/i);
+ assert.doesNotMatch(html,/trial-metric-profit|trial-chart-invite|in R|drawdown in R/i);
+ assert.doesNotMatch(js,/trial-metric-profit|example\.netUsd|trial-performance-cta/);
+ assert.match(js,/fmtUSD\(performance\.netUsd,true\)/);
+ assert.match(js,/fmtUSD\(performance\.maxDrawdownUsd\)/);
+ assert.match(js,/fmtUSD\(item\.resultUsd,true\)/);
  assert.match(css,/trial-hero-alert-action/);
  assert.doesNotMatch(html,/trial-show-last-signal|trial-show-latest-bars/);
  assert.doesNotMatch(js,/trial-show-last-signal|trial-show-latest-bars/);
+});
+
+test('Every $100,000-based trade result uses the same risk unit as the summary',()=>{
+ assert.equal(goldTradeUsd(1),1000);
+ assert.equal(goldTradeUsd(-.75),-750);
+ assert.equal(goldTradeUsd(0),0);
+ assert.equal(goldTradeUsd(1.234),1234);
+ assert.equal(goldTradeUsd(-1.111),-1111);
+ assert.equal(goldTradeUsd(NaN),null);
+ const summary=illustrativeGoldResults({netR:2.4,maxDrawdownR:1.25});
+ assert.equal(summary.netUsd,2400);
+ assert.equal(summary.returnPercent,2.4);
+ assert.equal(summary.maxDrawdownUsd,1250);
 });
