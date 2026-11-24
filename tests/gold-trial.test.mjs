@@ -95,7 +95,7 @@ test('Gold alert marketing opens the workspace before collecting email',async()=
  assert.doesNotMatch(home,/Try it before you buy|7 days free|Email only/i);
  assert.match(page,/<section class="trial-workspace" id="trial-workspace">/);
  assert.match(page,/<dialog class="trial-access-dialog"/);
- assert.match(page,/Enter your email and start for free/);
+ assert.match(page,/Get the next Gold Breakout signal/);
  assert.match(page,/<dialog class="trial-upgrade-dialog"/);
  assert.doesNotMatch(article,/\$4\.99|before buying/);
 });
