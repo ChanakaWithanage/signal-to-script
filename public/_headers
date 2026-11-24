@@ -16,6 +16,9 @@
 /join.html
   Cache-Control: public, max-age=0, must-revalidate
 
+/trial.html
+  Cache-Control: public, max-age=0, must-revalidate
+
 /checkout.html
   Cache-Control: public, max-age=0, must-revalidate
 
@@ -39,6 +42,12 @@
   Cache-Control: public, max-age=0, must-revalidate
 
 /checkout.js
+  Cache-Control: public, max-age=0, must-revalidate
+
+/trial.js
+  Cache-Control: public, max-age=0, must-revalidate
+
+/trial.css
   Cache-Control: public, max-age=0, must-revalidate
 
 # Original chart screenshots can be replaced under the same URLs.
