@@ -1,11 +1,9 @@
 import {ensureTrialSchema,signedIn,respond} from '../../_lib/gold-trial.js';
 import {fetchGoldCandles,runGoldBreakout} from '../../_lib/gold-market.js';
 
-const PREVIEW_DAYS=5;
-const DAY_MS=86400000;
-
-// Visitors can inspect the real Gold workspace immediately. Email verification
-// activates alerts and 30-day history; an expired trial returns to preview mode.
+// Visitors can inspect real past signals and up to 30 days of backtest results
+// before subscribing. Email is used only for future alerts and trial tracking.
+// 60-day historical testing remains exclusive to lifetime members.
 export async function onRequestGet({request,env}){
  try{
   let member=null;
@@ -14,33 +12,21 @@ export async function onRequestGet({request,env}){
     await ensureTrialSchema(env.DB);
     member=await signedIn(env.DB,request);
    }catch(error){
-    // Viewing live candles must not depend on subscriber-table availability.
-    console.error('Subscriber session unavailable while loading public gold chart',error);
+    // Public chart and historical results do not require subscriber DB availability.
+    console.error('Gold session unavailable while loading public market data',error);
    }
   }
   const requestedDays=new URL(request.url).searchParams.get('days')==='60'?60:30;
   if(requestedDays>30&&!member?.lifetime){
    return respond({error:'Extended historical testing is part of lifetime access.',code:'UPGRADE_REQUIRED'},403);
   }
-  const fullAccess=Boolean(member?.active);
-  const feed=await fetchGoldCandles(fullAccess?requestedDays:30);
-  const model=runGoldBreakout(feed.bars,{days:fullAccess?requestedDays:30});
-  if(!fullAccess){
-   const newest=model.candles.at(-1)?.time||Date.now();
-   const since=newest-PREVIEW_DAYS*DAY_MS;
-   model.candles=model.candles.filter(c=>c.time>=since);
-   model.events=model.events.filter(e=>e.time>=since);
-   model.ranges=model.ranges.filter(r=>r.end>=since);
-   model.trades=[];
-   model.stats=null;
-   model.current.lastEvent=model.events.at(-1)||null;
-  }
-  return respond({...model,preview:!fullAccess,
-   previewDays:fullAccess?null:PREVIEW_DAYS,
+  const feed=await fetchGoldCandles(requestedDays);
+  const model=runGoldBreakout(feed.bars,{days:requestedDays});
+  return respond({...model,preview:false,previewDays:null,
    market:{source:feed.source,symbol:feed.symbol,lastClosedBar:feed.asOf,
     interval:feed.interval,availableDays:feed.availableDays,
     limitedHistory:feed.limitedHistory,stale:!!feed.stale},
-   trial:{signedIn:!!member,active:fullAccess,lifetime:!!member?.lifetime,
+   trial:{signedIn:!!member,active:!!member?.active,lifetime:!!member?.lifetime,
     expiresAt:member?.expiresAt||null}});
  }catch(error){
   console.error('Gold trial data error',error);
