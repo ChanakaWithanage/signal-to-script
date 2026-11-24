@@ -278,3 +278,66 @@
  .trial-history-switch button{flex:1}
  .trial-history-coverage{padding:9px 13px}
 }
+
+/* Historical evidence-first layout: keep results and illustrative P&L in the
+   first viewport while the 15m chart and detailed trade history follow. */
+.trial-performance-top{
+ margin:0 0 17px;padding:19px 20px 17px;background:#fff;
+ border:1px solid #dbe8df;border-radius:15px;box-shadow:0 7px 28px #173d2510
+}
+.trial-performance-topline{display:flex;align-items:center;justify-content:space-between;gap:15px;margin-bottom:12px}
+.trial-performance-topline h2{font:700 clamp(22px,2.45vw,30px)/1.2 var(--serif,Georgia,serif);
+ letter-spacing:-.025em;color:#254733;margin:4px 0 4px}
+.trial-performance-topline p{color:#728678;font:500 12px/1.5 var(--sans,Arial,sans-serif);margin:0}
+.trial-performance-topline p strong{color:#355d43}
+.trial-performance-cta{font-size:11px;padding:11px 14px;flex:none;max-width:270px}
+.trial-performance-basis{display:flex;flex-wrap:wrap;align-items:center;gap:7px;margin:12px 0 13px}
+.trial-performance-basis span{display:inline-flex;align-items:center;border:1px solid #ddebe0;border-radius:99px;
+ background:#f7faf7;color:#527661;padding:5px 9px;font:700 10px/1.4 var(--sans,Arial,sans-serif)}
+.trial-performance-top .trial-metrics{display:grid;
+ grid-template-columns:minmax(235px,2.2fr) repeat(4,minmax(0,1fr));gap:9px}
+.trial-performance-top .trial-metrics>div{border:1px solid #e0ebe3;border-radius:10px;background:#fafcfa;
+ padding:13px 12px}
+.trial-performance-top .trial-metrics .trial-profit-highlight{
+ background:linear-gradient(125deg,#f1f8f1,#fff);border-color:#cbe4d2;padding:15px 17px}
+.trial-performance-top .trial-metrics .trial-profit-highlight>span{
+ color:#2f7050;font:800 11px/1.5 var(--sans,Arial,sans-serif)}
+.trial-performance-top .trial-metrics .trial-profit-highlight>strong{
+ margin:5px 0 3px;font:850 clamp(29px,3.3vw,43px)/1.15 var(--sans,Arial,sans-serif);
+ color:#245c3c;letter-spacing:-.045em;white-space:nowrap}
+.trial-performance-top .trial-metrics .trial-profit-highlight p{
+ display:flex;flex-wrap:wrap;align-items:center;gap:5px;color:#577565;
+ margin:2px 0 0;font:650 11px/1.5 var(--sans,Arial,sans-serif)}
+.trial-performance-top .trial-metrics .trial-profit-highlight p b,
+.trial-performance-top .trial-metrics .trial-profit-highlight p span{
+ display:inline;font:750 11px/1.5 var(--sans,Arial,sans-serif);color:inherit}
+.trial-performance-top .trial-metrics .trial-profit-highlight .trial-negative{color:#be4242!important}
+.trial-performance-top .trial-metrics .trial-profit-highlight .trial-positive{color:#1d8050!important}
+.trial-performance-top .trial-metrics>div:not(.trial-profit-highlight)>strong{
+ font-size:clamp(18px,1.9vw,25px);line-height:1.5;white-space:nowrap}
+.trial-performance-top .trial-metrics>div:not(.trial-profit-highlight)>small{font-size:10px}
+.trial-performance-footnote{margin-top:11px;color:#7b8d81;
+ font:500 10px/1.5 var(--sans,Arial,sans-serif)}
+.trial-trade-history{margin-top:22px}
+.trial-trade-history .trial-trades-card{margin-top:0}
+@media(max-width:1100px){
+ .trial-performance-top .trial-metrics{grid-template-columns:repeat(3,minmax(0,1fr))}
+ .trial-performance-top .trial-metrics .trial-profit-highlight{grid-column:span 2}
+}
+@media(max-width:780px){
+ .trial-performance-top{padding:17px}
+ .trial-performance-topline{align-items:flex-start;flex-direction:column;gap:11px}
+ .trial-performance-topline h2{font-size:26px}
+ .trial-performance-cta{max-width:none}
+ .trial-performance-top .trial-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .trial-performance-top .trial-metrics .trial-profit-highlight{grid-column:span 2}
+}
+@media(max-width:560px){
+ .trial-performance-top{padding:15px;margin-bottom:14px}
+ .trial-performance-cta{width:100%;max-width:none}
+ .trial-performance-topline h2{font-size:24px}
+ .trial-performance-top .trial-metrics>div{padding:12px 10px}
+ .trial-performance-top .trial-metrics .trial-profit-highlight>strong{font-size:35px}
+ .trial-performance-basis{gap:5px}
+ .trial-performance-basis span{padding:4px 7px;font-size:9px}
+}
