@@ -162,3 +162,9 @@ CREATE TABLE IF NOT EXISTS gold_trial_deliveries (
 CREATE TABLE IF NOT EXISTS gold_trial_state (
  id TEXT PRIMARY KEY,last_event_ms INTEGER NOT NULL,updated_ms INTEGER NOT NULL
 );
+
+-- Account-scoped upgrade prompts begin only after five days of active history.
+CREATE TABLE IF NOT EXISTS gold_trial_offer_prompts (
+ email TEXT PRIMARY KEY,last_shown_ms INTEGER NOT NULL,
+ shown_count INTEGER NOT NULL DEFAULT 1
+);
