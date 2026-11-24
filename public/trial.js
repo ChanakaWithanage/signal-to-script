@@ -59,7 +59,7 @@ function updatePreferences(){
  $('trial-telegram-connect').textContent=active&&session.telegramConnected?'Disconnect':'Connect';
  $('trial-telegram-connect').disabled=active&&!session?.delivery?.telegramReady;
  $('trial-alerts-note').textContent=!active?
-   'Explore the chart now. Activate your free alerts with a secure email link.':
+   'Explore the chart now. Enter an email to turn on your free notifications.':
    !session.delivery?.emailReady&&!session.delivery?.discordReady&&!session.delivery?.telegramReady?
    'Notification delivery is being configured. Chart signals and backtests are available now.':
    'Notifications are delivered on newly confirmed entry and exit events.';
@@ -74,9 +74,10 @@ async function showUpgradeIfDue(){
 async function loadSession({prompt=true}={}){
  session=await api('session');
  updateAccess();updatePreferences();
- if(!session.signedIn&&prompt)openEmailDialog();
  if(session.signedIn&&accessDialog.open)accessDialog.close();
  await loadData();
+ // Show the email popup only after the visitor has reached the chart workspace.
+ if(!session.signedIn&&prompt)openEmailDialog();
  if(session.signedIn&&prompt)await showUpgradeIfDue();
 }
 async function verifyLink(token){
@@ -94,15 +95,27 @@ async function verifyLink(token){
 const form=$('trial-start-form');
 form.addEventListener('submit',async e=>{
  e.preventDefault();if(!form.reportValidity())return;
- const button=$('trial-start-button');button.disabled=true;button.textContent='Sending your secure link…';message('');
+ const button=$('trial-start-button');
+ button.disabled=true;button.textContent='Activating alerts…';message('');
  try{
-  const email=$('trial-email').value.trim();
-  await post('start',{email,website:$('trial-website').value});
-  form.hidden=true;$('trial-email-sent').hidden=false;$('trial-confirm-email').textContent=email;
+  const params=new URLSearchParams(location.search);
+  const data={
+   email:$('trial-email').value.trim(),
+   website:$('trial-website').value,
+   source:'gold-workspace',
+   referrer:document.referrer||'direct',
+   utmSource:params.get('utm_source'),
+   utmMedium:params.get('utm_medium'),
+   utmCampaign:params.get('utm_campaign'),
+   timezone:Intl.DateTimeFormat().resolvedOptions().timeZone||null
+  };
+  await post('start',data);
+  accessDialog.close();
+  await loadSession({prompt:false});
+  message('Your Gold Breakout alerts are activated. Explore your chart and alert settings below.');
  }catch(error){message(error.message)}
- finally{button.disabled=false;button.textContent='Start for free →'}
+ finally{button.disabled=false;button.textContent='Activate my free alerts →'}
 });
-$('trial-try-another').addEventListener('click',()=>{form.hidden=false;$('trial-email-sent').hidden=true;$('trial-email').focus()});
 $('trial-modal-close').addEventListener('click',()=>accessDialog.close());
 $('trial-explore-preview').addEventListener('click',()=>accessDialog.close());
 $('trial-upgrade-close').addEventListener('click',()=>upgradeDialog.close());
@@ -124,7 +137,8 @@ function currentDetails(item){
  $('trial-last-time').textContent=event?fmtTime(event.time):'Waiting for confirmed signals';
 }
 function writeMetrics(item){
- $('trial-period-title').textContent=item.preview?'30':days;
+ $('trial-period-title').textContent=item.preview?'30':
+  Math.max(1,Math.min(days,Math.floor(item.market?.availableDays||days)));
  if(item.preview||!item.stats){
   for(const id of ['trial-metric-trades','trial-metric-win','trial-metric-net','trial-metric-pf','trial-metric-dd'])$(id).textContent='—';
   $('trial-metric-net').className='';
@@ -163,11 +177,36 @@ function showTrades(rows,preview=false){
   tbody.append(tr);
  }
 }
+function showMarketFallback(reason){
+ const box=$('trial-chart');
+ if(!chart){
+  box.replaceChildren();
+  const wrap=document.createElement('div');wrap.className='trial-market-fallback';
+  const head=document.createElement('div');head.className='trial-market-fallback-head';
+  head.textContent='Gold chart';
+  const iframe=document.createElement('iframe');
+  iframe.title='Gold price chart from TradingView';
+  iframe.loading='lazy';
+  iframe.referrerPolicy='strict-origin-when-cross-origin';
+  iframe.src='https://s.tradingview.com/widgetembed/?symbol=TVC%3AGOLD&interval=15&theme=light&style=1&locale=en&hide_top_toolbar=1&saveimage=0';
+  const note=document.createElement('div');note.className='trial-market-fallback-note';
+  note.textContent='Strategy overlays are reconnecting. You can still explore the live Gold chart.';
+  const retry=document.createElement('button');retry.type='button';retry.textContent='Retry strategy signals';
+  retry.addEventListener('click',loadData);
+  wrap.append(head,iframe,note,retry);box.append(wrap);
+ }
+ $('trial-asof').textContent='Strategy data temporarily unavailable';
+ $('trial-online-status').textContent='Retrying';
+ $('trial-source').textContent='Gold chart via TradingView · Strategy feed reconnecting';
+ $('trial-current-status').textContent='Reconnecting signals';
+ $('trial-current-detail').textContent='The live strategy feed is refreshing. The price chart remains available.';
+ $('trial-trade-rows').innerHTML='<tr><td colspan="6">Historical results will appear when the strategy feed reconnects.</td></tr>';
+}
 function drawChart(item){
  const box=$('trial-chart');
  if(!window.LightweightCharts){
-  box.replaceChildren();const p=document.createElement('div');p.className='trial-loading-chart';
-  p.textContent='The chart library could not load. Your signals and historical results are shown below.';box.append(p);return;
+  showMarketFallback('chart library');
+  return;
  }
  const barData=item.candles.map(b=>({time:Math.floor(b.time/1000),open:b.open,high:b.high,low:b.low,close:b.close}));
  if(!barData.length)return;
@@ -218,7 +257,8 @@ async function loadData(){
   model=item;currentDetails(item);writeMetrics(item);showTrades(item.trades,item.preview);
   drawChart(item);
   $('trial-asof').textContent='Last confirmed candle '+fmtTime(Date.parse(item.market.lastClosedBar));
-  $('trial-source').textContent=item.market.source;
+  $('trial-source').textContent=item.market.source+
+   (item.market.limitedHistory?' · '+item.market.availableDays+' days of confirmed candles available':'');
   const age=Date.now()-Date.parse(item.market.lastClosedBar);
   $('trial-online-status').textContent=age<60*60000?'Updated':'Latest session';
   $('trial-preview-lock').hidden=!item.preview;
@@ -227,7 +267,11 @@ async function loadData(){
     'Explore recent gold candles now. Activate your free alerts to unlock the full 30-day history.';
   $('trial-preview-unlock').textContent=session?.signedIn?'Continue with lifetime access':'Activate free alerts';
   message('');
- }catch(error){message(error.message)}
+ }catch(error){
+  console.error('Gold strategy data request failed',error);
+  showMarketFallback(error.message);
+  message('The strategy feed is reconnecting. The gold chart remains available below.');
+ }
  finally{loading=false;$('trial-refresh').disabled=false}
 }
 $('trial-preview-unlock').addEventListener('click',()=>{
