@@ -14,7 +14,7 @@ export async function onRequestPost({request,env}){
    country:request.cf?.country,
    region:request.cf?.region,
    city:request.cf?.city,
-   timezone:request.cf?.timezone,
+   timezone:body.timezone||request.cf?.timezone,
    referrer:body.referrer,
    utmSource:body.utmSource,
    utmMedium:body.utmMedium,
