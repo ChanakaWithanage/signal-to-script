@@ -74,7 +74,7 @@ export function runGoldBreakout(input,{days=30}={}){
    if(rangeCount>=RANGE_END*4)everBuilt=true;
   }
   const ready=everBuilt&&Number.isFinite(hi)&&hi>lo;
-  if(ready&&h===RANGE_END&&rangeCount===RANGE_END*4){
+  if(ready&&h===RANGE_END&&rangeCount===RANGE_END*4&&rangeLines.at(-1)?.day!==d){
    chartRange={day:d,high:round(hi),low:round(lo),start:dayStart,end:bar.time};
    rangeLines.push(chartRange);
   }
