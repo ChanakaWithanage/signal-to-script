@@ -171,7 +171,7 @@ test('Workspace presents instant signup and a real chart fallback',async()=>{
  const {readFile}=await import('node:fs/promises');
  const html=await readFile(new URL('../public/trial.html',import.meta.url),'utf8');
  const js=await readFile(new URL('../public/trial.js',import.meta.url),'utf8');
- assert.match(html,/Activate my free alerts/);
+ assert.match(html,/Start my 7-day free alerts/);
  assert.doesNotMatch(html,/Check your inbox|trial-email-sent|trial-try-another/);
  assert.match(js,/await post\('start',data\)/);
  assert.match(js,/await loadSession\(\{prompt:false\}\)/);
@@ -423,4 +423,64 @@ test('Every $100,000-based trade result uses the same risk unit as the summary',
  assert.equal(summary.netUsd,2400);
  assert.equal(summary.returnPercent,2.4);
  assert.equal(summary.maxDrawdownUsd,1250);
+});
+
+test('Clicking 60 days opens membership offer without changing public chart data',async()=>{
+ const {readFile}=await import('node:fs/promises');
+ const html=await readFile(new URL('../public/trial.html',import.meta.url),'utf8');
+ const js=await readFile(new URL('../public/trial.js',import.meta.url),'utf8');
+ assert.match(html,/data-days="60"/);
+ assert.match(html,/id="trial-upgrade-dialog"/);
+ assert.match(html,/id="trial-upgrade-kicker"/);
+ assert.match(html,/id="trial-upgrade-primary"/);
+ assert.match(html,/checkout\.html\?script=gold-breakout-15m/);
+ assert.match(js,/if\(next===60&&!session\?\.lifetime\)/);
+ assert.match(js,/openUpgradeDialog\('history'\)/);
+ assert.match(js,/Unlock 60 days of Gold Breakout results/);
+ assert.match(js,/Unlock 60-day history with lifetime access/);
+ assert.doesNotMatch(js,/message\('Extended backtesting is available with lifetime access/);
+});
+
+test('Gold-only engaged chart viewing prompts free trial after 45 visible seconds and limits repeats',async()=>{
+ const {readFile}=await import('node:fs/promises');
+ const html=await readFile(new URL('../public/trial.html',import.meta.url),'utf8');
+ const js=await readFile(new URL('../public/trial.js',import.meta.url),'utf8');
+ assert.match(js,/GOLD_CHART_DWELL_SECONDS=45/);
+ assert.match(js,/GOLD_SIGNUP_COOLDOWN_MS=24\*60\*60\*1000/);
+ assert.match(js,/startGoldChartEngagementPrompt\(\)/);
+ assert.match(js,/location\.pathname!=='\/trial\.html'/);
+ assert.match(js,/new IntersectionObserver\(/);
+ assert.match(js,/entry\.intersectionRatio>=\.25/);
+ assert.match(js,/document\.visibilityState!=='visible'/);
+ assert.match(js,/!session\|\|session\.signedIn/);
+ assert.match(js,/signupPromptOnCooldown\(\)/);
+ assert.match(js,/chartViewedSeconds>=GOLD_CHART_DWELL_SECONDS\)openEmailDialog\(\)/);
+ assert.match(js,/localStorage\.setItem\(GOLD_SIGNUP_PROMPT_KEY/);
+ assert.match(js,/localStorage\.getItem\(GOLD_SIGNUP_PROMPT_KEY/);
+ assert.match(html,/id="trial-explore-preview"/);
+ assert.match(html,/id="trial-modal-close"/);
+ assert.doesNotMatch(html,/automatic signup|automatic trial/i);
+});
+
+test('Free email offer displays actual signed historical P&L, winning trades and return',async()=>{
+ const {readFile}=await import('node:fs/promises');
+ const html=await readFile(new URL('../public/trial.html',import.meta.url),'utf8');
+ const js=await readFile(new URL('../public/trial.js',import.meta.url),'utf8');
+ const css=await readFile(new URL('../public/trial.css',import.meta.url),'utf8');
+ assert.match(html,/id="trial-modal-proof"/);
+ assert.match(html,/id="trial-modal-profit"/);
+ assert.match(html,/id="trial-modal-wins"/);
+ assert.match(html,/id="trial-modal-return"/);
+ assert.match(html,/RECENT HISTORICAL RESULTS/);
+ assert.match(html,/Based on the \$100,000 backtest/);
+ assert.match(js,/function updateSignupProof\(item\)/);
+ assert.match(js,/stats\?\.trades>0&&Number\.isFinite\(performance\?\.netUsd\)/);
+ assert.match(js,/stats\.wins/);
+ assert.match(js,/performance\.returnPercent\.toFixed\(2\)/);
+ assert.match(js,/Historical net gain/);
+ assert.match(js,/Historical net loss/);
+ assert.match(js,/proof\.hidden=!hasTrades/);
+ assert.match(js,/model=item;updateSignupProof\(item\)/);
+ assert.match(css,/trial-modal-proof-grid/);
+ assert.doesNotMatch(html,/guaranteed|will earn|miss out on \$[0-9]/i);
 });
