@@ -18,6 +18,7 @@ pages = {
     "articles/pinbar-3-line-strike-combo-alerts.html": "/articles/pinbar-3-line-strike-combo-alerts.html",
     "articles/automate-tradingview-strategies-chrome-extension.html": "/articles/automate-tradingview-strategies-chrome-extension.html",
     "join.html": "/join.html",
+    "trial.html": "/trial.html",
     "privacy.html": "/privacy.html",
     "terms.html": "/terms.html",
     "refunds.html": "/refunds.html"
