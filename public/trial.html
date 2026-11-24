@@ -6,7 +6,7 @@
 <title>Gold Breakout Alerts | Live 15-Minute Chart and Strategy Results</title>
 <meta name="description" content="Explore the Gold Breakout chart, confirmed entry and exit signals and strategy backtests. Get alerts by email, Discord and Telegram for free.">
 <link rel="canonical" href="https://signaltoscript.com/trial.html">
-<link rel="icon" href="/favicon.svg"><link rel="stylesheet" href="/styles.css"><link rel="stylesheet" href="/trial.css?v=20261124-future-alerts-1">
+<link rel="icon" href="/favicon.svg"><link rel="stylesheet" href="/styles.css"><link rel="stylesheet" href="/trial.css?v=20261124-signal-markers-1">
 <meta property="og:type" content="website"><meta property="og:title" content="Free Gold Breakout Alerts | Signal to Script">
 <meta property="og:description" content="Open a live-updating gold chart, follow BUY, SELL and EXIT signals, and connect free alerts. No credit card or subscription.">
 <meta property="og:url" content="https://signaltoscript.com/trial.html"><meta property="og:image" content="https://signaltoscript.com/images/gold-breakout-15m-chart.webp">
@@ -34,9 +34,16 @@
  </div>
  <div class="trial-dashboard-grid">
   <section class="trial-chart-card">
-   <div class="trial-card-heading"><div><strong>Gold 15-minute chart</strong><span id="trial-asof">Loading latest confirmed candles…</span></div><div class="trial-chart-legend"><span><i class="legend-range"></i> Range</span><span><i class="legend-buy"></i> Long</span><span><i class="legend-sell"></i> Short</span><span><i class="legend-exit"></i> Exit</span></div></div>
+   <div class="trial-card-heading"><div><strong>Gold · 15-minute candles</strong><span id="trial-asof">Loading latest confirmed candles…</span></div><div class="trial-chart-legend"><span><i class="legend-range"></i> Range</span><span><i class="legend-buy"></i> BUY</span><span><i class="legend-sell"></i> SELL</span><span><i class="legend-exit"></i> EXIT</span></div></div>
+   <div class="trial-signal-toolbar">
+    <div class="trial-signal-badge"><span>15M</span><strong id="trial-signal-count">Loading confirmed signals…</strong></div>
+    <div class="trial-signal-toolbar-actions"><button type="button" id="trial-show-last-signal" hidden>Show latest signal</button><button type="button" id="trial-show-latest-bars" hidden>Latest candles</button></div>
+   </div>
    <div id="trial-chart" class="trial-chart" role="img" aria-label="Gold 15 minute candlestick chart with range lines and trade entry and exit markers"><div class="trial-loading-chart">Connecting to gold market data…</div></div>
    <div class="trial-chart-foot"><span>Session: 00:00–07:00 · Entries: 07:00–20:00 · Broker time UTC+3</span><span id="trial-source">Market data loading</span></div>
+   <div class="trial-signal-history" id="trial-signal-history" aria-label="Recent confirmed buy, sell and exit signals" aria-live="polite">
+    <span class="trial-signals-loading">Recent 15-minute signals are loading…</span>
+   </div>
    <div class="trial-chart-invite" id="trial-chart-invite" hidden>
     <div><span>PAST SIGNALS ARE ON THE CHART</span><strong>Get the next entry and exit alerts for free.</strong></div>
     <button type="button" id="trial-chart-invite-button">Notify me for free <span aria-hidden="true">→</span></button>
@@ -102,5 +109,5 @@
 <footer class="footer"><div class="wrap foot"><div>© 2026 Signal to Script · by CW.</div><div>Built for strategy research.</div></div><nav class="policy-links" aria-label="Legal and business policies"><a href="/terms.html">Terms &amp; Conditions</a><a href="/privacy.html">Privacy Policy</a><a href="/refunds.html">Refunds</a><a href="mailto:support@signaltoscript.com">Support</a></nav></footer>
 <script defer src="/site.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/lightweight-charts@4.2.3/dist/lightweight-charts.standalone.production.js"></script>
-<script defer src="/trial.js?v=20261124-future-alerts-1"></script>
+<script defer src="/trial.js?v=20261124-signal-markers-1"></script>
 </body></html>

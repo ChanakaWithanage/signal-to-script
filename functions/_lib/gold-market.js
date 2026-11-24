@@ -100,7 +100,10 @@ export function runGoldBreakout(input,{days=30}={}){
  const cutoff=bars.at(-1).time-days*DAY_MS;
  const traded=[],events=[],rangeLines=[];
  let date='',hi=-Infinity,lo=Infinity,rangeCount=0,position=null,completed=false;
- let dayStart=null,chartRange=null,everBuilt=false;
+ let dayStart=null,rangeFirstHour=null,rangeLastHour=null,rangeFinalized=false,rangeReady=false;
+ // Gold futures can have a one-hour maintenance break at the beginning of
+ // the broker day. Require >=20 observed 15m bars (of 28 scheduled bars)
+ // spanning the overnight range, rather than requiring all 28 candles.
  const exit=(at,price,reason)=>{
   if(!position)return;
   const pnl=(price-position.entry)*(position.side==='LONG'?1:-1)-SPREAD_USD;
@@ -115,18 +118,27 @@ export function runGoldBreakout(input,{days=30}={}){
   if(d!==date){
    if(position)exit(bar.time,bar.open,'Session close');
    date=d;hi=-Infinity;lo=Infinity;rangeCount=0;completed=false;
-   // A complete overnight range is required; never trade on a partial first day.
-   dayStart=bar.time;everBuilt=false;
+   dayStart=bar.time;rangeFirstHour=null;rangeLastHour=null;
+   rangeFinalized=false;rangeReady=false;
   }
-  if(h>=RANGE_START&&h<RANGE_END){
+  if(h>=RANGE_START&&h<RANGE_END&&!rangeFinalized){
    hi=Math.max(hi,bar.high);lo=Math.min(lo,bar.low);rangeCount++;
-   if(rangeCount>=RANGE_END*4)everBuilt=true;
+   if(rangeFirstHour===null)rangeFirstHour=h;
+   rangeLastHour=h;
   }
-  const ready=everBuilt&&Number.isFinite(hi)&&hi>lo;
-  if(ready&&h===RANGE_END&&rangeCount===RANGE_END*4&&rangeLines.at(-1)?.day!==d){
-   chartRange={day:d,high:round(hi),low:round(lo),start:dayStart,end:bar.time};
-   rangeLines.push(chartRange);
+  // Freeze the range at the opening of the trading window, never later.
+  // CME/COMEX futures commonly omit 00:00-00:45 on the broker UTC+3 clock,
+  // while spot gold may trade all 28 candles. Both are valid real sessions.
+  if(!rangeFinalized&&h>=RANGE_END){
+   rangeFinalized=true;
+   rangeReady=rangeCount>=20&&rangeFirstHour!==null&&
+    rangeFirstHour<=2&&rangeLastHour>=6&&Number.isFinite(hi)&&hi>lo;
+   if(rangeReady){
+    rangeLines.push({day:d,high:round(hi),low:round(lo),
+     start:dayStart,end:bar.time,observedBars:rangeCount});
+   }
   }
+  const ready=rangeFinalized&&rangeReady;
   if(position){
    if(h>=SESSION_CLOSE){exit(bar.time,bar.open,'Session close');continue}
    if(position.side==='LONG'&&bar.low<=position.stop)

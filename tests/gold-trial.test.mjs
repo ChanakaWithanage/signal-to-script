@@ -215,3 +215,44 @@ test('Conversion invitations use past results to promote future free entry and e
  assert.match(article,/Explore past Gold Breakout entries, exits and backtest results/);
  assert.doesNotMatch(html,/\$4\.99|before you buy/i);
 });
+
+test('COMEX 15m maintenance gap does not suppress a valid overnight breakout',()=>{
+ const complete=dayBars('2026-11-18');
+ // CME futures can omit the first broker-clock hour (4 real 15m bars).
+ const maintenanceGap=complete.slice(4);
+ const result=runGoldBreakout(maintenanceGap,{days:30});
+ assert.equal(result.settings.timeframe,'15m');
+ assert.equal(result.stats.trades,1);
+ assert.equal(result.events.length,2);
+ assert.deepEqual(result.events.map(e=>e.type),['ENTRY','EXIT']);
+ assert.equal(result.events[0].side,'LONG');
+ assert.equal(result.ranges[0].observedBars,24);
+ assert.equal(result.ranges[0].high,110);
+ assert.equal(result.ranges[0].low,100);
+ assert.equal(result.events[0].time,complete[28].time);
+});
+test('Incomplete midday-only data never invents a valid overnight 15m range',()=>{
+ const partial=dayBars('2026-11-18').slice(16);
+ const result=runGoldBreakout(partial,{days:30});
+ assert.equal(result.stats.trades,0);
+ assert.equal(result.events.length,0);
+ assert.equal(result.ranges.length,0);
+});
+test('15m Gold chart explicitly renders and navigates historical BUY SELL EXIT markers',async()=>{
+ const {readFile}=await import('node:fs/promises');
+ const html=await readFile(new URL('../public/trial.html',import.meta.url),'utf8');
+ const js=await readFile(new URL('../public/trial.js',import.meta.url),'utf8');
+ assert.match(html,/Gold · 15-minute candles/);
+ assert.match(html,/id="trial-show-last-signal"/);
+ assert.match(html,/id="trial-show-latest-bars"/);
+ assert.match(html,/id="trial-signal-history"/);
+ assert.match(html,/id="trial-signal-count"/);
+ assert.match(js,/function showSignalHistory/);
+ assert.match(js,/function focusLatestSignal/);
+ assert.match(js,/function focusLatestBars/);
+ assert.match(js,/candles\.setMarkers\(markerData\)/);
+ assert.match(js,/setVisibleLogicalRange/);
+ assert.doesNotMatch(js,/chart\.timeScale\(\)\.fitContent\(\)/);
+ assert.match(js,/item\.market\.interval!=='15m'/);
+ assert.match(js,/15-minute price-only fallback/);
+});
