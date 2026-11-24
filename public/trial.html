@@ -6,7 +6,7 @@
 <title>Gold Breakout Alerts | Live 15-Minute Chart and Strategy Results</title>
 <meta name="description" content="Explore the Gold Breakout chart, confirmed entry and exit signals and strategy backtests. Get alerts by email, Discord and Telegram for free.">
 <link rel="canonical" href="https://signaltoscript.com/trial.html">
-<link rel="icon" href="/favicon.svg"><link rel="stylesheet" href="/styles.css"><link rel="stylesheet" href="/trial.css">
+<link rel="icon" href="/favicon.svg"><link rel="stylesheet" href="/styles.css"><link rel="stylesheet" href="/trial.css?v=20261124-data-fix-1">
 <meta property="og:type" content="website"><meta property="og:title" content="Free Gold Breakout Alerts | Signal to Script">
 <meta property="og:description" content="Open a live-updating gold chart, follow BUY, SELL and EXIT signals, and connect free alerts. No credit card or subscription.">
 <meta property="og:url" content="https://signaltoscript.com/trial.html"><meta property="og:image" content="https://signaltoscript.com/images/gold-breakout-15m-chart.webp">
@@ -35,7 +35,7 @@
  <div class="trial-dashboard-grid">
   <section class="trial-chart-card">
    <div class="trial-card-heading"><div><strong>Gold 15-minute chart</strong><span id="trial-asof">Loading latest confirmed candles…</span></div><div class="trial-chart-legend"><span><i class="legend-range"></i> Range</span><span><i class="legend-buy"></i> Long</span><span><i class="legend-sell"></i> Short</span><span><i class="legend-exit"></i> Exit</span></div></div>
-   <div id="trial-chart" class="trial-chart" role="img" aria-label="Gold 15 minute candlestick chart with range lines and trade entry and exit markers"><div class="trial-loading-chart">Loading gold market candles…</div></div>
+   <div id="trial-chart" class="trial-chart" role="img" aria-label="Gold 15 minute candlestick chart with range lines and trade entry and exit markers"><div class="trial-loading-chart">Connecting to gold market data…</div></div>
    <div class="trial-chart-foot"><span>Session: 00:00–07:00 · Entries: 07:00–20:00 · Broker time UTC+3</span><span id="trial-source">Market data loading</span></div>
   </section>
   <aside class="trial-side">
@@ -44,7 +44,7 @@
     <div class="trial-last-signal"><span>Latest confirmed event</span><strong id="trial-last-event">–</strong><small id="trial-last-time"></small></div>
    </section>
    <section class="trial-alerts-card"><div><span class="trial-small-label">SMART NOTIFICATIONS</span><h2>Signals, wherever you are.</h2><p>Choose how you want entry and exit alerts delivered.</p><button type="button" id="trial-start-alerts" class="trial-alert-activate">Get Gold Breakout alerts for free</button></div>
-    <div class="trial-channel"><div><span class="trial-channel-icon">✉</span><div><strong>Email alerts</strong><small>To your trial email</small></div></div><label class="trial-switch" title="Toggle email alerts"><input type="checkbox" id="trial-email-alerts"><span></span></label></div>
+    <div class="trial-channel"><div><span class="trial-channel-icon">✉</span><div><strong>Email alerts</strong><small>To your saved email</small></div></div><label class="trial-switch" title="Toggle email alerts"><input type="checkbox" id="trial-email-alerts"><span></span></label></div>
     <div class="trial-channel"><div><span class="trial-channel-icon">#</span><div><strong>Discord</strong><small id="trial-discord-status">Add your channel webhook</small></div></div><button type="button" id="trial-discord-toggle">Connect</button></div>
     <form id="trial-discord-form" class="trial-channel-form" hidden><label for="trial-discord-url">Discord channel webhook URL</label><input id="trial-discord-url" type="password" autocomplete="off" spellcheck="false" placeholder="https://discord.com/api/webhooks/…" maxlength="500"><div><button type="submit">Save channel</button><button id="trial-discord-remove" type="button" class="trial-muted-button">Remove</button></div></form>
     <div class="trial-channel"><div><span class="trial-channel-icon">➤</span><div><strong>Telegram</strong><small id="trial-telegram-status">Connect with one click</small></div></div><button type="button" id="trial-telegram-connect">Connect</button></div>
@@ -54,7 +54,7 @@
  </div>
  <section class="trial-performance" id="trial-performance"><div class="trial-preview-lock" id="trial-preview-lock" hidden><span id="trial-preview-lock-text">Explore recent gold candles now. Activate free alerts to unlock the 30-day history.</span> <button type="button" id="trial-preview-unlock">Activate free alerts</button></div><div class="trial-section-heading"><div><span class="trial-small-label">YOUR BACKTEST</span><h2>What happened over the last <span id="trial-period-title">30</span> days?</h2></div><span>Closed trades · 0.30 USD spread / oz · Results in R</span></div>
  <div class="trial-metrics"><div><span>Closed trades</span><strong id="trial-metric-trades">–</strong><small>Only completed positions</small></div><div><span>Win rate</span><strong id="trial-metric-win">–</strong><small>Winning trades / all trades</small></div><div><span>Net performance</span><strong id="trial-metric-net">–</strong><small>Sum of results in R</small></div><div><span>Profit factor</span><strong id="trial-metric-pf">–</strong><small>Gross wins / losses</small></div><div><span>Max drawdown</span><strong id="trial-metric-dd">–</strong><small>Peak-to-trough in R</small></div></div>
- <div class="trial-trades-card"><div class="trial-trades-head"><strong>Trade history</strong><span id="trial-trades-caption">Latest completed trades first</span></div><div class="trial-table-scroll"><table class="trial-trades-table"><thead><tr><th>Entry time (UTC)</th><th>Direction</th><th>Entry</th><th>Exit</th><th>Exit reason</th><th>Result</th></tr></thead><tbody id="trial-trade-rows"><tr><td colspan="6">Loading your trade history…</td></tr></tbody></table></div></div>
+ <div class="trial-trades-card"><div class="trial-trades-head"><strong>Trade history</strong><span id="trial-trades-caption">Latest completed trades first</span></div><div class="trial-table-scroll"><table class="trial-trades-table"><thead><tr><th>Entry time (UTC)</th><th>Direction</th><th>Entry</th><th>Exit</th><th>Exit reason</th><th>Result</th></tr></thead><tbody id="trial-trade-rows"><tr><td colspan="6">Loading trade history…</td></tr></tbody></table></div></div>
  </section>
  <div class="trial-workspace-upsell" id="trial-workspace-upsell" hidden><div><span class="trial-small-label">WHEN YOU'RE READY</span><h2>Keep every signal. Unlock more history.</h2><p>One lifetime membership includes the full script library, extended strategy testing and future releases. Pay once, not every month.</p></div><a class="trial-primary" href="/checkout.html?script=gold-breakout-15m">See lifetime membership →</a></div>
  <details class="trial-redeem" id="trial-redeem" hidden><summary>Already have lifetime access? Activate it here.</summary><form id="trial-redeem-form"><label for="trial-receipt-url">Paste your private membership receipt link</label><div><input type="url" id="trial-receipt-url" placeholder="https://signaltoscript.com/checkout.html?…" required><button type="submit">Activate</button></div><p id="trial-redeem-status" role="status"></p></form></details>
@@ -69,11 +69,10 @@
   <label for="trial-email">Email address</label>
   <input type="email" id="trial-email" autocomplete="email" inputmode="email" maxlength="254" placeholder="you@example.com" required>
   <div class="trial-honeypot" aria-hidden="true"><input type="text" id="trial-website" tabindex="-1" autocomplete="off"></div>
-  <button type="submit" class="trial-primary" id="trial-start-button">Start for free →</button>
+  <button type="submit" class="trial-primary" id="trial-start-button">Activate my free alerts →</button>
  </form>
- <div id="trial-email-sent" class="trial-email-sent" hidden><span class="trial-sent-icon">✓</span><h3>Check your inbox</h3><p>We've sent a secure activation link to <strong id="trial-confirm-email"></strong>.</p><p>Open the link to turn on your Gold Breakout alerts.</p><button class="trial-text-link" id="trial-try-another" type="button">Use another email</button></div>
  <p class="trial-dialog-assurance">No credit card · No name or phone number · No subscription</p>
- <small class="trial-dialog-terms">Free access runs for seven days from activation. You'll only see a membership offer later; there are no automatic charges.</small>
+ <small class="trial-dialog-terms">Free access runs for seven days from signup. Membership options appear later; there are no automatic charges.</small>
  <button id="trial-explore-preview" type="button" class="trial-text-link trial-explore">Explore chart first</button>
 </dialog>
 <dialog class="trial-upgrade-dialog" id="trial-upgrade-dialog" aria-labelledby="trial-upgrade-title" aria-describedby="trial-upgrade-desc">
@@ -90,5 +89,5 @@
 <footer class="footer"><div class="wrap foot"><div>© 2026 Signal to Script · by CW.</div><div>Built for strategy research.</div></div><nav class="policy-links" aria-label="Legal and business policies"><a href="/terms.html">Terms &amp; Conditions</a><a href="/privacy.html">Privacy Policy</a><a href="/refunds.html">Refunds</a><a href="mailto:support@signaltoscript.com">Support</a></nav></footer>
 <script defer src="/site.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/lightweight-charts@4.2.3/dist/lightweight-charts.standalone.production.js"></script>
-<script defer src="/trial.js"></script>
+<script defer src="/trial.js?v=20261124-data-fix-1"></script>
 </body></html>

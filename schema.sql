@@ -168,3 +168,16 @@ CREATE TABLE IF NOT EXISTS gold_trial_offer_prompts (
  email TEXT PRIMARY KEY,last_shown_ms INTEGER NOT NULL,
  shown_count INTEGER NOT NULL DEFAULT 1
 );
+
+-- Zero-verification Gold subscribers: browser sessions must not inherit a paid
+-- account's entitlement without proof from a completed purchase receipt.
+CREATE TABLE IF NOT EXISTS gold_trial_instant_sessions (
+ token_hash TEXT PRIMARY KEY,email TEXT NOT NULL,proven INTEGER NOT NULL DEFAULT 0,
+ created_ms INTEGER NOT NULL
+);
+CREATE TABLE IF NOT EXISTS gold_trial_subscribers (
+ email TEXT PRIMARY KEY,first_signup_ms INTEGER NOT NULL,last_signup_ms INTEGER NOT NULL,
+ signup_count INTEGER NOT NULL DEFAULT 1,source TEXT,country TEXT,region TEXT,city TEXT,
+ timezone TEXT,referrer TEXT,utm_source TEXT,utm_medium TEXT,utm_campaign TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_gold_trial_subscribers_last ON gold_trial_subscribers(last_signup_ms DESC);

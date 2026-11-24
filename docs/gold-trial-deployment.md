@@ -3,9 +3,9 @@
 ## What is included
 The Gold Breakout strategy trial is served at `/trial.html` and promoted from the homepage, strategy article, and checkout.
 
-- Workspace-first onboarding: visitors enter the live Gold chart before registration. A dismissible email modal activates free alerts and a full 30-day history; sign-in links are single use and expire after 20 minutes.
-- Trial begins on the first successful verification; remains free for exactly 7 × 24 hours.
-- 15-minute gold-futures candles from Yahoo's chart endpoint (GC=F). The source and last confirmed candle are shown in the workspace. Data is not represented as the same feed as a TradingView chart.
+- Workspace-first onboarding: visitors enter the live Gold chart before registration. A dismissible email modal immediately activates free alerts and the available historical results. No inbox verification is required.
+- Trial begins on the first email submission; remains free for exactly 7 × 24 hours.
+- 15-minute COMEX gold-futures candles from two Yahoo Finance endpoints, with an independent spot-gold candle fallback from biquote. If both feeds fail, the page shows an embedded gold price chart and retry control rather than an indefinite loading indicator. Data is not represented as the same feed as a TradingView chart.
 - Server-side Gold Breakout preview engine. The paid Pine script is never exposed by trial API or browser scripts. The preview uses a 1% protective stop, 00:00–07:00 UTC+3 range and trading until 20:00 UTC+3; intrabar double breaks are intentionally excluded.
 - Up to 30 days of past trades and 30-day chart for free trial. Extended 60-day lookback is unlocked after lifetime membership.
 - Email, encrypted Discord webhook and Telegram bot notifications of newly confirmed entry/exit events while trial/member access is active.
@@ -18,8 +18,9 @@ Set Cloudflare Pages project secrets/environment variables:
 
 | Key | Usage |
 | --- | --- |
-| `DB` | **Existing D1 binding**, same database shared with the scheduled worker. |
-| `RESEND_API_KEY` | Resend API key for sign-in links and email alerts; reuse your existing key. |
+| `DB` | **Existing D1 binding**, shared with the scheduled worker. New subscriber tables are created on first use. |
+| `TRIAL_ADMIN_KEY` | Optional private API key (32 or more characters) for the owner-only subscriber overview. Keep it in Pages secrets. |
+| `RESEND_API_KEY` | Resend API key for actual signal alerts; signup itself does not require email delivery. |
 | `TRIAL_EMAIL_FROM` | Verified sending address, e.g. `Signal to Script <alerts@yourdomain.com>`, or omit to reuse `MANUAL_REQUEST_FROM`. |
 | `ALERTS_ENCRYPTION_KEY` | 32 random bytes encoded as exactly 64 hex characters; **same value** in the Cron Worker. |
 | `TELEGRAM_BOT_TOKEN` | Telegram bot token created in BotFather, for webhook connection and alerts. |
@@ -49,6 +50,35 @@ curl -X POST "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/setWebhook" \
 
 Customers click **Connect** in the workspace, open their private Telegram bot link, and press **Start**. The bot associates their chat ID with the account via a single-use code stored as a hash.
 
+## Subscriber counts and email lead records
+
+Every email signup is recorded in `gold_trial_subscribers` with a unique email, first and last submission timestamps, submission count, acquisition source, UTM values, browser timezone and approximate Cloudflare country/region/city when available. No IP address is intentionally recorded in this table. Repeat submissions do not reset the seven-day trial.
+
+Run these SQL queries in the Cloudflare D1 console:
+
+```sql
+SELECT COUNT(*) AS unique_subscribers, COALESCE(SUM(signup_count),0) AS total_submissions
+FROM gold_trial_subscribers;
+
+SELECT email, datetime(first_signup_ms/1000,'unixepoch') AS joined_utc,
+       datetime(last_signup_ms/1000,'unixepoch') AS last_signup_utc,
+       signup_count, country, region, timezone, utm_source, utm_campaign
+FROM gold_trial_subscribers ORDER BY last_signup_ms DESC LIMIT 100;
+```
+
+To retrieve counts and the 100 most recent subscriber emails remotely, configure the `TRIAL_ADMIN_KEY` secret in Cloudflare Pages, then call:
+
+```bash
+curl -H "Authorization: Bearer $TRIAL_ADMIN_KEY" "https://signaltoscript.com/api/trial/subscribers"
+```
+
+Without the secret, the endpoint responds with 404. Do not place this key in browser JavaScript.
+
+Instant signup establishes a browser-bound trial. Only a verified legacy sign-in or a completed purchase receipt can unlock an existing paid membership. Entering someone else's email must not give that browser their paid entitlement.
+
+## Data resilience
+
+The API concurrently tries both Yahoo chart hosts for 15-minute GC=F gold-futures candles, then real XAUUSD spot bars from biquote if Yahoo is throttled or blocked. It reports feed name, last confirmed candle and actual history coverage. The browser falls back to an embedded TradingView gold price chart if server-side candle data fails; the TradingView fallback does not claim to show custom strategy overlays.
 ## Membership access
 The existing checkout continues to accept manual payment requests ($4.99) and NOWPayments crypto ($12.99) using the site's current verification. A completed private membership receipt link can be pasted into the trial dashboard's **Activate membership** field; only a verified completed receipt sets `gold_trial_accounts.lifetime=1`. Manual requests must first be marked `paid` by the operator. An unverified request cannot unlock premium access. Existing free-script Google login is separate and unaffected.
 
@@ -65,6 +95,6 @@ The old November 30 checkout shutdown has been removed; it would have left peopl
 8. Run `node --test tests/gold-trial.test.mjs` on Node 22. The GitHub workflow also checks syntax of all new Cloudflare Functions and trial browser scripts.
 
 ## Data refresh and availability
-The market adapter uses the public Yahoo chart endpoint `GC=F` for 15-minute COMEX gold-futures candles. The workspace explicitly shows the feed name and the latest closed candle timestamp. This is an independently calculated preview, not an execution engine and not an exact rendering of TradingView’s `TVC:GOLD` history. For guaranteed production uptime, a provider-backed R2 candle ingestion and retention pipeline can replace the adapter without changing the UI or strategy API.
+The market adapter uses Yahoo `GC=F` and a separate biquote XAUUSD spot fallback for real 15-minute OHLC data. The workspace explicitly shows the feed name and the latest closed candle timestamp. This is an independently calculated preview, not an execution engine and not an exact rendering of TradingView’s `TVC:GOLD` history. For guaranteed production uptime, a provider-backed R2 candle ingestion and retention pipeline can replace the adapter without changing the UI or strategy API.
 
 The backend is in a public repository, so while premium Pine files remain private in R2 and browser users do not receive the original source, the preview engine algorithm is readable on GitHub. If implementation secrecy is required beyond the website, move the strategy engine to a private Worker repository.
