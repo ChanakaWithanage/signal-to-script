@@ -4,7 +4,7 @@ import {fetchGoldCandles,runGoldBreakout} from '../../_lib/gold-market.js';
 // Visitors can inspect real past signals and up to 30 days of backtest results
 // before subscribing. Email is used only for future alerts and trial tracking.
 // 60-day historical testing remains exclusive to lifetime members.
-export async function onRequestGet({request,env}){
+export async function onRequestGet({request,env,context,ctx}){
  try{
   let member=null;
   if(env.DB){
@@ -20,7 +20,10 @@ export async function onRequestGet({request,env}){
   if(requestedDays>30&&!member?.lifetime){
    return respond({error:'Extended historical testing is part of lifetime access.',code:'UPGRADE_REQUIRED'},403);
   }
-  const feed=await fetchGoldCandles(requestedDays);
+  const lifetime=(context||ctx);
+  const feed=await fetchGoldCandles(requestedDays,{
+   db:env.DB||null,waitUntil:lifetime?.waitUntil?.bind(lifetime)
+  });
   const model=runGoldBreakout(feed.bars,{days:requestedDays});
   return respond({...model,preview:false,previewDays:null,
    market:{source:feed.source,symbol:feed.symbol,lastClosedBar:feed.asOf,
