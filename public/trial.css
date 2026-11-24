@@ -415,3 +415,17 @@
  .trial-modal-proof-grid>div{padding:9px 7px}
  .trial-modal-proof-grid strong{font-size:17px}
 }
+
+/* Historical result-led Gold signup copy and returning-trial pathway. */
+.trial-access-dialog .trial-modal-marketing{
+ display:block;margin:0 0 15px;padding:13px 14px;border-radius:10px;
+ background:#eaf6ed;border:1px solid #cce6d4;
+ color:#285c3d;font:700 13px/1.65 var(--sans,Arial,sans-serif);
+}
+.trial-access-dialog .trial-modal-marketing[hidden]{display:none}
+.trial-returning-member{margin:14px 0 2px;padding:11px 12px;
+ border:1px solid #d8e8dc;border-radius:9px;background:#f8fbf9;
+ font:600 12px/1.6 var(--sans,Arial,sans-serif);color:#506f59;
+}
+.trial-returning-member strong{color:#275e3e;font-weight:850}
+.trial-access-dialog .trial-dialog-assurance{margin-top:15px}
