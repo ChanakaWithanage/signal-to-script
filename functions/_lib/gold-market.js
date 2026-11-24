@@ -22,7 +22,7 @@ export async function fetchGoldCandles(days=30){
  const entry=cached[days],now=Date.now();
  if(entry&&now-entry.loaded<45000)return entry.result;
  const url='https://query1.finance.yahoo.com/v8/finance/chart/GC%3DF?interval=15m&period1='+
-  Math.floor((now-(days+2)*DAY_MS)/1000)+'&period2='+Math.floor((now+DAY_MS)/1000);
+  Math.floor((now-(days===60?59.5:days+1)*DAY_MS)/1000)+'&period2='+Math.floor((now+DAY_MS)/1000);
  const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),10500);
  let response;
  try{response=await fetch(url,{headers:{'Accept':'application/json','User-Agent':'Mozilla/5.0 (compatible; SignalToScriptMarket/1.0)'},
@@ -112,6 +112,7 @@ export function runGoldBreakout(input,{days=30}={}){
  const lastRange=rangeLines.at(-1),status=position?position.side+' open':!lastRange?'Building range':'Waiting for next setup';
  return {
   candles:bars.filter(b=>b.time>=cutoff).slice(-6000),
+  ranges:rangeLines.filter(r=>r.end>=cutoff).slice(-80),
   events:visibleEvents.slice(-250),trades:visibleTrades.slice(-150).reverse(),
   stats:{trades:visibleTrades.length,wins:wins.length,winRate:visibleTrades.length?
    round(wins.length/visibleTrades.length*100):0,profitFactor:grossLoss?round(grossWin/grossLoss):null,
