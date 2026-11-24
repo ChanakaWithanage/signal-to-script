@@ -181,3 +181,16 @@ CREATE TABLE IF NOT EXISTS gold_trial_subscribers (
  timezone TEXT,referrer TEXT,utm_source TEXT,utm_medium TEXT,utm_campaign TEXT
 );
 CREATE INDEX IF NOT EXISTS idx_gold_trial_subscribers_last ON gold_trial_subscribers(last_signup_ms DESC);
+
+-- Persist confirmed 15-minute gold OHLC bars for longer history and outages.
+-- Each instrument has its own independent series: never merge GC=F with XAUUSD.
+CREATE TABLE IF NOT EXISTS gold_candle_history (
+ symbol TEXT NOT NULL,
+ time_ms INTEGER NOT NULL,
+ open REAL NOT NULL,
+ high REAL NOT NULL,
+ low REAL NOT NULL,
+ close REAL NOT NULL,
+ source TEXT NOT NULL,
+ PRIMARY KEY(symbol,time_ms)
+);
