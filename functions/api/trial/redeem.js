@@ -1,4 +1,4 @@
-import {ensureTrialSchema,signedIn,respond,sameOrigin,jsonBody} from '../../_lib/gold-trial.js';
+import {ensureTrialSchema,signedIn,respond,sameOrigin,jsonBody,proveCurrentSession} from '../../_lib/gold-trial.js';
 import {manualReceiptId} from '../manual-request.js';
 import {lookupOrder,ensurePremiumSchema,MEMBERSHIP} from '../../_lib/premium.js';
 export async function onRequestPost({request,env}){
@@ -21,6 +21,8 @@ export async function onRequestPost({request,env}){
   }
   if(!paid)return respond({error:'This receipt has not been activated yet. Please use a completed membership receipt.'},403);
   await env.DB.prepare('UPDATE gold_trial_accounts SET lifetime=1 WHERE email=?').bind(user.email).run();
+  // A verified, paid receipt proves authorization for this browser session.
+  await proveCurrentSession(env.DB,request);
   return respond({ok:true,lifetime:true});
  }catch(e){console.error('Trial membership redeem error',e);return respond({error:'Could not verify your membership receipt.'},503)}
 }
