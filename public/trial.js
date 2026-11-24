@@ -33,7 +33,7 @@ function updateAccess(){
  $('trial-workspace-upsell').hidden=!eligible;
  $('trial-access-upgrade').hidden=!eligible;
  $('trial-redeem').hidden=!signed;
- $('trial-extended').querySelector('span').textContent=member?'Unlocked':'Lifetime';
+ $('trial-extended').querySelector('span').textContent=member?'Unlocked':eligible?'Lifetime':'More history';
  if(!signed)return;
  if(member){
   $('trial-access-label').textContent='LIFETIME MEMBER';
