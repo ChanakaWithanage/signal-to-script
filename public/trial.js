@@ -1,9 +1,11 @@
-/* Gold Breakout customer workspace. Trade logic stays in Cloudflare Functions. */
+/* Gold Breakout alert workspace: chart first, email registration inside the workspace. */
 (()=>{'use strict';
 const $=id=>document.getElementById(id);
-const intro=$('trial-intro'),workspace=$('trial-workspace'),expired=$('trial-expired'),flash=$('trial-flash');
+const workspace=$('trial-workspace'),flash=$('trial-flash');
+const accessDialog=$('trial-access-dialog'),upgradeDialog=$('trial-upgrade-dialog');
 const fmtPrice=n=>typeof n==='number'?new Intl.NumberFormat('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}).format(n):'—';
 const fmtTime=t=>t?new Date(t).toLocaleString('en-GB',{timeZone:'UTC',day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit',hour12:false})+' UTC':'—';
+const DAY_MS=86400000;
 let session=null,model=null,chart=null,candles=null,highLine=null,lowLine=null,loading=false,days=30;
 function message(text){flash.textContent=text;flash.hidden=!text}
 async function api(path,options={}){
@@ -13,55 +15,80 @@ async function api(path,options={}){
  return data;
 }
 const post=(path,data)=>api(path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
-function show(which){intro.hidden=which!=='intro';workspace.hidden=which!=='workspace';expired.hidden=which!=='expired'}
+function openEmailDialog(){
+ if(session?.active){return}
+ if(session?.signedIn){message('Your free alert access has finished. Choose lifetime access to keep alerts running.');return}
+ if(!accessDialog.open)accessDialog.showModal();
+}
+function openUpgradeDialog(){
+ if(!upgradeDialog.open)upgradeDialog.showModal();
+}
 function updateAccess(){
- if(!session?.signedIn)return;
- if(session.lifetime){
+ const signed=!!session?.signedIn,member=!!session?.lifetime,active=!!session?.active;
+ const eligible=signed&&!member&&(Date.now()-session.createdAt>=5*DAY_MS);
+ $('trial-access-card').hidden=!signed;
+ $('trial-activate').hidden=active||signed;
+ $('trial-start-alerts').hidden=active;
+ $('trial-start-alerts').textContent=signed?'Continue Gold Breakout alerts':'Get Gold Breakout alerts for free';
+ $('trial-workspace-upsell').hidden=!eligible;
+ $('trial-access-upgrade').hidden=!eligible;
+ $('trial-redeem').hidden=!signed;
+ $('trial-extended').querySelector('span').textContent=member?'Unlocked':'Lifetime';
+ if(!signed)return;
+ if(member){
   $('trial-access-label').textContent='LIFETIME MEMBER';
   $('trial-days-left').textContent='Unlimited access';
   $('trial-expiry').textContent='No renewals or recurring payments';
   $('trial-progress').style.width='100%';
-  $('trial-extended').querySelector('span').textContent='Unlocked';
  }else{
   const remaining=Math.max(0,session.expiresAt-Date.now());
-  $('trial-days-left').textContent=(session.remainingDays===1?'1 day':' '+session.remainingDays+' days')+' remaining';
-  $('trial-expiry').textContent='Access through '+new Date(session.expiresAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
-  $('trial-progress').style.width=Math.max(0,remaining/(7*86400000)*100)+'%';
+  $('trial-access-label').textContent=active?'YOUR ALERT ACCESS':'YOUR ACCESS';
+  $('trial-days-left').textContent=active?(session.remainingDays===1?'1 day remaining':session.remainingDays+' days remaining'):'Free access complete';
+  $('trial-expiry').textContent=active?'Active until '+new Date(session.expiresAt).toLocaleDateString('en-US',{month:'short',day:'numeric'}):'Explore the chart below or continue with lifetime access';
+  $('trial-progress').style.width=Math.max(0,remaining/(7*DAY_MS)*100)+'%';
  }
 }
 function updatePreferences(){
- if(!session)return;
- $('trial-email-alerts').checked=!!session.emailAlerts;
- $('trial-email-alerts').disabled=!session.delivery?.emailReady;
- $('trial-discord-status').textContent=session.discordConnected?'Connected to your channel':'Add your channel webhook';
- $('trial-discord-toggle').textContent=session.discordConnected?'Edit':'Connect';
- $('trial-discord-toggle').disabled=!session.delivery?.discordReady;
- $('trial-telegram-status').textContent=session.telegramConnected?'Telegram connected':'Connect with one click';
- $('trial-telegram-connect').textContent=session.telegramConnected?'Disconnect':'Connect';
- $('trial-telegram-connect').disabled=!session.delivery?.telegramReady;
- const unavailable=[];
- if(!session.delivery?.emailReady)unavailable.push('Email');
- if(!session.delivery?.discordReady)unavailable.push('Discord');
- if(!session.delivery?.telegramReady)unavailable.push('Telegram');
- $('trial-alerts-note').textContent=unavailable.length===3?
+ const active=!!session?.active;
+ $('trial-email-alerts').checked=active&&!!session.emailAlerts;
+ $('trial-email-alerts').disabled=active&&!session?.delivery?.emailReady;
+ $('trial-discord-status').textContent=active&&session.discordConnected?'Connected to your channel':'Add your channel webhook';
+ $('trial-discord-toggle').textContent=active&&session.discordConnected?'Edit':'Connect';
+ $('trial-discord-toggle').disabled=active&&!session?.delivery?.discordReady;
+ $('trial-telegram-status').textContent=active&&session.telegramConnected?'Telegram connected':'Connect with one click';
+ $('trial-telegram-connect').textContent=active&&session.telegramConnected?'Disconnect':'Connect';
+ $('trial-telegram-connect').disabled=active&&!session?.delivery?.telegramReady;
+ $('trial-alerts-note').textContent=!active?
+   'Explore the chart now. Activate your free alerts with a secure email link.':
+   !session.delivery?.emailReady&&!session.delivery?.discordReady&&!session.delivery?.telegramReady?
    'Notification delivery is being configured. Chart signals and backtests are available now.':
-   'Entry and exit notifications are delivered on newly confirmed signals.';
+   'Notifications are delivered on newly confirmed entry and exit events.';
 }
-async function loadSession(){
+async function showUpgradeIfDue(){
+ if(!session?.signedIn||session.lifetime||Date.now()-session.createdAt<5*DAY_MS)return;
+ try{
+  const result=await post('offer',{});
+  if(result.show&&!accessDialog.open)openUpgradeDialog();
+ }catch(error){console.error('Membership prompt unavailable',error)}
+}
+async function loadSession({prompt=true}={}){
  session=await api('session');
- if(!session.signedIn){show('intro');return}
- if(!session.active){show('expired');return}
- show('workspace');updateAccess();updatePreferences();await loadData();
+ updateAccess();updatePreferences();
+ if(!session.signedIn&&prompt)openEmailDialog();
+ if(session.signedIn&&accessDialog.open)accessDialog.close();
+ await loadData();
+ if(session.signedIn&&prompt)await showUpgradeIfDue();
 }
 async function verifyLink(token){
- message('Verifying your private access link…');
+ message('Confirming your private access link…');
  try{
   await post('verify',{token});
+  if(accessDialog.open)accessDialog.close();
   message('');
-  await loadSession();
+  await loadSession({prompt:false});
+  message('Your Gold Breakout workspace is ready. Configure your preferred alert channels.');
  }catch(error){
-  show('intro');
-  message(error.message);
+  message(error.message);openEmailDialog();
  }
 }
 const form=$('trial-start-form');
@@ -73,9 +100,17 @@ form.addEventListener('submit',async e=>{
   await post('start',{email,website:$('trial-website').value});
   form.hidden=true;$('trial-email-sent').hidden=false;$('trial-confirm-email').textContent=email;
  }catch(error){message(error.message)}
- finally{button.disabled=false;button.textContent='Get my free access link →'}
+ finally{button.disabled=false;button.textContent='Start for free →'}
 });
 $('trial-try-another').addEventListener('click',()=>{form.hidden=false;$('trial-email-sent').hidden=true;$('trial-email').focus()});
+$('trial-modal-close').addEventListener('click',()=>accessDialog.close());
+$('trial-explore-preview').addEventListener('click',()=>accessDialog.close());
+$('trial-upgrade-close').addEventListener('click',()=>upgradeDialog.close());
+$('trial-upgrade-later').addEventListener('click',()=>upgradeDialog.close());
+$('trial-activate').addEventListener('click',openEmailDialog);
+$('trial-start-alerts').addEventListener('click',()=>{
+ if(session?.signedIn&&!session?.active)openUpgradeDialog();else openEmailDialog();
+});
 function currentDetails(item){
  const c=item.current;
  $('trial-current-status').textContent=c.status;
@@ -89,6 +124,13 @@ function currentDetails(item){
  $('trial-last-time').textContent=event?fmtTime(event.time):'Waiting for confirmed signals';
 }
 function writeMetrics(item){
+ $('trial-period-title').textContent=item.preview?'30':days;
+ if(item.preview||!item.stats){
+  for(const id of ['trial-metric-trades','trial-metric-win','trial-metric-net','trial-metric-pf','trial-metric-dd'])$(id).textContent='—';
+  $('trial-metric-net').className='';
+  $('trial-trades-caption').textContent='Activate alerts to unlock 30-day trade results';
+  return;
+ }
  const s=item.stats;
  $('trial-metric-trades').textContent=s.trades;
  $('trial-metric-win').textContent=s.winRate.toFixed(1)+'%';
@@ -96,12 +138,21 @@ function writeMetrics(item){
  $('trial-metric-net').className=s.netR>0?'trial-positive':s.netR<0?'trial-negative':'';
  $('trial-metric-pf').textContent=s.profitFactor===null?'—':s.profitFactor.toFixed(2);
  $('trial-metric-dd').textContent=s.maxDrawdownR.toFixed(2)+'R';
- $('trial-period-title').textContent=days;
+ $('trial-trades-caption').textContent='Latest completed trades first';
 }
-function showTrades(rows){
+function showTrades(rows,preview=false){
  const tbody=$('trial-trade-rows');tbody.replaceChildren();
+ if(preview){
+  const tr=document.createElement('tr'),td=document.createElement('td');td.colSpan=6;
+  td.textContent='30-day trade history is included when you activate your free alerts.';
+  const button=document.createElement('button');button.type='button';button.className='trial-text-link';
+  button.textContent='Unlock full history';button.addEventListener('click',()=>{
+   if(session?.signedIn&&!session.active)openUpgradeDialog();else openEmailDialog();
+  });
+  td.append(' ',button);tr.append(td);tbody.append(tr);return;
+ }
  if(!rows.length){const tr=document.createElement('tr'),td=document.createElement('td');td.colSpan=6;
-  td.textContent='No completed trades in this period. The chart remains available for live signals.';tr.append(td);tbody.append(tr);return}
+  td.textContent='No completed trades in this period. The chart remains available for signals.';tr.append(td);tbody.append(tr);return}
  for(const item of rows.slice(0,45)){
   const tr=document.createElement('tr');
   const values=[fmtTime(item.entryTime),item.side,fmtPrice(item.entry),fmtPrice(item.exit),item.reason,(item.r>0?'+':'')+item.r.toFixed(2)+'R'];
