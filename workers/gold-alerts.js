@@ -64,7 +64,8 @@ export default {
   await ensureTrialSchema(env.DB);
   const now=Date.now();
   try{
-   const feed=await fetchGoldCandles(30),result=runGoldBreakout(feed.bars);
+   const feed=await fetchGoldCandles(30,{db:env.DB,
+    waitUntil:ctx?.waitUntil?.bind(ctx)}),result=runGoldBreakout(feed.bars);
    const barTime=Date.parse(feed.asOf)-15*60000;
    const cursor=await env.DB.prepare("SELECT last_event_ms FROM gold_trial_state WHERE id='gold-15m'").first();
    if(!cursor){
