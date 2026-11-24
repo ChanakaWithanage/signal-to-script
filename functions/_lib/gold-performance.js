@@ -18,3 +18,9 @@ export function illustrativeGoldResults(stats,capital=EXAMPLE_CAPITAL_USD,riskPe
   method:'fixed risk per trade; no compounding'
  };
 }
+
+// A trade's displayed USD result uses the same fixed dollar risk as the summary.
+export function goldTradeUsd(tradeR,riskUsd=EXAMPLE_CAPITAL_USD*EXAMPLE_RISK_PERCENT/100){
+ if(!Number.isFinite(tradeR)||!Number.isFinite(riskUsd)||riskUsd<=0)return null;
+ return Math.round(tradeR*riskUsd*100)/100;
+}
