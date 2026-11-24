@@ -1,0 +1,37 @@
+name: Gold strategy trial checks
+
+on:
+  push:
+    paths:
+      - 'functions/_lib/gold-*.js'
+      - 'functions/api/trial/**'
+      - 'public/trial.*'
+      - 'workers/gold-alerts.js'
+      - 'tests/gold-trial.test.mjs'
+      - '.github/workflows/gold-trial.yml'
+  pull_request:
+    paths:
+      - 'functions/_lib/gold-*.js'
+      - 'functions/api/trial/**'
+      - 'public/trial.*'
+      - 'workers/gold-alerts.js'
+      - 'tests/gold-trial.test.mjs'
+      - '.github/workflows/gold-trial.yml'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax check Cloudflare and browser JS
+        run: |
+          node --check functions/_lib/gold-market.js
+          node --check functions/_lib/gold-trial.js
+          node --check public/trial.js
+          node --check workers/gold-alerts.js
+          for f in functions/api/trial/*.js; do node --check "$f"; done
+      - name: Strategy and access tests
+        run: node --test tests/gold-trial.test.mjs

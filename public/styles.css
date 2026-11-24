@@ -638,3 +638,18 @@
     font-size: 12px;
   }
 }
+
+/* Seven-day Gold trial campaign: free value first, membership second. */
+.home-hero .hero-grid>div:first-child h1 em{color:#4c996c;font-weight:500}
+.trial-hero-pulse{width:8px;height:8px;border-radius:50%;background:#23a773;display:inline-block;box-shadow:0 0 0 4px #dbf5e3;margin-right:9px}
+.trial-hero-benefits{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0}
+.trial-hero-benefits span{display:inline-flex;align-items:center;border:1px solid #d8e8db;background:#f5faf5;border-radius:99px;padding:6px 10px;color:#2c6548;font:750 11px/1.4 var(--sans)}
+.trial-hero-proof{background:#fff;border:1px solid #dae8dc;border-radius:10px;padding:15px 17px;margin:20px 0;display:grid;gap:5px}
+.trial-hero-proof strong{color:#27583d;font:850 12px/1.5 var(--sans)}
+.trial-hero-proof>span{color:#617d6a;font:500 12px/1.7 var(--sans)}
+.trial-before-purchase{display:flex;align-items:center;justify-content:space-between;gap:20px;border:1px solid #c8e5d2;background:#edf8ef;border-radius:11px;padding:16px 20px;margin:4px 0 22px}
+.trial-before-purchase>div{display:grid;gap:4px}
+.trial-before-purchase strong{font:800 14px/1.45 var(--sans);color:#255538}
+.trial-before-purchase span{font:500 12px/1.55 var(--sans);color:#55775d}
+.trial-before-purchase a{white-space:nowrap;display:inline-flex;padding:11px 13px;background:#236947;border-radius:7px;text-decoration:none;color:white;font:800 12px/1.4 var(--sans)}
+@media(max-width:670px){.trial-before-purchase{align-items:flex-start;flex-direction:column}.trial-before-purchase a{white-space:normal}}

@@ -259,9 +259,9 @@ async function loadAvailability(){
   newOrder.hidden=false;orderPanel.hidden=true;
   if(!state.offerActive){
    manualForm.hidden=true;
-   manualStatus.textContent='This Black Friday offer has ended.';
+   manualStatus.textContent='This launch offer is no longer available.';
    newOrder.hidden=true;
-   availability.textContent='The early Black Friday promotion ended. New orders are paused.';
+   availability.textContent='The introductory membership offer is no longer available. New orders are paused.';
    return;
   }
   if(!state.ready?.[slug]){
