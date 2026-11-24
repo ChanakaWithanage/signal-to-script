@@ -142,3 +142,40 @@
 @media(max-width:1100px){.trial-intro{gap:35px}.trial-dashboard-grid{grid-template-columns:minmax(0,1fr) 270px}.trial-metrics{grid-template-columns:repeat(3,1fr)}.trial-chart{height:430px}.trial-chart-legend{gap:7px}}
 @media(max-width:780px){.trial-main{padding-top:18px}.trial-intro{grid-template-columns:1fr;padding-top:20px}.trial-intro h1{font-size:clamp(43px,11vw,72px)}.trial-entry-card{max-width:570px}.trial-preview{margin-top:22px}.trial-dashboard-grid{grid-template-columns:1fr}.trial-side{grid-template-columns:1fr 1fr}.trial-workspace-head{align-items:flex-start}.trial-chart{height:420px}.trial-access-card{min-width:195px}.trial-workspace-upsell{flex-direction:column;align-items:flex-start}}
 @media(max-width:560px){.trial-main .wrap{padding-inline:16px}.trial-workspace-head{flex-direction:column;gap:15px}.trial-access-card{width:100%}.trial-toolbar{gap:10px}.trial-period-switch{order:3;width:100%}.trial-period-switch button{flex:1}.trial-chart{height:340px}.trial-card-heading{padding:15px}.trial-chart-foot{flex-direction:column;padding:12px 15px}.trial-side{grid-template-columns:1fr}.trial-performance{padding:20px 0}.trial-metrics{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.trial-metrics>div{padding:12px}.trial-section-heading{align-items:flex-start;flex-direction:column}.trial-workspace-upsell{padding:24px 19px}.trial-workspace-upsell .trial-primary{white-space:normal}.trial-bottom-info{align-items:flex-start;flex-direction:column}.trial-expired{padding:32px 18px}.trial-redeem form>div{flex-direction:column}.trial-trust{gap:8px}}
+
+/* Workspace-first onboarding: visitors see a real chart before sharing an email. */
+.trial-access-dialog,.trial-upgrade-dialog{
+ box-sizing:border-box;width:min(440px,calc(100% - 30px));max-height:min(92dvh,750px);
+ overflow-y:auto;border:1px solid #d2e5d7;border-radius:18px;background:#fff;
+ padding:32px;box-shadow:0 28px 75px #0c34254d;color:#213d2c;
+}
+.trial-upgrade-dialog{width:min(480px,calc(100% - 30px));padding:36px}
+.trial-access-dialog::backdrop,.trial-upgrade-dialog::backdrop{background:rgba(14,42,28,.42);backdrop-filter:blur(3px)}
+.trial-dialog-close{position:absolute;right:16px;top:12px;border:none;background:transparent;
+ color:#6c8375;font:500 28px/1 Arial,sans-serif;padding:7px;cursor:pointer}
+.trial-dialog-close:hover{color:#204c34}
+.trial-dialog-intro h2,.trial-upgrade-dialog h2{margin:15px 0 12px;
+ font:700 clamp(27px,5vw,34px)/1.18 var(--serif,Georgia,serif);letter-spacing:-.035em;color:#204731}
+.trial-dialog-intro p,.trial-upgrade-dialog>p{font:450 13px/1.7 var(--sans,Arial,sans-serif);color:#687c6f;margin:0 0 25px}
+.trial-access-dialog #trial-start-form{display:grid;gap:9px}
+.trial-access-dialog #trial-start-form .trial-primary{width:100%;margin-top:6px;min-height:48px}
+.trial-dialog-assurance{font:700 11px/1.6 var(--sans,Arial,sans-serif);color:#347450;
+ border-top:1px solid #e7f0e9;margin:24px 0 7px;padding-top:16px;text-align:center}
+.trial-dialog-terms{display:block;color:#89988d;font:450 10px/1.65 var(--sans,Arial,sans-serif);text-align:center}
+.trial-access-dialog .trial-explore{display:block;margin:12px auto 0;color:#567d63;font:650 12px/1.5 var(--sans,Arial,sans-serif);cursor:pointer}
+.trial-activate-button{font-size:11px;padding:10px 13px;white-space:nowrap}
+.trial-alert-activate{margin:2px 0 14px;background:#236545;border:0;color:#fff;
+ border-radius:8px;padding:11px 13px;font:800 11px/1.4 var(--sans,Arial,sans-serif);cursor:pointer}
+.trial-alert-activate:hover{background:#194934}
+.trial-preview-lock{font:650 11px/1.6 var(--sans,Arial,sans-serif);color:#3d7758;
+ background:#f0f9f3;border:1px solid #d7eadc;border-radius:8px;padding:10px 13px;margin:0 0 12px}
+.trial-preview-lock button{background:transparent;border:0;text-decoration:underline;color:#24734d;font:800 11px/1.5 var(--sans,Arial,sans-serif);cursor:pointer;padding:0 3px}
+.trial-upgrade-benefits{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:23px}
+.trial-upgrade-benefits span{font:650 11px/1.4 var(--sans,Arial,sans-serif);color:#347450;padding:7px 10px;border:1px solid #d9ebde;border-radius:99px;background:#f8fbf8}
+.trial-upgrade-dialog .trial-primary{width:100%}
+.trial-upgrade-dialog .trial-text-link{display:block;margin:17px auto 0;font:650 12px/1.5 var(--sans,Arial,sans-serif)}
+@media(max-width:560px){
+ .trial-access-dialog,.trial-upgrade-dialog{padding:24px 20px;width:calc(100% - 22px)}
+ .trial-dialog-close{right:10px;top:6px}
+ .trial-activate-button{order:3;width:100%}
+}
