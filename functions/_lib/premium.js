@@ -2,7 +2,8 @@
 import {randomToken,hashToken} from './download-access.js';
 import {utcTime,sriLankaTime,ensureCheckoutTracking} from './checkout-tracking.js';
 
-export const OFFER_END=Date.parse('2026-12-01T00:00:00Z');
+// Ongoing founder launch: trial members can upgrade after their seven-day evaluation.
+export const OFFER_END=Number.POSITIVE_INFINITY;
 export const PRICE_USD='12.99';
 export const MEMBERSHIP='lifetime';
 export const MEMBERSHIP_NAME='Signal to Script Lifetime Membership';
