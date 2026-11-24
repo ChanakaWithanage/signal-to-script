@@ -1,5 +1,10 @@
 import {randomToken,hashToken} from './download-access.js';
 export const TRIAL_DAYS=7,TRIAL_MS=TRIAL_DAYS*86400000;
+export const UPGRADE_AFTER_MS=5*86400000,UPGRADE_COOLDOWN_MS=24*3600000;
+export function upgradeEligible(account,now=Date.now()){
+ return !!account&&account.lifetime!==true&&Number.isFinite(account.createdAt)&&
+  now-account.createdAt>=UPGRADE_AFTER_MS;
+}
 const EMAIL=/^[^\s@<>]{1,64}@[^\s@<>]{1,190}\.[A-Za-z]{2,30}$/;
 export const noCache={'Cache-Control':'private, no-store','Vary':'Cookie','X-Content-Type-Options':'nosniff'};
 export const respond=(value,status=200)=>Response.json(value,{status,headers:noCache});
@@ -47,6 +52,9 @@ export async function ensureTrialSchema(db){
    )`).run();
   await db.prepare(`CREATE TABLE IF NOT EXISTS gold_trial_state(
     id TEXT PRIMARY KEY,last_event_ms INTEGER NOT NULL,updated_ms INTEGER NOT NULL
+   )`).run();
+  await db.prepare(`CREATE TABLE IF NOT EXISTS gold_trial_offer_prompts(
+    email TEXT PRIMARY KEY,last_shown_ms INTEGER NOT NULL,shown_count INTEGER NOT NULL DEFAULT 1
    )`).run();
  })();
  try{await schema}catch(e){schema=null;throw e}
@@ -148,4 +156,17 @@ export function discordUrl(value){
    /^\/api\/webhooks\/\d{10,25}\/[A-Za-z0-9_-]{20,}$/.test(u.pathname)&&
    !u.search&&!u.hash}
  catch{return false}
+}
+
+export async function claimUpgradePrompt(db,user,now=Date.now()){
+ if(!upgradeEligible(user,now))return false;
+ await ensureTrialSchema(db);
+ // One friendly reminder per verified account every 24 hours, starting on day five.
+ // Atomic upsert prevents duplicate popups across tabs and devices.
+ const result=await db.prepare(`INSERT INTO gold_trial_offer_prompts(email,last_shown_ms,shown_count)
+  VALUES(?,?,1) ON CONFLICT(email) DO UPDATE SET
+  last_shown_ms=excluded.last_shown_ms,shown_count=gold_trial_offer_prompts.shown_count+1
+  WHERE gold_trial_offer_prompts.last_shown_ms<=?`)
+  .bind(user.email,now,now-UPGRADE_COOLDOWN_MS).run();
+ return result.meta?.changes===1;
 }

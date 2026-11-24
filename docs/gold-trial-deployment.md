@@ -3,13 +3,13 @@
 ## What is included
 The Gold Breakout strategy trial is served at `/trial.html` and promoted from the homepage, strategy article, and checkout.
 
-- Email-only secure sign-in, one account per email, 20-minute single-use access links.
+- Workspace-first onboarding: visitors enter the live Gold chart before registration. A dismissible email modal activates free alerts and a full 30-day history; sign-in links are single use and expire after 20 minutes.
 - Trial begins on the first successful verification; remains free for exactly 7 × 24 hours.
 - 15-minute gold-futures candles from Yahoo's chart endpoint (GC=F). The source and last confirmed candle are shown in the workspace. Data is not represented as the same feed as a TradingView chart.
 - Server-side Gold Breakout preview engine. The paid Pine script is never exposed by trial API or browser scripts. The preview uses a 1% protective stop, 00:00–07:00 UTC+3 range and trading until 20:00 UTC+3; intrabar double breaks are intentionally excluded.
 - Up to 30 days of past trades and 30-day chart for free trial. Extended 60-day lookback is unlocked after lifetime membership.
 - Email, encrypted Discord webhook and Telegram bot notifications of newly confirmed entry/exit events while trial/member access is active.
-- On day 7 the user sees a lifetime upgrade offer; no recurring billing. Unexpired/paid membership receipts activate the lifetime entitlement for the account's email.
+- Upgrade messaging begins after five full days, with at most one account-scoped popup per 24 hours. The homepage and Gold article show no price or trial countdown. After seven days, users retain a recent-chart preview until lifetime activation.
 
 ## Cloudflare Pages configuration
 The existing Cloudflare Pages application uses `public/` as its output and `functions/` for server endpoints. Reuse the same D1 binding `DB`. Pages Functions create tables on first use, or apply `schema.sql` to D1.
@@ -55,11 +55,11 @@ The existing checkout continues to accept manual payment requests ($4.99) and NO
 The old November 30 checkout shutdown has been removed; it would have left people who registered for a seven-day trial unable to upgrade after day seven.
 
 ## QA checklist
-1. Open `/trial.html` as a guest; enter an email, open the single-use link from the inbox, confirm that the second click fails and that a second email link can sign the user in again without restarting their trial.
-2. Verify a real, refreshed chart with 15-minute candles, daily range lines, entry/exit markers, source label, last candle timestamp, and a 30-day trade list. Live market changes require new confirmed data; prices should not be simulated.
-3. Confirm unsigned users cannot fetch `/api/trial/data` and expired users get `TRIAL_ENDED`. Ensure unpaid users cannot access 60-day results and the original premium Pine source is never served from trial APIs.
+1. Open `/trial.html` as a guest. The workspace and real candles should load immediately behind the email dialog. Dismiss it, explore recent candles, then activate alerts by entering an email. Confirm that repeated sign-ins do not reset the original seven-day period.
+2. Before sign-in verify public data is limited to a recent five-day chart with no full 30-day metrics or trades. After sign-in verify the real 15-minute chart, daily range, entry/exit markers, feed timestamp and full historical results.
+3. Confirm anonymous and expired users can load only preview candles. Extended 60-day results and the premium Pine source remain protected.
 4. Enable email delivery, connect Discord and Telegram; send a test notification using a new, genuine confirmed signal (do not send historical trades).
-5. Verify one notification per event and channel; open the page in two tabs and ensure no duplicated deliveries.
+5. Confirm only one alert is sent per event/channel. Confirm the upgrade popup never appears during days 0-4, appears starting at day five, is suppressed in other tabs for 24 hours, and never appears for lifetime users.
 6. Redeem a completed manual/crypto membership receipt in the trial, check lifetime state and extended backtest; verify an unpaid receipt fails.
 7. Test responsive display: 360px, 768px and desktop; verify onboarding, chart sizing, membership paywall, and keyboard tab order.
 8. Run `node --test tests/gold-trial.test.mjs` on Node 22. The GitHub workflow also checks syntax of all new Cloudflare Functions and trial browser scripts.
