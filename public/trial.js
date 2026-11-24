@@ -7,7 +7,7 @@ const fmtPrice=n=>typeof n==='number'?new Intl.NumberFormat('en-US',{minimumFrac
 const fmtTime=t=>t?new Date(t).toLocaleString('en-GB',{timeZone:'UTC',day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit',hour12:false})+' UTC':'—';
 const DAY_MS=86400000;
 let session=null,model=null,chart=null,candles=null,highLine=null,lowLine=null,loading=false,days=30;
-let chartViewInitialized=false,chartViewMode='signal',latestChartBars=[];
+let chartViewInitialized=false,chartViewMode='week',latestChartBars=[];
 function message(text){flash.textContent=text;flash.hidden=!text}
 async function api(path,options={}){
  const res=await fetch('/api/trial/'+path,{credentials:'same-origin',cache:'no-store',...options});
@@ -223,6 +223,23 @@ function signalText(event){
  if(event.type==='EXIT')return 'EXIT '+event.side;
  return event.side==='LONG'?'BUY':'SELL';
 }
+function chartHistoryWindow(days){
+ if(!chart||!latestChartBars.length)return;
+ const lastTime=latestChartBars.at(-1).time;
+ const cutoff=lastTime-days*86400;
+ const first=Math.max(0,latestChartBars.findIndex(b=>b.time>=cutoff));
+ const last=latestChartBars.length;
+ chart.timeScale().setVisibleLogicalRange({from:first,to:last+3});
+ chartViewMode=days===7?'week':'month';
+ document.querySelectorAll('[data-view-days]').forEach(button=>{
+  const selected=Number(button.dataset.viewDays)===days;
+  button.classList.toggle('active',selected);
+  button.setAttribute('aria-pressed',String(selected));
+ });
+}
+document.querySelectorAll('[data-view-days]').forEach(button=>button.addEventListener('click',()=>{
+ chartHistoryWindow(Number(button.dataset.viewDays));
+}));
 function focusOnSignal(atTime){
  if(!chart||!latestChartBars.length)return;
  const candleTime=Math.floor(atTime/1000);
@@ -231,6 +248,9 @@ function focusOnSignal(atTime){
  const start=Math.max(0,index-70),stop=Math.min(latestChartBars.length+4,index+48);
  chart.timeScale().setVisibleLogicalRange({from:start,to:Math.max(start+20,stop)});
  chartViewMode='signal';
+ document.querySelectorAll('[data-view-days]').forEach(button=>{
+  button.classList.remove('active');button.setAttribute('aria-pressed','false');
+ });
 }
 function focusLatestSignal(){
  const last=model?.events?.at(-1);
@@ -241,13 +261,16 @@ function focusLatestBars(){
  const last=latestChartBars.length;
  chart.timeScale().setVisibleLogicalRange({from:Math.max(0,last-165),to:last+3});
  chartViewMode='latest';
+ document.querySelectorAll('[data-view-days]').forEach(button=>{
+  button.classList.remove('active');button.setAttribute('aria-pressed','false');
+ });
 }
 $('trial-show-last-signal').addEventListener('click',focusLatestSignal);
 $('trial-show-latest-bars').addEventListener('click',focusLatestBars);
 function showSignalHistory(item){
  const entries=item.events.filter(e=>e.type==='ENTRY');
  const exits=item.events.filter(e=>e.type==='EXIT');
- $('trial-signal-count').textContent=entries.length+' entries · '+exits.length+' exits on 15m';
+ $('trial-signal-count').textContent=entries.length+' entries · '+exits.length+' exits in available history';
  $('trial-show-last-signal').hidden=item.events.length===0;
  $('trial-show-latest-bars').hidden=item.candles.length===0;
  const list=$('trial-signal-history');list.replaceChildren();
@@ -257,8 +280,8 @@ function showSignalHistory(item){
   list.append(span);return;
  }
  const label=document.createElement('span');label.className='trial-signal-history-heading';
- label.textContent='Recent 15m signals';list.append(label);
- for(const event of [...item.events].reverse().slice(0,7)){
+ label.textContent='Past signals · newest first';list.append(label);
+ for(const event of [...item.events].reverse().slice(0,100)){
   const button=document.createElement('button');button.type='button';button.className='trial-signal-event';
   button.setAttribute('aria-label','Show '+signalText(event)+' on the 15-minute chart, '+fmtTime(event.time));
   const direction=document.createElement('strong');
@@ -327,10 +350,11 @@ function drawChart(item){
  // A full-month fit shrinks markers into near-invisible dots. Start focused
  // on the most recent real signal and keep the latest-price view available.
  if(!chartViewInitialized){
-  chartViewInitialized=true;
-  if(item.events.length)focusLatestSignal();
-  else focusLatestBars();
- }else if(chartViewMode==='latest')focusLatestBars();
+  // Show an entire week of real 15m history on first load, not just one trade.
+  chartViewInitialized=true;chartHistoryWindow(7);
+ }else if(chartViewMode==='week')chartHistoryWindow(7);
+ else if(chartViewMode==='month')chartHistoryWindow(30);
+ else if(chartViewMode==='latest')focusLatestBars();
 }
 async function loadData(){
  if(loading)return;
@@ -343,7 +367,17 @@ async function loadData(){
   drawChart(item);
   $('trial-asof').textContent='Last confirmed candle '+fmtTime(Date.parse(item.market.lastClosedBar));
   $('trial-source').textContent=item.market.source+
-   (item.market.limitedHistory?' · '+item.market.availableDays+' days of confirmed candles available':'');
+   (item.market.limitedHistory?' · limited history currently available':'');
+  const coverageDays=Number(item.market.availableDays||0);
+  const earliest=item.candles.at(0)?.time;
+  const latest=item.candles.at(-1)?.time;
+  const dateOnly=t=>new Date(t).toLocaleDateString('en-GB',{
+   timeZone:'UTC',day:'numeric',month:'short',year:'numeric'});
+  $('trial-history-coverage').textContent=earliest&&latest?
+   'Showing '+item.candles.length.toLocaleString()+' confirmed 15-minute candles · '+
+   dateOnly(earliest)+' – '+dateOnly(latest)+' ('+coverageDays.toFixed(1)+' calendar days)'+
+   (coverageDays<7?' · Past week is still being collected from market sources':''):
+   'No confirmed 15-minute candles available.';
   const age=Date.now()-Date.parse(item.market.lastClosedBar);
   $('trial-online-status').textContent=age<60*60000?'Updated':'Latest session';
 
