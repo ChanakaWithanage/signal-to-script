@@ -363,3 +363,21 @@
  .trial-hero-alert-button{width:100%;max-width:420px}
  .trial-performance-top{margin-top:19px}
 }
+
+/* Reading order: the full-width 15m chart, USD performance, then strategy
+   status and notification settings, followed by the full trade history. */
+.trial-dashboard-grid{display:block}
+.trial-details-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+ gap:16px;margin-top:18px;align-items:start}
+.trial-performance-top{margin-top:20px;margin-bottom:0}
+.trial-performance-top .trial-metrics .trial-profit-highlight>strong{
+ font-size:clamp(30px,3.1vw,44px);white-space:nowrap}
+.trial-performance-top .trial-metrics .trial-profit-highlight p b{
+ font-size:12px;font-weight:800}
+@media(max-width:780px){
+ .trial-details-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+}
+@media(max-width:620px){
+ .trial-details-grid{grid-template-columns:1fr}
+ .trial-performance-top .trial-metrics .trial-profit-highlight>strong{font-size:34px}
+}
