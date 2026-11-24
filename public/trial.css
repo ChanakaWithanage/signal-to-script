@@ -179,3 +179,14 @@
  .trial-dialog-close{right:10px;top:6px}
  .trial-activate-button{order:3;width:100%}
 }
+
+/* Never leave the chart region as an indefinite loading placeholder. */
+.trial-market-fallback{height:100%;min-height:385px;display:flex;flex-direction:column;
+ background:#f6faf7;border-radius:12px;overflow:hidden}
+.trial-market-fallback-head{padding:11px 16px;color:#244b34;
+ font:800 12px/1.4 var(--sans,Arial,sans-serif);background:#f2f8f3}
+.trial-market-fallback iframe{width:100%;min-height:270px;height:100%;border:0;flex:1;background:#fff}
+.trial-market-fallback-note{padding:8px 15px 0;color:#667d6a;
+ font:600 11px/1.5 var(--sans,Arial,sans-serif)}
+.trial-market-fallback button{margin:7px auto 12px;background:#226a47;border:0;border-radius:8px;
+ padding:8px 16px;color:#fff;font:700 11px/1.5 var(--sans,Arial,sans-serif);cursor:pointer}
