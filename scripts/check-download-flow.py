@@ -77,8 +77,10 @@ print("One guest download and unlimited Google access remain for the free script
 # Gold strategy conversion placement and source wiring.
 gold = (public/"articles/gold-breakout-15m-strategy.html").read_text(encoding="utf-8")
 assert gold.index('class="gold-lead-image"') < gold.index('id="download"') < gold.index("What makes this breakout"), "Early download CTA should immediately follow hero chart"
-assert gold.count('data-buy-script="gold-breakout-15m"') >= 2
+assert gold.count('href="/trial.html"') >= 2
+assert gold.count("Get Gold Breakout alerts for free") >= 2
+assert "$4.99" not in gold and "before buying" not in gold
 assert "2026" in gold and "59.7%" in gold and "1.893" in gold
 assert "'gold-breakout-15m':'Gold Breakout 15M Strategy'" not in site
-assert 'href="/checkout.html?script=gold-breakout-15m"' in gold
+assert 'href="/checkout.html?script=gold-breakout-15m"' not in gold
 assert 'data-buy-script="supertrend-dema-reversal"' in (public/"articles/supertrend-dema-reversal-strategy.html").read_text(encoding="utf-8")
