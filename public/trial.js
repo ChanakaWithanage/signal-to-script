@@ -215,46 +215,77 @@ async function loadData(){
  loading=true;$('trial-refresh').disabled=true;
  try{
   const item=await api('data?days='+days);
-  model=item;currentDetails(item);writeMetrics(item);showTrades(item.trades);
+  model=item;currentDetails(item);writeMetrics(item);showTrades(item.trades,item.preview);
   drawChart(item);
   $('trial-asof').textContent='Last confirmed candle '+fmtTime(Date.parse(item.market.lastClosedBar));
   $('trial-source').textContent=item.market.source;
   const age=Date.now()-Date.parse(item.market.lastClosedBar);
   $('trial-online-status').textContent=age<60*60000?'Updated':'Latest session';
+  $('trial-preview-lock').hidden=!item.preview;
+  $('trial-preview-lock-text').textContent=session?.signedIn?
+    'Your free alert period is complete. Lifetime access unlocks full history and notifications.':
+    'Explore recent gold candles now. Activate your free alerts to unlock the full 30-day history.';
+  $('trial-preview-unlock').textContent=session?.signedIn?'Continue with lifetime access':'Activate free alerts';
   message('');
- }catch(error){if(error.code==='TRIAL_ENDED'){show('expired');return}message(error.message)}
+ }catch(error){message(error.message)}
  finally{loading=false;$('trial-refresh').disabled=false}
 }
+$('trial-preview-unlock').addEventListener('click',()=>{
+ if(session?.signedIn&&!session.active)openUpgradeDialog();else openEmailDialog();
+});
 document.querySelectorAll('[data-days]').forEach(button=>button.addEventListener('click',async()=>{
  const next=Number(button.dataset.days);
- if(next===60&&!session?.lifetime){message('The 60-day backtest is included with lifetime membership. Explore the pass below.');$('trial-workspace').querySelector('.trial-workspace-upsell').scrollIntoView({behavior:'smooth',block:'center'});return}
- days=next;document.querySelectorAll('[data-days]').forEach(b=>{b.classList.toggle('active',Number(b.dataset.days)===days);b.setAttribute('aria-pressed',String(Number(b.dataset.days)===days))});
+ if(next===60&&!session?.lifetime){
+  message('Extended backtesting is available with lifetime access. You can explore the live chart and free results now.');
+  return;
+ }
+ days=next;document.querySelectorAll('[data-days]').forEach(b=>{
+  b.classList.toggle('active',Number(b.dataset.days)===days);
+  b.setAttribute('aria-pressed',String(Number(b.dataset.days)===days));
+ });
  await loadData();
 }));
 $('trial-refresh').addEventListener('click',loadData);
 $('trial-email-alerts').addEventListener('change',async e=>{
- const el=e.target;el.disabled=true;
+ const el=e.target;
+ if(!session?.active){el.checked=false;if(session?.signedIn)openUpgradeDialog();else openEmailDialog();return}
+ el.disabled=true;
  try{await post('preferences',{action:'email',enabled:el.checked});session.emailAlerts=el.checked;message('Email alert preference saved.')}
  catch(error){el.checked=!el.checked;message(error.message)}
  finally{el.disabled=!session.delivery.emailReady}
 });
-$('trial-discord-toggle').addEventListener('click',()=>{const form=$('trial-discord-form');form.hidden=!form.hidden;if(!form.hidden)$('trial-discord-url').focus()});
+$('trial-discord-toggle').addEventListener('click',()=>{
+ if(!session?.active){if(session?.signedIn)openUpgradeDialog();else openEmailDialog();return}
+ const form=$('trial-discord-form');form.hidden=!form.hidden;if(!form.hidden)$('trial-discord-url').focus();
+});
 $('trial-discord-form').addEventListener('submit',async e=>{
- e.preventDefault();try{const hook=$('trial-discord-url').value.trim();if(!hook)throw Error('Paste your Discord channel webhook URL.');
+ e.preventDefault();
+ if(!session?.active){openEmailDialog();return}
+ try{
+  const hook=$('trial-discord-url').value.trim();
+  if(!hook)throw Error('Paste your Discord channel webhook URL.');
   const result=await post('preferences',{action:'discord',webhook:hook});
-  session.discordConnected=result.discordConnected;$('trial-discord-url').value='';$('trial-discord-form').hidden=true;updatePreferences();message('Discord channel connected.')}
- catch(error){message(error.message)}
+  session.discordConnected=result.discordConnected;$('trial-discord-url').value='';
+  $('trial-discord-form').hidden=true;updatePreferences();message('Discord channel connected.');
+ }catch(error){message(error.message)}
 });
 $('trial-discord-remove').addEventListener('click',async()=>{
- try{await post('preferences',{action:'discord',webhook:''});session.discordConnected=false;
-  $('trial-discord-url').value='';$('trial-discord-form').hidden=true;updatePreferences();message('Discord channel removed.')}
- catch(error){message(error.message)}
+ if(!session?.active)return;
+ try{
+  await post('preferences',{action:'discord',webhook:''});session.discordConnected=false;
+  $('trial-discord-url').value='';$('trial-discord-form').hidden=true;updatePreferences();message('Discord channel removed.');
+ }catch(error){message(error.message)}
 });
 $('trial-telegram-connect').addEventListener('click',async()=>{
+ if(!session?.active){if(session?.signedIn)openUpgradeDialog();else openEmailDialog();return}
  try{
-  if(session.telegramConnected){await post('preferences',{action:'telegram-remove'});session.telegramConnected=false;updatePreferences();message('Telegram disconnected.');return}
+  if(session.telegramConnected){
+   await post('preferences',{action:'telegram-remove'});
+   session.telegramConnected=false;updatePreferences();message('Telegram disconnected.');return;
+  }
   const {telegramUrl}=await post('preferences',{action:'telegram-link'});
-  window.open(telegramUrl,'_blank','noopener,noreferrer');message('Open Telegram and tap Start to connect your alerts.');
+  window.open(telegramUrl,'_blank','noopener,noreferrer');
+  message('Open Telegram and tap Start to connect your alerts.');
  }catch(error){message(error.message)}
 });
 async function redeem(formEl){
@@ -262,25 +293,42 @@ async function redeem(formEl){
  status.textContent='Checking your membership…';
  try{
   const url=new URL(field.value.trim());
-  if(!['signaltoscript.com','www.signaltoscript.com',location.hostname].includes(url.hostname))throw Error('Paste a Signal to Script membership receipt link.');
+  if(!['signaltoscript.com','www.signaltoscript.com',location.hostname].includes(url.hostname))
+   throw Error('Paste a Signal to Script membership receipt link.');
   const hash=new URLSearchParams(url.hash.slice(1)),query=url.searchParams;
   const receipt={method:hash.get('method')||query.get('method')||'crypto',
    id:hash.get('id')||query.get('id'),secret:hash.get('secret')||query.get('secret')};
   if(!receipt.id||!receipt.secret)throw Error('This link does not include a complete membership receipt.');
   await post('redeem',receipt);
   status.textContent='Lifetime membership activated.';
-  await loadSession();message('Welcome back. Your lifetime features are now unlocked.');
+  if(upgradeDialog.open)upgradeDialog.close();
+  await loadSession({prompt:false});
+  message('Your lifetime features are now available.');
  }catch(error){status.textContent=error.message}
 }
-for(const id of ['trial-redeem-form','trial-expired-redeem-form'])$(id).addEventListener('submit',e=>{e.preventDefault();redeem(e.target)});
+$('trial-redeem-form').addEventListener('submit',e=>{e.preventDefault();redeem(e.target)});
 window.addEventListener('focus',async()=>{
- if(!session?.signedIn||!session.active)return;
- try{const next=await api('session');if(next.signedIn){session=next;updatePreferences();if(!next.active)show('expired')}}catch{}
+ try{
+  if(session?.signedIn){
+   await loadSession({prompt:false});
+   await showUpgradeIfDue();
+  }
+ }catch{}
 });
-setInterval(()=>{if(session?.active&&document.visibilityState==='visible')loadData()},60000);
+setInterval(()=>{if(document.visibilityState==='visible')loadData()},60000);
 (async()=>{
  const verify=new URLSearchParams(location.search).get('verify');
- if(verify){history.replaceState(null,'',location.pathname);await verifyLink(verify)}
- else try{await loadSession()}catch(error){show('intro');message(error.message)}
+ if(verify){
+  history.replaceState(null,'',location.pathname);
+  await verifyLink(verify);
+ }else{
+  try{await loadSession()}
+  catch(error){
+   message(error.message);
+   session={signedIn:false,active:false};
+   updateAccess();updatePreferences();openEmailDialog();
+   await loadData();
+  }
+ }
 })();
 })();
