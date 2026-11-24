@@ -6,7 +6,7 @@
 <title>Gold Breakout Alerts | Live 15-Minute Chart and Strategy Results</title>
 <meta name="description" content="Explore the Gold Breakout chart, confirmed entry and exit signals and strategy backtests. Get alerts by email, Discord and Telegram for free.">
 <link rel="canonical" href="https://signaltoscript.com/trial.html">
-<link rel="icon" href="/favicon.svg"><link rel="stylesheet" href="/styles.css"><link rel="stylesheet" href="/trial.css?v=20261124-history-v2">
+<link rel="icon" href="/favicon.svg"><link rel="stylesheet" href="/styles.css"><link rel="stylesheet" href="/trial.css?v=20261124-top-results-v1">
 <meta property="og:type" content="website"><meta property="og:title" content="Free Gold Breakout Alerts | Signal to Script">
 <meta property="og:description" content="Open a live-updating gold chart, follow BUY, SELL and EXIT signals, and connect free alerts. No credit card or subscription.">
 <meta property="og:url" content="https://signaltoscript.com/trial.html"><meta property="og:image" content="https://signaltoscript.com/images/gold-breakout-15m-chart.webp">
@@ -27,6 +27,33 @@
   <div class="trial-access-card" id="trial-access-card" hidden><span id="trial-access-label">YOUR ACCESS</span><strong id="trial-days-left">Alerts activated</strong><small id="trial-expiry"></small>
    <div class="trial-progress-track"><span id="trial-progress"></span></div><a href="/checkout.html?script=gold-breakout-15m" id="trial-access-upgrade" hidden>Keep my alerts for life →</a></div>
  </div>
+ <section class="trial-performance trial-performance-top" id="trial-performance" aria-label="Gold Breakout historical performance">
+  <div class="trial-performance-topline">
+   <div>
+    <span class="trial-small-label">HISTORICAL GOLD BREAKOUT RESULTS</span>
+    <h2>See the results before the next signal</h2>
+    <p>Completed trades from the last <strong id="trial-period-title">30</strong> days of available market history.</p>
+   </div>
+   <button type="button" class="trial-primary trial-performance-cta" id="trial-performance-cta">Get future BUY, SELL &amp; EXIT alerts free →</button>
+  </div>
+  <div class="trial-performance-basis">
+   <span>$100,000 example account</span>
+   <span>1% ($1,000) fixed risk per trade</span>
+   <span>No compounding</span>
+  </div>
+  <div class="trial-metrics">
+   <div class="trial-profit-highlight">
+    <span>Illustrative net P&amp;L</span>
+    <strong id="trial-metric-profit">—</strong>
+    <p><b id="trial-metric-return">—</b> return <span aria-hidden="true">·</span> <span id="trial-metric-net">—</span></p>
+   </div>
+   <div><span>Closed trades</span><strong id="trial-metric-trades">—</strong><small>Completed positions</small></div>
+   <div><span>Win rate</span><strong id="trial-metric-win">—</strong><small>Historical winning trades</small></div>
+   <div><span>Profit factor</span><strong id="trial-metric-pf">—</strong><small>Gross wins ÷ losses</small></div>
+   <div><span>Max drawdown</span><strong id="trial-metric-dd">—</strong><small id="trial-metric-dd-note">From backtest equity</small></div>
+  </div>
+  <div class="trial-performance-footnote" id="trial-performance-coverage">Calculated from the strategy backtest, including the configured spread.</div>
+ </section>
  <div class="trial-toolbar">
   <div class="trial-market-symbol"><strong>GOLD</strong><span>15m · USD per oz</span><span class="trial-dot-online" id="trial-online-status">Updating</span></div><button class="trial-primary trial-activate-button" id="trial-activate" type="button">Get free alerts</button>
   <div class="trial-period-switch" role="group" aria-label="Backtest period"><button type="button" class="active" data-days="30" aria-pressed="true">Past 30 days</button><button type="button" data-days="60" aria-pressed="false" id="trial-extended">60 days <span>More history</span></button></div>
@@ -42,8 +69,6 @@
       <button type="button" data-view-days="7" class="active" aria-pressed="true">Past week</button>
       <button type="button" data-view-days="30" aria-pressed="false">Past 30 days</button>
      </div>
-     <button type="button" id="trial-show-last-signal" hidden>Latest signal</button>
-     <button type="button" id="trial-show-latest-bars" hidden>Latest candles</button>
     </div>
    </div>
    <div class="trial-history-coverage" id="trial-history-coverage" role="status">Checking available 15-minute candle history…</div>
@@ -71,9 +96,7 @@
    </section>
   </aside>
  </div>
- <section class="trial-performance" id="trial-performance"><div class="trial-section-heading"><div><span class="trial-small-label">YOUR BACKTEST</span><h2>See how Gold Breakout performed over the last <span id="trial-period-title">30</span> days</h2></div><span>Closed trades · 0.30 USD spread / oz · Results in R</span></div>
- <div class="trial-metrics"><div><span>Closed trades</span><strong id="trial-metric-trades">–</strong><small>Only completed positions</small></div><div><span>Win rate</span><strong id="trial-metric-win">–</strong><small>Winning trades / all trades</small></div><div><span>Net performance</span><strong id="trial-metric-net">–</strong><small>Sum of results in R</small></div><div><span>Profit factor</span><strong id="trial-metric-pf">–</strong><small>Gross wins / losses</small></div><div><span>Max drawdown</span><strong id="trial-metric-dd">–</strong><small>Peak-to-trough in R</small></div></div>
- <div class="trial-trades-card"><div class="trial-trades-head"><strong>Trade history</strong><span id="trial-trades-caption">Latest completed trades first</span></div><div class="trial-table-scroll"><table class="trial-trades-table"><thead><tr><th>Entry time (UTC)</th><th>Direction</th><th>Entry</th><th>Exit</th><th>Exit reason</th><th>Result</th></tr></thead><tbody id="trial-trade-rows"><tr><td colspan="6">Loading trade history…</td></tr></tbody></table></div></div>
+ <section class="trial-trade-history" id="trial-trade-history"> <div class="trial-trades-card"><div class="trial-trades-head"><strong>Trade history</strong><span id="trial-trades-caption">Latest completed trades first</span></div><div class="trial-table-scroll"><table class="trial-trades-table"><thead><tr><th>Entry time (UTC)</th><th>Direction</th><th>Entry</th><th>Exit</th><th>Exit reason</th><th>Result</th></tr></thead><tbody id="trial-trade-rows"><tr><td colspan="6">Loading trade history…</td></tr></tbody></table></div></div>
   <div class="trial-results-invite" id="trial-results-invite" hidden>
     <div class="trial-results-invite-copy">
      <span class="trial-small-label">FROM PAST RESULTS TO FUTURE SIGNALS</span>
@@ -117,5 +140,5 @@
 <footer class="footer"><div class="wrap foot"><div>© 2026 Signal to Script · by CW.</div><div>Built for strategy research.</div></div><nav class="policy-links" aria-label="Legal and business policies"><a href="/terms.html">Terms &amp; Conditions</a><a href="/privacy.html">Privacy Policy</a><a href="/refunds.html">Refunds</a><a href="mailto:support@signaltoscript.com">Support</a></nav></footer>
 <script defer src="/site.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/lightweight-charts@4.2.3/dist/lightweight-charts.standalone.production.js"></script>
-<script defer src="/trial.js?v=20261124-history-v2"></script>
+<script defer src="/trial.js?v=20261124-top-results-v1"></script>
 </body></html>
