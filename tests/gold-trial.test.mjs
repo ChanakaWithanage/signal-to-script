@@ -95,7 +95,7 @@ test('Gold alert marketing opens the workspace before collecting email',async()=
  assert.doesNotMatch(home,/Try it before you buy|7 days free|Email only/i);
  assert.match(page,/<section class="trial-workspace" id="trial-workspace">/);
  assert.match(page,/<dialog class="trial-access-dialog"/);
- assert.match(page,/Get the next Gold Breakout signal/);
+ assert.match(page,/Don.t miss the next Gold Breakout opportunity/);
  assert.match(page,/<dialog class="trial-upgrade-dialog"/);
  assert.doesNotMatch(article,/\$4\.99|before buying/);
 });
@@ -171,7 +171,7 @@ test('Workspace presents instant signup and a real chart fallback',async()=>{
  const {readFile}=await import('node:fs/promises');
  const html=await readFile(new URL('../public/trial.html',import.meta.url),'utf8');
  const js=await readFile(new URL('../public/trial.js',import.meta.url),'utf8');
- assert.match(html,/Start my 7-day free alerts/);
+ assert.match(html,/Get my free BUY &amp; SELL alerts/);
  assert.doesNotMatch(html,/Check your inbox|trial-email-sent|trial-try-another/);
  assert.match(js,/await post\('start',data\)/);
  assert.match(js,/await loadSession\(\{prompt:false\}\)/);
@@ -441,22 +441,22 @@ test('Clicking 60 days opens membership offer without changing public chart data
  assert.doesNotMatch(js,/message\('Extended backtesting is available with lifetime access/);
 });
 
-test('Gold-only engaged chart viewing prompts free trial after 45 visible seconds and limits repeats',async()=>{
+test('Gold-only viewing prompts at 45 seconds and repeats every two visible minutes until joined',async()=>{
  const {readFile}=await import('node:fs/promises');
  const html=await readFile(new URL('../public/trial.html',import.meta.url),'utf8');
  const js=await readFile(new URL('../public/trial.js',import.meta.url),'utf8');
  assert.match(js,/GOLD_CHART_DWELL_SECONDS=45/);
- assert.match(js,/GOLD_SIGNUP_COOLDOWN_MS=24\*60\*60\*1000/);
+ assert.match(js,/GOLD_SIGNUP_REPEAT_SECONDS=120/);
+ assert.match(js,/nextGoldSignupAt=GOLD_CHART_DWELL_SECONDS/);
+ assert.match(js,/nextGoldSignupAt=chartViewedSeconds\+GOLD_SIGNUP_REPEAT_SECONDS/);
  assert.match(js,/startGoldChartEngagementPrompt\(\)/);
  assert.match(js,/location\.pathname!=='\/trial\.html'/);
  assert.match(js,/new IntersectionObserver\(/);
  assert.match(js,/entry\.intersectionRatio>=\.25/);
  assert.match(js,/document\.visibilityState!=='visible'/);
- assert.match(js,/!session\|\|session\.signedIn/);
- assert.match(js,/signupPromptOnCooldown\(\)/);
- assert.match(js,/chartViewedSeconds>=GOLD_CHART_DWELL_SECONDS\)openEmailDialog\(\)/);
- assert.match(js,/localStorage\.setItem\(GOLD_SIGNUP_PROMPT_KEY/);
- assert.match(js,/localStorage\.getItem\(GOLD_SIGNUP_PROMPT_KEY/);
+ assert.match(js,/!session\|\|session\.signedIn\|\|accessDialog\.open\|\|upgradeDialog\.open/);
+ assert.match(js,/chartViewedSeconds>=nextGoldSignupAt\)openEmailDialog\(\)/);
+ assert.doesNotMatch(js,/GOLD_SIGNUP_COOLDOWN_MS|signupPromptOnCooldown|GOLD_SIGNUP_PROMPT_KEY/);
  assert.match(html,/id="trial-explore-preview"/);
  assert.match(html,/id="trial-modal-close"/);
  assert.doesNotMatch(html,/automatic signup|automatic trial/i);
@@ -483,4 +483,27 @@ test('Free email offer displays actual signed historical P&L, winning trades and
  assert.match(js,/model=item;updateSignupProof\(item\)/);
  assert.match(css,/trial-modal-proof-grid/);
  assert.doesNotMatch(html,/guaranteed|will earn|miss out on \$[0-9]/i);
+});
+
+test('Signup message leads with real profitable USD backtest evidence and offers return-by-email',async()=>{
+ const {readFile}=await import('node:fs/promises');
+ const html=await readFile(new URL('../public/trial.html',import.meta.url),'utf8');
+ const js=await readFile(new URL('../public/trial.js',import.meta.url),'utf8');
+ const css=await readFile(new URL('../public/trial.css',import.meta.url),'utf8');
+ assert.match(html,/id="trial-modal-marketing"/);
+ assert.match(html,/Don.t miss the next Gold Breakout opportunity/);
+ assert.match(html,/Already joined\?/);
+ assert.match(html,/Enter the same email above to continue your existing trial/);
+ assert.match(html,/No verification step/);
+ assert.match(js,/if\(performance\.netUsd>0\)/);
+ assert.match(js,/fmtUSD\(performance\.netUsd,true\).*net backtest profit/);
+ assert.match(js,/return\) and '/);
+ assert.match(js,/wins\+' '\+historyLabel/);
+ assert.match(js,/winning .*trade/);
+ assert.match(js,/if\(!hasTrades\)return/);
+ assert.match(js,/copy\.hidden=false/);
+ assert.match(js,/copy\.textContent='Gold Breakout recorded '/);
+ assert.match(css,/trial-modal-marketing/);
+ assert.match(css,/trial-returning-member/);
+ assert.doesNotMatch(html,/guaranteed return|guaranteed profit/i);
 });
