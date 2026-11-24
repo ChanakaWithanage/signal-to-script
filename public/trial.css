@@ -341,3 +341,25 @@
  .trial-performance-basis{gap:5px}
  .trial-performance-basis span{padding:4px 7px;font-size:9px}
 }
+
+/* Conversion-first order: one clear alert CTA, chart, then real results. */
+.trial-workspace-head{align-items:center;padding-bottom:20px}
+.trial-hero-alert-action{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:16px}
+.trial-hero-alert-button{font-size:14px;min-height:49px;padding:13px 22px;
+ box-shadow:0 7px 20px #1b694b20}
+.trial-hero-alert-action>span{font:650 11px/1.5 var(--sans,Arial,sans-serif);color:#6b8d77}
+.trial-toolbar{margin-top:8px}
+.trial-performance-top{margin:24px 0 0}
+.trial-performance-topline{margin-bottom:15px}
+.trial-performance-top .trial-metrics .trial-profit-highlight>strong{
+ font-size:clamp(27px,3vw,39px);white-space:nowrap}
+.trial-performance-top .trial-metrics .trial-profit-highlight p{
+ margin:5px 0 0;color:#658471}
+.trial-performance-top .trial-metrics .trial-profit-highlight p::before{content:"●";
+ font-size:6px;color:#4d9970}
+.trial-performance-top .trial-metrics>div{min-height:98px}
+@media(max-width:780px){
+ .trial-hero-alert-action{align-items:stretch;flex-direction:column;gap:8px}
+ .trial-hero-alert-button{width:100%;max-width:420px}
+ .trial-performance-top{margin-top:19px}
+}

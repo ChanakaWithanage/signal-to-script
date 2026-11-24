@@ -97,21 +97,18 @@ The old November 30 checkout shutdown has been removed; it would have left peopl
 7. Test responsive display: 360px, 768px and desktop; verify onboarding, chart sizing, membership paywall, and keyboard tab order.
 8. Run `node --test tests/gold-trial.test.mjs` on Node 22. The GitHub workflow also checks syntax of all new Cloudflare Functions and trial browser scripts.
 
-## Results-first workspace and $100,000 illustration
+## Simplified visitor flow
 
-The strategy performance appears immediately below the Gold Breakout heading, **above the live 15-minute chart**. Visitors can see actual completed-trade counts, win rate, profit factor, max drawdown and a prominent example net P&L before deciding whether to subscribe for free future BUY/SELL/EXIT notifications. The detailed completed-trade table remains below the chart.
+The public Gold workspace follows this hierarchy:
 
-The optional dollar illustration is calculated server-side from the same historical backtest used by the chart:
+1. **Get BUY & SELL Alerts Free** prominently below the Gold Breakout headline, opening the existing single-email activation dialog on click
+2. Actual **15-minute Gold chart** with historical entry/exit markers, recent event links, Past week / Past 30 days chart controls, and alert-channel configuration
+3. **Historical results** calculated from the server-side strategy model: net R, win rate, completed trades, profit factor, and max drawdown in R
+4. **Trade history** below the results, with the existing post-history CTA for future alerts
 
-- Starting account: **$100,000**
-- Position risk: **1% = $1,000 per completed trade**, fixed and non-compounded
-- Example net P&L: `stats.netR × $1,000`
-- Example return: `stats.netR × 1%`
-- Example peak-to-trough drawdown: `stats.maxDrawdownR × $1,000`
+No hypothetical account balance, position sizing, dollar estimate or compounding information is displayed to visitors. The strategy performance is expressed in the original backtest R units, so it does not imply an arbitrary account-specific cash gain. The public data endpoint no longer exposes the unused `exampleAccount` property.
 
-Dollar values are only displayed when the historical model has completed trades; losses are displayed as negative results, never recast as gains. The sample is labeled illustrative throughout and does not claim the user would earn the example dollar amount. The strategy's model includes its configured $0.30/oz spread.
-
-The old **Latest signal** and **Latest candles** quick-navigation buttons have been removed to simplify the chart. **Past week** and **Past 30 days** still control the visible 15-minute history, and users can click an individual signal in the signal-history strip to jump to that candle. Guest users see an inline button to subscribe to future signals next to the visible performance summary. Signed-in users do not see duplicate signup prompts.
+The latest-signal and latest-candle buttons remain removed. Visitors can still select a historical event to locate it on the chart. The free alert CTA is hidden after signup.
 
 ## Seven-day and 30-day history
 

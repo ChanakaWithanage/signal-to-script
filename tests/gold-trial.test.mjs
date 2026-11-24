@@ -200,24 +200,22 @@ test('An anonymous viewer still cannot request extended lifetime backtests',asyn
  assert.equal(response.status,403);
  assert.equal(result.code,'UPGRADE_REQUIRED');
 });
-test('Conversion invitations use past results to promote future free entry and exit alerts',async()=>{
+test('Gold workspace presents free BUY SELL CTA followed by chart and historical results',async()=>{
  const {readFile}=await import('node:fs/promises');
  const html=await readFile(new URL('../public/trial.html',import.meta.url),'utf8');
  const js=await readFile(new URL('../public/trial.js',import.meta.url),'utf8');
  const article=await readFile(new URL('../public/articles/gold-breakout-15m-strategy.html',import.meta.url),'utf8');
- assert.match(html,/PAST SIGNALS ARE ON THE CHART/);
- assert.match(html,/Get the next entry and exit alerts for free/);
+ assert.match(html,/Get BUY &amp; SELL Alerts Free/);
  assert.match(html,/FROM PAST RESULTS TO FUTURE SIGNALS/);
  assert.match(html,/Get future entry &amp; exit alerts for free/);
  assert.match(html,/No verification step/);
- assert.match(js,/trial-chart-invite-button'\)\.addEventListener\('click',openEmailDialog\)/);
+ assert.match(js,/trial-activate'\)\.addEventListener\('click',openEmailDialog\)/);
  assert.match(js,/trial-results-invite-button'\)\.addEventListener\('click',openEmailDialog\)/);
  assert.match(js,/const canSubscribe=!session\?\.signedIn/);
  assert.doesNotMatch(js,/if\(!session\.signedIn&&prompt\)openEmailDialog\(\)/);
  assert.match(article,/Explore past Gold Breakout entries, exits and backtest results/);
  assert.doesNotMatch(html,/\$4\.99|before you buy/i);
 });
-
 test('COMEX 15m maintenance gap does not suppress a valid overnight breakout',()=>{
  const complete=dayBars('2026-11-18');
  // CME futures can omit the first broker-clock hour (4 real 15m bars).
@@ -366,33 +364,33 @@ test('Illustrative $100k performance is calculated from backtest R not fabricate
  assert.equal(loss.maxDrawdownUsd,4200);
  assert.equal(illustrativeGoldResults(null),null);
 });
-test('Backtest response contains a consistent $100k cash example',async()=>{
+test('Public trial response contains historical strategy results without a hypothetical account figure',async()=>{
  const request=new Request('https://signaltoscript.com/api/trial/data?days=30');
  const response=await goldData({request,env:{}});
  const result=await response.json();
  assert.equal(response.status,200);
- assert.equal(result.exampleAccount.capitalUsd,100000);
- assert.equal(result.exampleAccount.riskUsd,1000);
- assert.equal(result.exampleAccount.netUsd,Math.round(result.stats.netR*1000*100)/100);
- assert.equal(result.exampleAccount.returnPercent,result.stats.netR);
+ assert.equal(typeof result.stats.netR,'number');
+ assert.equal(typeof result.stats.maxDrawdownR,'number');
+ assert.equal(Object.hasOwn(result,'exampleAccount'),false);
 });
-test('Profit and historical metrics appear above chart and latest quick-nav controls are removed',async()=>{
+test('Workspace orders signup, 15m chart, performance and completed trade history',async()=>{
  const {readFile}=await import('node:fs/promises');
  const html=await readFile(new URL('../public/trial.html',import.meta.url),'utf8');
  const js=await readFile(new URL('../public/trial.js',import.meta.url),'utf8');
  const css=await readFile(new URL('../public/trial.css',import.meta.url),'utf8');
- assert.ok(html.indexOf('id="trial-performance"')<html.indexOf('id="trial-chart"'));
- assert.ok(html.indexOf('id="trial-trade-history"')>html.indexOf('id="trial-chart"'));
- assert.match(html,/id="trial-metric-profit"/);
- assert.match(html,/id="trial-metric-return"/);
- assert.match(html,/\$100,000 example account/);
- assert.match(html,/1% \(\$1,000\) fixed risk per trade/);
- assert.match(html,/id="trial-performance-cta"/);
+ const signup=html.indexOf('id="trial-activate"');
+ const chart=html.indexOf('id="trial-chart"');
+ const performance=html.indexOf('id="trial-performance"');
+ const trades=html.indexOf('id="trial-trade-history"');
+ assert.ok(signup>=0&&signup<chart&&chart<performance&&performance<trades);
+ assert.match(html,/id="trial-metric-net"/);
+ assert.match(html,/id="trial-metric-win"/);
+ assert.match(html,/id="trial-metric-dd"/);
+ assert.doesNotMatch(html,/\$100,000|\$1,000|No compounding|Illustrative net P|trial-performance-cta/);
+ assert.doesNotMatch(html,/trial-metric-profit|trial-metric-return|trial-chart-invite/);
+ assert.doesNotMatch(js,/trial-metric-profit|trial-metric-return|example\.netUsd|trial-performance-cta/);
+ assert.match(js,/stats\.netR\.toFixed\(2\)\+'R'/);
+ assert.match(css,/trial-hero-alert-action/);
  assert.doesNotMatch(html,/trial-show-last-signal|trial-show-latest-bars/);
- assert.doesNotMatch(js,/trial-show-last-signal|trial-show-latest-bars|focusLatestBars|focusLatestSignal/);
- assert.match(js,/example\.netUsd/);
- assert.match(js,/example\.returnPercent/);
- assert.match(js,/trial-performance-cta'\)\.addEventListener\('click',openEmailDialog\)/);
- assert.match(css,/trial-profit-highlight/);
- assert.match(css,/trial-performance-top/);
+ assert.doesNotMatch(js,/trial-show-last-signal|trial-show-latest-bars/);
 });
