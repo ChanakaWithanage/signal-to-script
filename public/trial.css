@@ -190,3 +190,38 @@
  font:600 11px/1.5 var(--sans,Arial,sans-serif)}
 .trial-market-fallback button{margin:7px auto 12px;background:#226a47;border:0;border-radius:8px;
  padding:8px 16px;color:#fff;font:700 11px/1.5 var(--sans,Arial,sans-serif);cursor:pointer}
+
+/* Historical evidence is the lead-in; the future-signal invitation is a
+   light inline prompt rather than a signup wall over the chart. */
+.trial-chart-invite{
+ display:flex;align-items:center;justify-content:space-between;gap:18px;
+ padding:15px 19px;border-top:1px solid #e5ede7;background:#f3f8f4;
+}
+.trial-chart-invite>div{display:grid;gap:4px;min-width:0}
+.trial-chart-invite>div>span{font:800 10px/1.4 var(--sans,Arial,sans-serif);letter-spacing:.07em;color:#57906b}
+.trial-chart-invite strong{font:750 13px/1.5 var(--sans,Arial,sans-serif);color:#25553a}
+.trial-chart-invite button{
+ flex:none;border:1px solid #badbc5;border-radius:8px;background:#fff;
+ padding:10px 13px;color:#267149;cursor:pointer;
+ font:750 12px/1.4 var(--sans,Arial,sans-serif);
+}
+.trial-chart-invite button:hover{border-color:#66ab82;background:#e7f5ec}
+.trial-results-invite{
+ display:flex;justify-content:space-between;align-items:center;gap:22px;
+ margin-top:18px;padding:25px 27px;background:#eaf4ec;
+ border:1px solid #d4e7da;border-radius:14px;
+}
+.trial-results-invite-copy{flex:1;min-width:0;max-width:720px}
+.trial-results-invite h3{margin:5px 0 8px;color:#224d35;
+ font:700 clamp(21px,2.5vw,28px)/1.25 var(--serif,Georgia,serif);letter-spacing:-.025em}
+.trial-results-invite p{color:#516e5c;margin:0 0 8px;
+ font:450 13px/1.7 var(--sans,Arial,sans-serif)}
+.trial-invite-trust{color:#397951;font:700 11px/1.5 var(--sans,Arial,sans-serif)}
+.trial-results-invite .trial-primary{flex:none;max-width:290px;min-height:49px;
+ font-size:12px;line-height:1.4}
+@media (max-width:740px){
+ .trial-chart-invite{align-items:flex-start;flex-direction:column;gap:11px}
+ .trial-chart-invite button{width:100%}
+ .trial-results-invite{padding:20px;align-items:stretch;flex-direction:column;gap:17px}
+ .trial-results-invite .trial-primary{max-width:none;width:100%}
+}

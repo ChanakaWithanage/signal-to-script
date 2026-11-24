@@ -4,6 +4,7 @@ import {runGoldBreakout,fetchGoldCandles,biquoteBars} from '../functions/_lib/go
 import {validEmail,normalizeEmail,discordUrl,TRIAL_DAYS,UPGRADE_AFTER_MS,upgradeEligible,claimUpgradePrompt,instantSubscribe,signedIn} from '../functions/_lib/gold-trial.js';
 import {onRequestPost as startTrial} from '../functions/api/trial/start.js';
 import {onRequestGet as listSubscribers} from '../functions/api/trial/subscribers.js';
+import {onRequestGet as goldData} from '../functions/api/trial/data.js';
 function dayBars(date,side='LONG',ambiguous=false){
  const start=Date.parse(date+'T21:00:00Z');
  const bars=[];
@@ -174,4 +175,43 @@ test('Workspace presents instant signup and a real chart fallback',async()=>{
  assert.match(js,/await loadSession\(\{prompt:false\}\)/);
  assert.match(js,/showMarketFallback/);
  assert.match(js,/s\.tradingview\.com\/widgetembed/);
+});
+
+test('Historical Gold signals and 30-day results can be seen without email signup',async()=>{
+ // The real-data adapter is shared with the previous mocked fallback test.
+ const guest=new Request('https://signaltoscript.com/api/trial/data?days=30');
+ const response=await goldData({request:guest,env:{}});
+ const result=await response.json();
+ assert.equal(response.status,200);
+ assert.equal(result.preview,false);
+ assert.ok(Array.isArray(result.candles)&&result.candles.length>0);
+ assert.ok(Array.isArray(result.trades));
+ assert.ok(Array.isArray(result.events));
+ assert.equal(typeof result.stats.trades,'number');
+ assert.ok(result.market.source);
+ assert.equal(result.trial.signedIn,false);
+});
+test('An anonymous viewer still cannot request extended lifetime backtests',async()=>{
+ const request=new Request('https://signaltoscript.com/api/trial/data?days=60');
+ const response=await goldData({request,env:{}});
+ const result=await response.json();
+ assert.equal(response.status,403);
+ assert.equal(result.code,'UPGRADE_REQUIRED');
+});
+test('Conversion invitations use past results to promote future free entry and exit alerts',async()=>{
+ const {readFile}=await import('node:fs/promises');
+ const html=await readFile(new URL('../public/trial.html',import.meta.url),'utf8');
+ const js=await readFile(new URL('../public/trial.js',import.meta.url),'utf8');
+ const article=await readFile(new URL('../public/articles/gold-breakout-15m-strategy.html',import.meta.url),'utf8');
+ assert.match(html,/PAST SIGNALS ARE ON THE CHART/);
+ assert.match(html,/Get the next entry and exit alerts for free/);
+ assert.match(html,/FROM PAST RESULTS TO FUTURE SIGNALS/);
+ assert.match(html,/Get future entry &amp; exit alerts for free/);
+ assert.match(html,/No verification step/);
+ assert.match(js,/trial-chart-invite-button'\)\.addEventListener\('click',openEmailDialog\)/);
+ assert.match(js,/trial-results-invite-button'\)\.addEventListener\('click',openEmailDialog\)/);
+ assert.match(js,/const canSubscribe=!session\?\.signedIn/);
+ assert.doesNotMatch(js,/if\(!session\.signedIn&&prompt\)openEmailDialog\(\)/);
+ assert.match(article,/Explore past Gold Breakout entries, exits and backtest results/);
+ assert.doesNotMatch(html,/\$4\.99|before you buy/i);
 });
