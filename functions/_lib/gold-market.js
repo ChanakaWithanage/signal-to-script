@@ -1,3 +1,4 @@
+import {getArchivedGold,storeGoldCandles,mergeGoldCandles} from './gold-archive.js';
 // Real 15-minute gold candles for the website and scheduled notifications.
 // Multiple independent market providers prevent one blocked or throttled endpoint
 // from leaving the public workspace stuck on "Loading".
@@ -48,44 +49,92 @@ async function getJson(url,timeoutMs=6500){
   return await res.json();
  }finally{clearTimeout(timer)}
 }
-async function yahooFeed(host,days,now){
+async function yahooFeed(host,days,now,{proxy=false}={}){
  const params='?interval=15m&range='+(days===60?'2mo':'1mo')+'&includePrePost=false';
- const json=await getJson('https://'+host+'/v8/finance/chart/GC%3DF'+params);
+ const direct='https://'+host+'/v8/finance/chart/GC%3DF'+params;
+ const url=proxy?'https://proxy.cors.dev/'+direct:direct;
+ const json=await getJson(url,proxy?8500:6500);
  return cleanFeed(yahooBars(json),'COMEX gold futures · Yahoo Finance','GC=F',days,now);
 }
 async function biquoteFeed(days,now){
+ // This feed only retains the latest 192 M15 bars. Never describe that as
+ // 30 days. As visitors return, merge real candles into D1 archive.
  const json=await getJson('https://biquote.io/api/XAUUSD/ohlc?interval=15m&limit=192',7000);
  return cleanFeed(biquoteBars(json),'Gold spot · biquote','XAUUSD',days,now);
 }
 const cache=new Map(),inflight=new Map();
-export async function fetchGoldCandles(days=30){
+async function enrichWithArchive(db,feed,days,now){
+ if(!db||!feed)return feed;
+ try{
+  const saved=await getArchivedGold(db,feed.symbol,days);
+  if(!saved.length)return feed;
+  const merged=mergeGoldCandles(feed.bars,saved);
+  return {...cleanFeed(merged,feed.source,feed.symbol,days,now),stale:!!feed.stale};
+ }catch(error){console.error('Gold candle archive read failed',error);return feed}
+}
+function keepGoldHistory(db,waitUntil,feed){
+ if(!db||!feed)return;
+ const job=storeGoldCandles(db,feed).catch(e=>console.error('Gold archive write failed',e));
+ if(typeof waitUntil==='function')waitUntil(job);
+ // Without a request lifetime hook, await is handled by the caller instead.
+ return job;
+}
+export async function fetchGoldCandles(days=30,{db=null,waitUntil=null}={}){
  if(![30,60].includes(days))throw Error('Invalid backtest period.');
  const now=Date.now(),previous=cache.get(days);
  if(previous&&now-previous.loaded<75000)return previous.result;
  if(inflight.has(days))return inflight.get(days);
  const promise=(async()=>{
-  const failures=[];
-  // Yahoo hosts are interchangeable. Query both in parallel because either
-  // one may be throttled by a hosting provider or fail at the edge.
-  const yahoo=Promise.any([
+  let feed=null;
+  // Two Yahoo servers and an independent fetch proxy request the same actual
+  // GC=F 15m candles. The proxy recovers month-long history when Yahoo blocks
+  // Cloudflare's outbound addresses. Choose full coverage before short data.
+  const probes=[
    yahooFeed('query1.finance.yahoo.com',days,now),
-   yahooFeed('query2.finance.yahoo.com',days,now)
-  ]);
-  let result;
-  try{result=await yahoo}
-  catch(error){
-   failures.push('Yahoo: '+String(error));
-   try{result=await biquoteFeed(days,now)}
-   catch(fallbackError){failures.push('Gold spot fallback: '+String(fallbackError))}
+   yahooFeed('query2.finance.yahoo.com',days,now),
+   yahooFeed('query1.finance.yahoo.com',days,now,{proxy:true})
+  ];
+  const qualified=probes.map(p=>p.then(value=>{
+   if(value.availableDays<days-4)throw Error('Gold feed has only '+value.availableDays+' days');
+   return value;
+  }));
+  try{feed=await Promise.any(qualified)}
+  catch{
+   const settled=await Promise.allSettled(probes);
+   const partial=settled.filter(r=>r.status==='fulfilled').map(r=>r.value);
+   partial.sort((a,b)=>b.availableDays-a.availableDays);
+   feed=partial[0]||null;
   }
-  if(result){
-   cache.set(days,{loaded:Date.now(),result});
-   return result;
+  if(feed){
+   feed=await enrichWithArchive(db,feed,days,now);
+  }else{
+   // Prefer archived month-long bars over a 192-candle backup if still fresh.
+   try{
+    if(db){
+     const archived=await getArchivedGold(db,'GC=F',days);
+     if(archived.length)feed={...cleanFeed(archived,
+      'COMEX gold futures · retained history','GC=F',days,now),stale:true};
+    }
+   }catch(error){console.error('Gold futures archive unavailable',error)}
+   if(!feed){
+    try{
+     feed=await biquoteFeed(days,now);
+     feed=await enrichWithArchive(db,feed,days,now);
+    }catch(error){
+     console.error('Gold short-term fallback unavailable',error);
+    }
+   }
   }
-  // A recently retrieved real dataset is preferable to a blank chart during
-  // a short upstream outage. Never synthesize candles or strategy results.
-  if(previous&&now-previous.loaded<15*60000)return {...previous.result,stale:true};
-  throw Error('No current gold candle feed responded. '+failures.join(' | '));
+  if(!feed){
+   if(previous&&now-previous.loaded<15*60000)return {...previous.result,stale:true};
+   throw Error('No current Gold 15-minute market data is available.');
+  }
+  // Persist genuine confirmed 15m bars by instrument, never fabricate older
+  // candles and never mix COMEX futures with spot XAUUSD.
+  const job=keepGoldHistory(db,waitUntil,feed);
+  if(job&&typeof waitUntil!=='function')await job;
+  cache.set(days,{loaded:Date.now(),result:feed});
+  return feed;
  })();
  inflight.set(days,promise);
  try{return await promise}finally{inflight.delete(days)}

@@ -97,6 +97,28 @@ The old November 30 checkout shutdown has been removed; it would have left peopl
 7. Test responsive display: 360px, 768px and desktop; verify onboarding, chart sizing, membership paywall, and keyboard tab order.
 8. Run `node --test tests/gold-trial.test.mjs` on Node 22. The GitHub workflow also checks syntax of all new Cloudflare Functions and trial browser scripts.
 
+## Seven-day and 30-day history
+
+The Gold workspace now loads the available 15-minute OHLC dataset as a single series. It opens on **Past week**, and visitors can choose **Past 30 days**, **Latest signal** or **Latest candles**. The controls change the visible chart window, not the candle interval: all four views remain 15 minutes. The horizontal recent-signals list includes up to 100 historical events, rather than only the latest seven, and every event is clickable to locate it on the chart.
+
+Data retrieval order:
+
+1. Request up to 30 days of actual COMEX gold-futures 15m candles from Yahoo's two chart hosts and a third server-side Yahoo proxy route. Prefer full-range responses over partial responses.
+2. Save confirmed candles to Cloudflare D1 in `gold_candle_history`, keyed by `(symbol,time_ms)`. The same scheduled alert worker updates this archive. This preserves up to 65 days of real bars against provider outages. Writes are incremental; existing bars are not rewritten every five minutes.
+3. When live Yahoo retrieval fails, try the fresh retained futures history. If unavailable, use real XAUUSD spot 15m data from biquote, augmented only with *previously saved XAUUSD spot candles*. Futures and spot OHLC are never mixed.
+4. Show the actual provider, last confirmed candle, dates, number of 15-minute bars and calendar-day coverage. If only two days of data exist, report that clearly rather than claim 30 days.
+
+The biquote endpoint is a **rolling 192-bar history** (roughly two trading days), not a month-long history. A fully historical month can be displayed immediately if one of the Yahoo routes responds; D1 retention adds resilience over subsequent sessions. No synthetic history, fake signals or unverified results are created.
+
+Apply the updated `schema.sql` or allow the server to create the `gold_candle_history` table on first write. Make sure both Cloudflare Pages and the five-minute scheduled Worker have the same `DB` D1 binding; this is required for continuous archiving. Check the `gold_candle_history` row count and timeframe:
+
+```sql
+SELECT symbol, COUNT(*) AS candles,
+       datetime(MIN(time_ms)/1000,'unixepoch') AS earliest_utc,
+       datetime(MAX(time_ms)/1000,'unixepoch') AS latest_utc
+FROM gold_candle_history GROUP BY symbol;
+```
+
 ## Data refresh and availability
 The market adapter uses Yahoo `GC=F` and a separate biquote XAUUSD spot fallback for real 15-minute OHLC data. The workspace explicitly shows the feed name and the latest closed candle timestamp. This is an independently calculated preview, not an execution engine and not an exact rendering of TradingView’s `TVC:GOLD` history. For guaranteed production uptime, a provider-backed R2 candle ingestion and retention pipeline can replace the adapter without changing the UI or strategy API.
 
