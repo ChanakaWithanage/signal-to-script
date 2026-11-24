@@ -402,7 +402,7 @@ test('Workspace orders signup, 15m chart, performance and completed trade histor
  assert.match(html,/id="trial-metric-return"/);
  assert.match(html,/Result \(USD\)/);
  assert.doesNotMatch(html,/No compounding|Illustrative net P|trial-performance-cta|example account/i);
- assert.doesNotMatch(html,/trial-metric-profit|trial-chart-invite|in R|drawdown in R/i);
+ assert.doesNotMatch(html,/trial-metric-profit|trial-chart-invite|Combined trade results in R|Peak-to-trough in R/i);
  assert.doesNotMatch(js,/trial-metric-profit|example\.netUsd|trial-performance-cta/);
  assert.match(js,/fmtUSD\(performance\.netUsd,true\)/);
  assert.match(js,/fmtUSD\(performance\.maxDrawdownUsd\)/);
