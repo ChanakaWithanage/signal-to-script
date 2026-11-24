@@ -10,8 +10,13 @@ export async function onRequestGet({request,env}){
  try{
   let member=null;
   if(env.DB){
-   await ensureTrialSchema(env.DB);
-   member=await signedIn(env.DB,request);
+   try{
+    await ensureTrialSchema(env.DB);
+    member=await signedIn(env.DB,request);
+   }catch(error){
+    // Viewing live candles must not depend on subscriber-table availability.
+    console.error('Subscriber session unavailable while loading public gold chart',error);
+   }
   }
   const requestedDays=new URL(request.url).searchParams.get('days')==='60'?60:30;
   if(requestedDays>30&&!member?.lifetime){
@@ -32,8 +37,11 @@ export async function onRequestGet({request,env}){
   }
   return respond({...model,preview:!fullAccess,
    previewDays:fullAccess?null:PREVIEW_DAYS,
-   market:{source:feed.source,symbol:feed.symbol,lastClosedBar:feed.asOf,interval:feed.interval},
-   trial:{signedIn:!!member,active:fullAccess,lifetime:!!member?.lifetime,expiresAt:member?.expiresAt||null}});
+   market:{source:feed.source,symbol:feed.symbol,lastClosedBar:feed.asOf,
+    interval:feed.interval,availableDays:feed.availableDays,
+    limitedHistory:feed.limitedHistory,stale:!!feed.stale},
+   trial:{signedIn:!!member,active:fullAccess,lifetime:!!member?.lifetime,
+    expiresAt:member?.expiresAt||null}});
  }catch(error){
   console.error('Gold trial data error',error);
   return respond({error:'Gold candles are refreshing. Please try again in a moment.'},503);
