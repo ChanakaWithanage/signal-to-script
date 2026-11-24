@@ -23,6 +23,21 @@ function openEmailDialog(){
 function openUpgradeDialog(){
  if(!upgradeDialog.open)upgradeDialog.showModal();
 }
+function updateSignalInvites(){
+ // Show the conversion invitation only while alerts have not been activated.
+ // Historical chart and performance remain visible without registration.
+ const canSubscribe=!session?.signedIn;
+ $('trial-chart-invite').hidden=!canSubscribe;
+ $('trial-results-invite').hidden=!canSubscribe;
+ if(!canSubscribe)return;
+ const stats=model?.stats;
+ if(!stats)return;
+ const count=stats.trades;
+ $('trial-results-invite-summary').textContent=count>0?
+  'You can review '+count+' completed historical '+(count===1?'trade':'trades')+
+   ' and their entry and exit signals above. Want to follow the next confirmed setup? Get an alert without watching every candle.':
+  'You can review the signals and chart history above. Get an alert when Gold Breakout confirms its next entry or exit.';
+}
 function updateAccess(){
  const signed=!!session?.signedIn,member=!!session?.lifetime,active=!!session?.active;
  const eligible=signed&&!member&&(Date.now()-session.createdAt>=5*DAY_MS);
@@ -34,6 +49,7 @@ function updateAccess(){
  $('trial-access-upgrade').hidden=!eligible;
  $('trial-redeem').hidden=!signed;
  $('trial-extended').querySelector('span').textContent=member?'Unlocked':eligible?'Lifetime':'More history';
+ updateSignalInvites();
  if(!signed)return;
  if(member){
   $('trial-access-label').textContent='LIFETIME MEMBER';
@@ -76,8 +92,8 @@ async function loadSession({prompt=true}={}){
  updateAccess();updatePreferences();
  if(session.signedIn&&accessDialog.open)accessDialog.close();
  await loadData();
- // Show the email popup only after the visitor has reached the chart workspace.
- if(!session.signedIn&&prompt)openEmailDialog();
+ // Let visitors explore the actual chart and historical results first.
+ // The inline future-alert calls to action open email activation on demand.
  if(session.signedIn&&prompt)await showUpgradeIfDue();
 }
 async function verifyLink(token){
@@ -255,17 +271,14 @@ async function loadData(){
  try{
   const item=await api('data?days='+days);
   model=item;currentDetails(item);writeMetrics(item);showTrades(item.trades,item.preview);
+  updateSignalInvites();
   drawChart(item);
   $('trial-asof').textContent='Last confirmed candle '+fmtTime(Date.parse(item.market.lastClosedBar));
   $('trial-source').textContent=item.market.source+
    (item.market.limitedHistory?' · '+item.market.availableDays+' days of confirmed candles available':'');
   const age=Date.now()-Date.parse(item.market.lastClosedBar);
   $('trial-online-status').textContent=age<60*60000?'Updated':'Latest session';
-  $('trial-preview-lock').hidden=!item.preview;
-  $('trial-preview-lock-text').textContent=session?.signedIn?
-    'Your free alert period is complete. Lifetime access unlocks full history and notifications.':
-    'Explore recent gold candles now. Activate your free alerts to unlock the full 30-day history.';
-  $('trial-preview-unlock').textContent=session?.signedIn?'Continue with lifetime access':'Activate free alerts';
+
   message('');
  }catch(error){
   console.error('Gold strategy data request failed',error);
@@ -274,9 +287,8 @@ async function loadData(){
  }
  finally{loading=false;$('trial-refresh').disabled=false}
 }
-$('trial-preview-unlock').addEventListener('click',()=>{
- if(session?.signedIn&&!session.active)openUpgradeDialog();else openEmailDialog();
-});
+$('trial-chart-invite-button').addEventListener('click',openEmailDialog);
+$('trial-results-invite-button').addEventListener('click',openEmailDialog);
 document.querySelectorAll('[data-days]').forEach(button=>button.addEventListener('click',async()=>{
  const next=Number(button.dataset.days);
  if(next===60&&!session?.lifetime){
