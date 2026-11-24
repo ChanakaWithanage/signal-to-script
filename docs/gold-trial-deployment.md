@@ -97,9 +97,25 @@ The old November 30 checkout shutdown has been removed; it would have left peopl
 7. Test responsive display: 360px, 768px and desktop; verify onboarding, chart sizing, membership paywall, and keyboard tab order.
 8. Run `node --test tests/gold-trial.test.mjs` on Node 22. The GitHub workflow also checks syntax of all new Cloudflare Functions and trial browser scripts.
 
+## Results-first workspace and $100,000 illustration
+
+The strategy performance appears immediately below the Gold Breakout heading, **above the live 15-minute chart**. Visitors can see actual completed-trade counts, win rate, profit factor, max drawdown and a prominent example net P&L before deciding whether to subscribe for free future BUY/SELL/EXIT notifications. The detailed completed-trade table remains below the chart.
+
+The optional dollar illustration is calculated server-side from the same historical backtest used by the chart:
+
+- Starting account: **$100,000**
+- Position risk: **1% = $1,000 per completed trade**, fixed and non-compounded
+- Example net P&L: `stats.netR × $1,000`
+- Example return: `stats.netR × 1%`
+- Example peak-to-trough drawdown: `stats.maxDrawdownR × $1,000`
+
+Dollar values are only displayed when the historical model has completed trades; losses are displayed as negative results, never recast as gains. The sample is labeled illustrative throughout and does not claim the user would earn the example dollar amount. The strategy's model includes its configured $0.30/oz spread.
+
+The old **Latest signal** and **Latest candles** quick-navigation buttons have been removed to simplify the chart. **Past week** and **Past 30 days** still control the visible 15-minute history, and users can click an individual signal in the signal-history strip to jump to that candle. Guest users see an inline button to subscribe to future signals next to the visible performance summary. Signed-in users do not see duplicate signup prompts.
+
 ## Seven-day and 30-day history
 
-The Gold workspace now loads the available 15-minute OHLC dataset as a single series. It opens on **Past week**, and visitors can choose **Past 30 days**, **Latest signal** or **Latest candles**. The controls change the visible chart window, not the candle interval: all four views remain 15 minutes. The horizontal recent-signals list includes up to 100 historical events, rather than only the latest seven, and every event is clickable to locate it on the chart.
+The Gold workspace now loads the available 15-minute OHLC dataset as a single series. It opens on **Past week**, and visitors can choose **Past 30 days**. These controls change the visible chart window, not the candle interval: both views remain 15 minutes. The horizontal recent-signals list includes up to 100 historical events, rather than only the latest seven, and every event is clickable to locate it on the chart.
 
 Data retrieval order:
 
