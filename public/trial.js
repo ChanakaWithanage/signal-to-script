@@ -19,13 +19,94 @@ async function api(path,options={}){
  return data;
 }
 const post=(path,data)=>api(path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
-function openEmailDialog(){
- if(session?.active){return}
- if(session?.signedIn){message('Your free alert access has finished. Choose lifetime access to keep alerts running.');return}
- if(!accessDialog.open)accessDialog.showModal();
+// Only the Gold workspace loads this script. Do not show this prompt on any
+// articles, checkout pages, the homepage or unrelated site routes.
+const GOLD_SIGNUP_PROMPT_KEY='sts_gold_chart_trial_prompt_v1';
+const GOLD_SIGNUP_COOLDOWN_MS=24*60*60*1000;
+const GOLD_CHART_DWELL_SECONDS=45;
+let goldChartVisible=false,chartViewedSeconds=0,chartPromptShownInTab=false;
+function markGoldSignupPrompt(){
+ chartPromptShownInTab=true;
+ try{localStorage.setItem(GOLD_SIGNUP_PROMPT_KEY,String(Date.now()))}catch{}
 }
-function openUpgradeDialog(){
+function signupPromptOnCooldown(){
+ if(chartPromptShownInTab)return true;
+ try{
+  const last=Number(localStorage.getItem(GOLD_SIGNUP_PROMPT_KEY));
+  return last>0&&Date.now()-last<GOLD_SIGNUP_COOLDOWN_MS;
+ }catch{return false}
+}
+function updateSignupProof(item){
+ const proof=$('trial-modal-proof'),stats=item?.stats,performance=item?.performanceUsd;
+ const hasTrades=stats?.trades>0&&Number.isFinite(performance?.netUsd)&&
+  Number.isFinite(performance?.returnPercent)&&Number.isFinite(stats?.wins);
+ proof.hidden=!hasTrades;
+ if(!hasTrades)return;
+ const daysAvailable=Number(item.market?.availableDays)||0;
+ const daysShown=daysAvailable>=1?
+  (daysAvailable>=7?Math.floor(daysAvailable):daysAvailable.toFixed(1)):'';
+ $('trial-modal-proof-period').textContent=daysShown?
+  daysShown+' days of available Gold history':'Available Gold history';
+ $('trial-modal-profit-label').textContent=performance.netUsd>0?
+  'Historical net gain':performance.netUsd<0?'Historical net loss':'Net result';
+ $('trial-modal-profit').textContent=fmtUSD(performance.netUsd,true);
+ $('trial-modal-profit').className=performance.netUsd>0?'trial-positive':
+  performance.netUsd<0?'trial-negative':'';
+ $('trial-modal-wins').textContent=String(stats.wins);
+ $('trial-modal-return').textContent=
+  (performance.returnPercent>0?'+':'')+performance.returnPercent.toFixed(2)+'%';
+ $('trial-modal-return').className=performance.returnPercent>0?'trial-positive':
+  performance.returnPercent<0?'trial-negative':'';
+}
+function openEmailDialog(){
+ if(session?.active)return;
+ if(session?.signedIn){
+  message('Your free alert access has finished. Choose lifetime access to keep alerts running.');
+  return;
+ }
+ if(upgradeDialog.open)return;
+ if(!accessDialog.open){
+  updateSignupProof(model);
+  markGoldSignupPrompt();
+  accessDialog.showModal();
+ }
+}
+function openUpgradeDialog(mode='general'){
+ if(accessDialog.open)return;
+ const history=mode==='history';
+ $('trial-upgrade-kicker').textContent=history?'UNLOCK EXTENDED BACKTESTING':'KEEP YOUR ALERTS GOING';
+ $('trial-upgrade-title').textContent=history?
+  'Unlock 60 days of Gold Breakout results.':'Your Gold Breakout workspace, for life.';
+ $('trial-upgrade-desc').textContent=history?
+  'Go beyond the public 30-day backtest with lifetime membership. Get 60-day history, ongoing Gold alerts, and access to every current and future script with a single payment.':
+  'Keep entry and exit alerts running, unlock longer backtests and access every current and future script with one lifetime membership.';
+ $('trial-upgrade-primary').textContent=history?
+  'Unlock 60-day history with lifetime access →':'Explore lifetime access →';
  if(!upgradeDialog.open)upgradeDialog.showModal();
+}
+function startGoldChartEngagementPrompt(){
+ // Count only time spent with at least a quarter of the chart on screen.
+ // Hidden tabs and other open dialogs do not count toward the prompt.
+ const chartBox=$('trial-chart');
+ if(!chartBox||location.pathname!=='/trial.html')return;
+ if('IntersectionObserver' in window){
+  const observer=new IntersectionObserver(entries=>{
+   goldChartVisible=entries.some(entry=>entry.isIntersecting&&entry.intersectionRatio>=.25);
+  },{threshold:[0,.25,.5]});
+  observer.observe(chartBox);
+ }
+ setInterval(()=>{
+  if(!('IntersectionObserver' in window)){
+   const box=chartBox.getBoundingClientRect();
+   const visibleHeight=Math.max(0,Math.min(box.bottom,innerHeight)-Math.max(box.top,0));
+   goldChartVisible=box.height>0&&visibleHeight/box.height>=.25;
+  }
+  if(document.visibilityState!=='visible'||!goldChartVisible||
+     !session||session.signedIn||accessDialog.open||upgradeDialog.open||
+     signupPromptOnCooldown())return;
+  chartViewedSeconds++;
+  if(chartViewedSeconds>=GOLD_CHART_DWELL_SECONDS)openEmailDialog();
+ },1000);
 }
 function updateSignalInvites(){
  // Show the conversion invitation only while alerts have not been activated.
@@ -133,7 +214,7 @@ form.addEventListener('submit',async e=>{
   await loadSession({prompt:false});
   message('Your Gold Breakout alerts are activated. Explore your chart and alert settings below.');
  }catch(error){message(error.message)}
- finally{button.disabled=false;button.textContent='Activate my free alerts →'}
+ finally{button.disabled=false;button.textContent='Start my 7-day free alerts →'}
 });
 $('trial-modal-close').addEventListener('click',()=>accessDialog.close());
 $('trial-explore-preview').addEventListener('click',()=>accessDialog.close());
@@ -356,7 +437,7 @@ async function loadData(){
  loading=true;$('trial-refresh').disabled=true;
  try{
   const item=await api('data?days='+days);
-  model=item;currentDetails(item);writeMetrics(item);showTrades(item.trades,item.preview);
+  model=item;updateSignupProof(item);currentDetails(item);writeMetrics(item);showTrades(item.trades,item.preview);
   updateSignalInvites();
   showSignalHistory(item);
   drawChart(item);
@@ -388,7 +469,8 @@ $('trial-results-invite-button').addEventListener('click',openEmailDialog);
 document.querySelectorAll('[data-days]').forEach(button=>button.addEventListener('click',async()=>{
  const next=Number(button.dataset.days);
  if(next===60&&!session?.lifetime){
-  message('Extended backtesting is available with lifetime access. You can explore the live chart and free results now.');
+  message('');
+  openUpgradeDialog('history');
   return;
  }
  days=next;document.querySelectorAll('[data-days]').forEach(b=>{
@@ -480,6 +562,7 @@ setInterval(async()=>{
   }catch(error){console.error('Trial status refresh failed',error)}
  }
 },60000);
+startGoldChartEngagementPrompt();
 (async()=>{
  const verify=new URLSearchParams(location.search).get('verify');
  if(verify){
