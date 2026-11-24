@@ -1,7 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {runGoldBreakout} from '../functions/_lib/gold-market.js';
-import {validEmail,normalizeEmail,discordUrl,TRIAL_DAYS,UPGRADE_AFTER_MS,upgradeEligible,claimUpgradePrompt} from '../functions/_lib/gold-trial.js';
+import {runGoldBreakout,fetchGoldCandles,biquoteBars} from '../functions/_lib/gold-market.js';
+import {validEmail,normalizeEmail,discordUrl,TRIAL_DAYS,UPGRADE_AFTER_MS,upgradeEligible,claimUpgradePrompt,instantSubscribe,signedIn} from '../functions/_lib/gold-trial.js';
+import {onRequestPost as startTrial} from '../functions/api/trial/start.js';
+import {onRequestGet as listSubscribers} from '../functions/api/trial/subscribers.js';
 function dayBars(date,side='LONG',ambiguous=false){
  const start=Date.parse(date+'T21:00:00Z');
  const bars=[];
@@ -93,4 +95,83 @@ test('Gold alert marketing opens the workspace before collecting email',async()=
  assert.match(page,/Enter your email and start for free/);
  assert.match(page,/<dialog class="trial-upgrade-dialog"/);
  assert.doesNotMatch(article,/\$4\.99|before buying/);
+});
+
+test('Gold candle adapter falls back to actual XAUUSD 15m bars if Yahoo is unavailable',async()=>{
+ const oldFetch=globalThis.fetch;
+ const end=Math.floor((Date.now()-20*60000)/900000)*900000;
+ const bars=Array.from({length:160},(_,index)=>{
+  const at=new Date(end-(159-index)*900000).toISOString();
+  return {openTime:at,open:4050,high:4053,low:4048,close:4051,isOpen:false};
+ });
+ try{
+  globalThis.fetch=async url=>String(url).includes('finance.yahoo.com')?
+   {ok:false,status:429}:{ok:true,json:async()=>({bars,symbol:'XAUUSD',interval:'15m'})};
+  const result=await fetchGoldCandles(30);
+  assert.equal(result.symbol,'XAUUSD');
+  assert.match(result.source,/biquote/);
+  assert.equal(result.bars.length,160);
+  assert.equal(result.limitedHistory,true);
+  assert.equal(result.interval,'15m');
+ }finally{globalThis.fetch=oldFetch}
+});
+test('Fallback candle parser excludes a still-open bar and rejects malformed OHLC',()=>{
+ const now=new Date().toISOString();
+ assert.equal(biquoteBars({bars:[
+  {openTime:now,open:4000,high:4001,low:3999,close:4000,isOpen:true},
+  {openTime:now,open:4000,high:4001,low:3999,close:4000,isOpen:false},
+  {openTime:now,open:-3,high:4001,low:3999,close:4000,isOpen:false}
+ ]}).length,1);
+});
+test('Email submission activates a browser trial immediately and stores lead metadata',async()=>{
+ const statements=[];
+ const db={prepare(sql){
+  const stmt={values:[],bind(...values){this.values=values;return this},
+   async run(){statements.push({sql,values:this.values});return {meta:{changes:1}}},
+   async first(){return null}};
+  return stmt;
+ }};
+ const request=new Request('https://signaltoscript.com/api/trial/start',{
+  method:'POST',headers:{Origin:'https://signaltoscript.com','Content-Type':'application/json'},
+  body:JSON.stringify({email:'  free@example.com  ',source:'gold-workspace',
+   utmSource:'social',utmCampaign:'gold-alerts'})
+ });
+ const response=await startTrial({request,env:{DB:db}});
+ const data=await response.json();
+ assert.equal(response.status,200);
+ assert.equal(data.ok,true);
+ assert.equal(data.active,true);
+ assert.match(response.headers.get('Set-Cookie'),/__Host-sts_trial=[a-f0-9]{64}/);
+ assert.ok(statements.some(x=>x.sql.includes('INSERT INTO gold_trial_subscribers')&&x.values[0]==='free@example.com'));
+ assert.ok(statements.some(x=>x.sql.includes('gold_trial_instant_sessions')));
+ assert.ok(statements.some(x=>x.sql.includes('gold_trial_accounts')&&x.sql.includes('ON CONFLICT(email) DO NOTHING')));
+});
+test('Unproven email-only session never inherits an existing paid membership',async()=>{
+ const token='a'.repeat(64);
+ const request=new Request('https://signaltoscript.com/api/trial/session',{headers:{Cookie:'__Host-sts_trial='+token}});
+ const db={prepare(sql){return {bind(){return this},async first(){
+  if(sql.includes('LEFT JOIN gold_trial_instant_sessions'))return {
+   email:'paid@example.com',created_ms:Date.now()-86400000,expires_ms:Date.now()+86400000,
+   lifetime:1,instant_token:'digest',session_proven:0};
+  return null;
+ }}}};
+ const result=await signedIn(db,request);
+ assert.equal(result.lifetime,false);
+ assert.equal(result.active,true);
+});
+test('Subscriber list is never accessible without the owner admin key',async()=>{
+ const request=new Request('https://signaltoscript.com/api/trial/subscribers');
+ const response=await listSubscribers({request,env:{DB:{},TRIAL_ADMIN_KEY:'x'.repeat(48)}});
+ assert.equal(response.status,404);
+});
+test('Workspace presents instant signup and a real chart fallback',async()=>{
+ const {readFile}=await import('node:fs/promises');
+ const html=await readFile(new URL('../public/trial.html',import.meta.url),'utf8');
+ const js=await readFile(new URL('../public/trial.js',import.meta.url),'utf8');
+ assert.match(html,/Activate my free alerts/);
+ assert.doesNotMatch(html,/Check your inbox|trial-email-sent|trial-try-another/);
+ assert.match(js,/await post\('start',data\)/);
+ assert.match(js,/await loadSession\(\{prompt:false\}\)/);
+ assert.match(js,/showMarketFallback/);
+ assert.match(js,/s\.tradingview\.com\/widgetembed/);
 });
