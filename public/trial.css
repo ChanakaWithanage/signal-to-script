@@ -225,3 +225,40 @@
  .trial-results-invite{padding:20px;align-items:stretch;flex-direction:column;gap:17px}
  .trial-results-invite .trial-primary{max-width:none;width:100%}
 }
+
+/* 15m signals: readable markers and direct navigation instead of a compressed month view. */
+.trial-signal-toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;
+ padding:10px 17px;background:#fbfdfb;border-top:1px solid #ebf0ed;border-bottom:1px solid #ebf0ed}
+.trial-signal-badge{display:flex;align-items:center;gap:9px;min-width:0}
+.trial-signal-badge>span{display:inline-flex;align-items:center;flex:none;
+ font:800 11px/1 var(--sans,Arial,sans-serif);padding:5px 7px;border-radius:5px;
+ color:#216441;background:#e1f4e6;border:1px solid #bfe5c9}
+.trial-signal-badge>strong{color:#3b6250;font:750 11px/1.4 var(--sans,Arial,sans-serif)}
+.trial-signal-toolbar-actions{display:flex;flex-wrap:wrap;gap:7px}
+.trial-signal-toolbar-actions button{background:#fff;border:1px solid #cfe1d3;
+ border-radius:7px;color:#226345;font:700 11px/1.4 var(--sans,Arial,sans-serif);
+ padding:7px 11px;cursor:pointer}
+.trial-signal-toolbar-actions button:hover{border-color:#78bc92;background:#f2faf4}
+.trial-signal-history{display:flex;gap:9px;align-items:center;
+ overflow-x:auto;padding:12px 15px;background:#fff;border-top:1px solid #eaf0ec;
+ scrollbar-width:thin}
+.trial-signal-history-heading{flex:none;color:#648073;
+ font:850 10px/1.4 var(--sans,Arial,sans-serif);letter-spacing:.04em;
+ max-width:92px}
+.trial-signal-event{display:grid;flex:none;gap:2px;align-content:start;
+ background:#f8fbf8;border:1px solid #dceae0;border-radius:9px;
+ padding:8px 11px;text-align:left;cursor:pointer;min-width:142px}
+.trial-signal-event:hover{background:#eef8f0;border-color:#8ccba1}
+.trial-signal-event strong{font:850 12px/1.4 var(--sans,Arial,sans-serif)}
+.trial-signal-event span,.trial-signal-event small{color:#718578;
+ font:550 10px/1.4 var(--sans,Arial,sans-serif)}
+.trial-signal-event .signal-event-buy{color:#078752}
+.trial-signal-event .signal-event-sell{color:#cf454b}
+.trial-signal-event .signal-event-exit{color:#b27c1f}
+.trial-signals-loading{color:#718578;font:600 11px/1.5 var(--sans,Arial,sans-serif)}
+@media(max-width:620px){
+ .trial-signal-toolbar{align-items:flex-start;flex-direction:column}
+ .trial-signal-toolbar-actions{width:100%}
+ .trial-signal-toolbar-actions button{flex:1}
+ .trial-signal-history-heading{min-width:75px}
+}
