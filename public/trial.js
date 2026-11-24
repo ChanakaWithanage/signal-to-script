@@ -315,7 +315,19 @@ window.addEventListener('focus',async()=>{
   }
  }catch{}
 });
-setInterval(()=>{if(document.visibilityState==='visible')loadData()},60000);
+let lastAccountRefresh=Date.now();
+setInterval(async()=>{
+ if(document.visibilityState!=='visible')return;
+ await loadData();
+ // Tabs left open for days still receive the day-five membership reminder.
+ if(session?.signedIn&&Date.now()-lastAccountRefresh>=20*60*1000){
+  lastAccountRefresh=Date.now();
+  try{
+   await loadSession({prompt:false});
+   await showUpgradeIfDue();
+  }catch(error){console.error('Trial status refresh failed',error)}
+ }
+},60000);
 (async()=>{
  const verify=new URLSearchParams(location.search).get('verify');
  if(verify){
