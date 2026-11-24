@@ -97,18 +97,24 @@ The old November 30 checkout shutdown has been removed; it would have left peopl
 7. Test responsive display: 360px, 768px and desktop; verify onboarding, chart sizing, membership paywall, and keyboard tab order.
 8. Run `node --test tests/gold-trial.test.mjs` on Node 22. The GitHub workflow also checks syntax of all new Cloudflare Functions and trial browser scripts.
 
-## Simplified visitor flow
+## Conversion-first Gold workspace
 
-The public Gold workspace follows this hierarchy:
+The public Gold workspace follows this visual order:
 
-1. **Get BUY & SELL Alerts Free** prominently below the Gold Breakout headline, opening the existing single-email activation dialog on click
-2. Actual **15-minute Gold chart** with historical entry/exit markers, recent event links, Past week / Past 30 days chart controls, and alert-channel configuration
-3. **Historical results** calculated from the server-side strategy model: net R, win rate, completed trades, profit factor, and max drawdown in R
-4. **Trade history** below the results, with the existing post-history CTA for future alerts
+1. **Get BUY & SELL Alerts Free** CTA below the heading, using the single-email activation dialog
+2. Full-width **15-minute Gold chart** with real BUY, SELL and EXIT markers, Past week / Past 30 days views and historical signal navigation
+3. **Historical performance in USD** (net P&L, return %, completed trades, win rate, profit factor, and maximum drawdown)
+4. **Current Strategy Status** and email/Discord/Telegram notification configuration below the results
+5. **Completed trade history** in USD, with the existing free future-alerts CTA below the table
 
-No hypothetical account balance, position sizing, dollar estimate or compounding information is displayed to visitors. The strategy performance is expressed in the original backtest R units, so it does not imply an arbitrary account-specific cash gain. The public data endpoint no longer exposes the unused `exampleAccount` property.
+Dollar calculations use the existing strategy R-multiples with the reference balance specified by the owner: **$100,000**, fixed **1% ($1,000) risk per trade**. The server applies this same risk unit for both summary results and the per-trade USD P&L.
 
-The latest-signal and latest-candle buttons remain removed. Visitors can still select a historical event to locate it on the chart. The free alert CTA is hidden after signup.
+- Net P&L = `stats.netR * $1,000`
+- Return % = `stats.netR * 1%`
+- Max drawdown = `stats.maxDrawdownR * $1,000`
+- Each completed trade's dollar result = `trade.r * $1,000`
+
+This conversion is applied only to calculated historical trades; no hypothetical cash return is displayed when no trades exist. The visitor-facing page uses a concise `$100,000 balance · 1% risk per trade` label, does not show R units, and does not include extra compounding text. Backtest R metrics remain internally available for strategy computations; the public API now includes a `performanceUsd` summary and `resultUsd` on each trade. The private Pine implementation is unchanged.
 
 ## Seven-day and 30-day history
 
