@@ -1,4 +1,5 @@
 /* Gold Breakout trial: spacious editorial introduction, compact trading workspace. */
+.trial-main [hidden]{display:none!important}
 .trial-main{background:linear-gradient(180deg,#f4f8f5 0,#fbfcfa 520px,#f6f8f6 100%);color:#17382b;min-height:80vh;padding:42px 0 70px}
 .trial-main *{box-sizing:border-box}
 .trial-main .wrap{max-width:1260px}
