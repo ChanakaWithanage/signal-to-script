@@ -4,7 +4,7 @@ export async function onRequestGet({request,env}){
  try{
   await ensureTrialSchema(env.DB);
   const member=await signedIn(env.DB,request);
-  if(!member)return respond({signedIn:false,registrationAvailable:!!env.RESEND_API_KEY});
+  if(!member)return respond({signedIn:false,registrationAvailable:true});
   const prefs=await preferences(env.DB,member.email);
   return respond({signedIn:true,...member,
    emailAlerts:prefs?.email_alerts===1,discordConnected:!!prefs?.discord_webhook_cipher,
