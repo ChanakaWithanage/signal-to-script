@@ -1,0 +1,19 @@
+# Copy to workers/wrangler.toml and deploy from the repository root:
+# npx wrangler deploy --config workers/wrangler.toml
+name = "signal-to-script-gold-alerts"
+main = "gold-alerts.js"
+compatibility_date = "2026-11-24"
+
+[triggers]
+crons = ["*/5 * * * *"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "YOUR_EXISTING_SIGNAL_TO_SCRIPT_D1_NAME"
+database_id = "REPLACE_WITH_YOUR_EXISTING_D1_DATABASE_ID"
+
+# Provide the same secrets as Cloudflare Pages (do not put real secrets in Git):
+# wrangler secret put RESEND_API_KEY --config workers/wrangler.toml
+# wrangler secret put TRIAL_EMAIL_FROM --config workers/wrangler.toml
+# wrangler secret put ALERTS_ENCRYPTION_KEY --config workers/wrangler.toml
+# wrangler secret put TELEGRAM_BOT_TOKEN --config workers/wrangler.toml
