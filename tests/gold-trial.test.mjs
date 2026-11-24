@@ -497,7 +497,8 @@ test('Signup message leads with real profitable USD backtest evidence and offers
  assert.match(html,/No verification step/);
  assert.match(js,/if\(performance\.netUsd>0\)/);
  assert.match(js,/fmtUSD\(performance\.netUsd,true\).*net backtest profit/);
- assert.match(js,/return\) and .*wins/);
+ assert.match(js,/return\) and '/);
+ assert.match(js,/wins\+' '\+historyLabel/);
  assert.match(js,/winning .*trade/);
  assert.match(js,/if\(!hasTrades\)return/);
  assert.match(js,/copy\.hidden=false/);
