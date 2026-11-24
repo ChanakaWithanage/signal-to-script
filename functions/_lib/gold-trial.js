@@ -58,6 +58,17 @@ export async function signedIn(db,request){
  WHERE s.token_hash=? AND s.expires_ms>? LIMIT 1`)
   .bind(await hashToken(token),Date.now()).first();
  if(!row)return null;
+ // Manual purchases are made using the same email; activate automatically once staff confirms payment.
+ if(row.lifetime!==1){
+  try{
+   const paid=await db.prepare("SELECT id FROM premium_manual_requests WHERE email=? AND slug='lifetime' AND status='paid' LIMIT 1")
+    .bind(row.email).first();
+   if(paid){
+    await db.prepare('UPDATE gold_trial_accounts SET lifetime=1 WHERE email=?').bind(row.email).run();
+    row.lifetime=1;
+   }
+  }catch(error){if(!/no such table/i.test(String(error)))throw error}
+ }
  return {email:row.email,createdAt:row.created_ms,expiresAt:row.expires_ms,
    lifetime:row.lifetime===1,active:row.lifetime===1||row.expires_ms>Date.now(),
    remainingDays:row.lifetime===1?null:Math.max(0,Math.ceil((row.expires_ms-Date.now())/86400000))};
