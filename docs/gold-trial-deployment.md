@@ -3,13 +3,13 @@
 ## What is included
 The Gold Breakout strategy trial is served at `/trial.html` and promoted from the homepage, strategy article, and checkout.
 
-- Workspace-first onboarding: visitors enter the live Gold chart before registration. A dismissible email modal immediately activates free alerts and the available historical results. No inbox verification is required.
+- Workspace-first onboarding: visitors enter the live Gold chart before registration. A dismissible email modal immediately activates free entry and exit alerts. Historical chart signals and available 30-day backtest results are public, so visitors can inspect the strategy first. No inbox verification is required.
 - Trial begins on the first email submission; remains free for exactly 7 × 24 hours.
 - 15-minute COMEX gold-futures candles from two Yahoo Finance endpoints, with an independent spot-gold candle fallback from biquote. If both feeds fail, the page shows an embedded gold price chart and retry control rather than an indefinite loading indicator. Data is not represented as the same feed as a TradingView chart.
 - Server-side Gold Breakout preview engine. The paid Pine script is never exposed by trial API or browser scripts. The preview uses a 1% protective stop, 00:00–07:00 UTC+3 range and trading until 20:00 UTC+3; intrabar double breaks are intentionally excluded.
-- Up to 30 days of past trades and 30-day chart for free trial. Extended 60-day lookback is unlocked after lifetime membership.
+- Past entry and exit signals, completed trades, statistics and up to 30 days of confirmed chart data are publicly visible. Free trial signup activates future alerts. Extended 60-day lookback is unlocked after lifetime membership.
 - Email, encrypted Discord webhook and Telegram bot notifications of newly confirmed entry/exit events while trial/member access is active.
-- Upgrade messaging begins after five full days, with at most one account-scoped popup per 24 hours. The homepage and Gold article show no price or trial countdown. After seven days, users retain a recent-chart preview until lifetime activation.
+- Upgrade messaging begins after five full days, with at most one account-scoped popup per 24 hours. The homepage and Gold article show no price or trial countdown. After seven days, past results remain public, while future notification delivery requires lifetime activation.
 
 ## Cloudflare Pages configuration
 The existing Cloudflare Pages application uses `public/` as its output and `functions/` for server endpoints. Reuse the same D1 binding `DB`. Pages Functions create tables on first use, or apply `schema.sql` to D1.
@@ -87,7 +87,7 @@ The old November 30 checkout shutdown has been removed; it would have left peopl
 ## QA checklist
 1. Open `/trial.html` as a guest. The workspace and real candles should load immediately behind the email dialog. Dismiss it, explore recent candles, then activate alerts by entering an email. Confirm that repeated sign-ins do not reset the original seven-day period.
 2. Before sign-in verify public data is limited to a recent five-day chart with no full 30-day metrics or trades. After sign-in verify the real 15-minute chart, daily range, entry/exit markers, feed timestamp and full historical results.
-3. Confirm anonymous and expired users can load only preview candles. Extended 60-day results and the premium Pine source remain protected.
+3. Confirm anonymous and expired users can review past signals and available 30-day results but cannot request extended 60-day data. Extended 60-day results and the premium Pine source remain protected.
 4. Enable email delivery, connect Discord and Telegram; send a test notification using a new, genuine confirmed signal (do not send historical trades).
 5. Confirm only one alert is sent per event/channel. Confirm the upgrade popup never appears during days 0-4, appears starting at day five, is suppressed in other tabs for 24 hours, and never appears for lifetime users.
 6. Redeem a completed manual/crypto membership receipt in the trial, check lifetime state and extended backtest; verify an unpaid receipt fails.
