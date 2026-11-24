@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {runGoldBreakout,fetchGoldCandles,biquoteBars} from '../functions/_lib/gold-market.js';
+import {storeGoldCandles,getArchivedGold,mergeGoldCandles} from '../functions/_lib/gold-archive.js';
 import {validEmail,normalizeEmail,discordUrl,TRIAL_DAYS,UPGRADE_AFTER_MS,upgradeEligible,claimUpgradePrompt,instantSubscribe,signedIn} from '../functions/_lib/gold-trial.js';
 import {onRequestPost as startTrial} from '../functions/api/trial/start.js';
 import {onRequestGet as listSubscribers} from '../functions/api/trial/subscribers.js';
@@ -255,4 +256,94 @@ test('15m Gold chart explicitly renders and navigates historical BUY SELL EXIT m
  assert.doesNotMatch(js,/chart\.timeScale\(\)\.fitContent\(\)/);
  assert.match(js,/item\.market\.interval!=='15m'/);
  assert.match(js,/15-minute price-only fallback/);
+});
+
+test('Thirty-day strategy data is restored from a full Yahoo proxy even if direct Yahoo is blocked',async()=>{
+ // Use the unused 60d cache lane so this test is independent of earlier
+ // cached 30d biquote fixture.
+ const original=globalThis.fetch;
+ const interval=15*60000;
+ const newest=Math.floor((Date.now()-1800000)/interval)*interval;
+ const length=58*96;
+ const timestamps=Array.from({length},(_,i)=>(newest-(length-i-1)*interval)/1000);
+ const quote={open:Array(length).fill(4000),high:Array(length).fill(4010),
+  low:Array(length).fill(3990),close:Array(length).fill(4004)};
+ const yahoo={chart:{result:[{timestamp:timestamps,indicators:{quote:[quote]}}]}};
+ const called=[];
+ try{
+  globalThis.fetch=async url=>{
+   called.push(String(url));
+   if(String(url).startsWith('https://proxy.cors.dev/'))
+    return {ok:true,json:async()=>yahoo};
+   return {ok:false,status:429};
+  };
+  const feed=await fetchGoldCandles(60);
+  assert.equal(feed.symbol,'GC=F');
+  assert.ok(feed.availableDays>=56);
+  assert.ok(feed.bars.length>5000);
+  assert.equal(feed.limitedHistory,false);
+  assert.ok(called.some(url=>url.includes('proxy.cors.dev')));
+  assert.equal(feed.interval,'15m');
+ }finally{globalThis.fetch=original}
+});
+test('D1 retention merges real candles chronologically and deduplicates overlaps',async()=>{
+ const memory=new Map();
+ const db={prepare(sql){
+  let args=[];
+  return {
+   bind(...values){args=values;return this},
+   async run(){
+    if(sql.includes('INSERT OR IGNORE INTO gold_candle_history')){
+     for(let i=0;i<args.length;i+=7){
+      const row=args.slice(i,i+7),key=row[0]+':'+row[1];
+      if(!memory.has(key))memory.set(key,{symbol:row[0],time_ms:row[1],
+       open:row[2],high:row[3],low:row[4],close:row[5],source:row[6]});
+     }
+    }
+    return {meta:{changes:1}};
+   },
+   async first(){
+    if(sql.includes('MAX(time_ms)')){
+     const times=[...memory.values()].filter(row=>row.symbol===args[0]).map(row=>row.time_ms);
+     return {latest:times.length?Math.max(...times):null};
+    }
+    return null;
+   },
+   async all(){
+    if(sql.includes('FROM gold_candle_history')){
+     return {results:[...memory.values()].filter(row=>row.symbol===args[0]&&row.time_ms>=args[1])
+      .sort((a,b)=>a.time_ms-b.time_ms)};
+    }
+    return {results:[]};
+   }
+  };
+ }};
+ const end=Math.floor((Date.now()-1800000)/900000)*900000;
+ const bars=Array.from({length:75},(_,i)=>({time:end-(74-i)*900000,
+  open:4000+i,high:4003+i,low:3998+i,close:4001+i}));
+ await storeGoldCandles(db,{symbol:'GC=F',source:'Yahoo Finance',bars});
+ await storeGoldCandles(db,{symbol:'GC=F',source:'Yahoo Finance',bars});
+ assert.equal(memory.size,75);
+ const saved=await getArchivedGold(db,'GC=F',30);
+ assert.equal(saved.length,75);
+ assert.deepEqual(saved.map(b=>b.time),bars.map(b=>b.time));
+ assert.deepEqual(mergeGoldCandles(bars.slice(-5),saved),saved);
+ assert.equal((await getArchivedGold(db,'XAUUSD',30)).length,0);
+});
+test('Chart exposes separate 7-day and 30-day windows and shows all loaded signals',async()=>{
+ const {readFile}=await import('node:fs/promises');
+ const html=await readFile(new URL('../public/trial.html',import.meta.url),'utf8');
+ const js=await readFile(new URL('../public/trial.js',import.meta.url),'utf8');
+ const adapter=await readFile(new URL('../functions/_lib/gold-market.js',import.meta.url),'utf8');
+ const endpoint=await readFile(new URL('../functions/api/trial/data.js',import.meta.url),'utf8');
+ assert.match(html,/data-view-days="7" class="active"/);
+ assert.match(html,/data-view-days="30"/);
+ assert.match(html,/id="trial-history-coverage"/);
+ assert.match(js,/chartHistoryWindow\(7\)/);
+ assert.match(js,/chartHistoryWindow\(30\)/);
+ assert.match(js,/reverse\(\)\.slice\(0,100\)/);
+ assert.match(js,/trial-history-coverage/);
+ assert.match(adapter,/proxy\.cors\.dev/);
+ assert.match(adapter,/getArchivedGold/);
+ assert.match(endpoint,/waitUntil:typeof waitUntil/);
 });
