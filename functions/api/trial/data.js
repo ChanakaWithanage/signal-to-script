@@ -1,6 +1,5 @@
 import {ensureTrialSchema,signedIn,respond} from '../../_lib/gold-trial.js';
 import {fetchGoldCandles,runGoldBreakout} from '../../_lib/gold-market.js';
-import {illustrativeGoldResults} from '../../_lib/gold-performance.js';
 
 // Visitors can inspect real past signals and up to 30 days of backtest results
 // before subscribing. Email is used only for future alerts and trial tracking.
@@ -25,7 +24,7 @@ export async function onRequestGet({request,env,waitUntil}){
    db:env.DB||null,waitUntil:typeof waitUntil==='function'?waitUntil:null
   });
   const model=runGoldBreakout(feed.bars,{days:requestedDays});
-  return respond({...model,exampleAccount:illustrativeGoldResults(model.stats),preview:false,previewDays:null,
+  return respond({...model,preview:false,previewDays:null,
    market:{source:feed.source,symbol:feed.symbol,lastClosedBar:feed.asOf,
     interval:feed.interval,availableDays:feed.availableDays,
     limitedHistory:feed.limitedHistory,stale:!!feed.stale},
