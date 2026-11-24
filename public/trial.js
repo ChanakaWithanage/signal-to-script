@@ -7,6 +7,7 @@ const fmtPrice=n=>typeof n==='number'?new Intl.NumberFormat('en-US',{minimumFrac
 const fmtTime=t=>t?new Date(t).toLocaleString('en-GB',{timeZone:'UTC',day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit',hour12:false})+' UTC':'—';
 const DAY_MS=86400000;
 let session=null,model=null,chart=null,candles=null,highLine=null,lowLine=null,loading=false,days=30;
+let chartViewInitialized=false,chartViewMode='signal',latestChartBars=[];
 function message(text){flash.textContent=text;flash.hidden=!text}
 async function api(path,options={}){
  const res=await fetch('/api/trial/'+path,{credentials:'same-origin',cache:'no-store',...options});
@@ -199,33 +200,100 @@ function showMarketFallback(reason){
   box.replaceChildren();
   const wrap=document.createElement('div');wrap.className='trial-market-fallback';
   const head=document.createElement('div');head.className='trial-market-fallback-head';
-  head.textContent='Gold chart';
+  head.textContent='Gold price · 15-minute chart';
   const iframe=document.createElement('iframe');
-  iframe.title='Gold price chart from TradingView';
+  iframe.title='15-minute gold price chart from TradingView';
   iframe.loading='lazy';
   iframe.referrerPolicy='strict-origin-when-cross-origin';
   iframe.src='https://s.tradingview.com/widgetembed/?symbol=TVC%3AGOLD&interval=15&theme=light&style=1&locale=en&hide_top_toolbar=1&saveimage=0';
   const note=document.createElement('div');note.className='trial-market-fallback-note';
-  note.textContent='Strategy overlays are reconnecting. You can still explore the live Gold chart.';
+  note.textContent='This is the 15-minute price-only fallback. BUY, SELL and EXIT overlays will return when the strategy feed reconnects.';
   const retry=document.createElement('button');retry.type='button';retry.textContent='Retry strategy signals';
   retry.addEventListener('click',loadData);
   wrap.append(head,iframe,note,retry);box.append(wrap);
  }
  $('trial-asof').textContent='Strategy data temporarily unavailable';
  $('trial-online-status').textContent='Retrying';
- $('trial-source').textContent='Gold chart via TradingView · Strategy feed reconnecting';
+ $('trial-source').textContent='TradingView Gold · 15-minute price-only fallback';
  $('trial-current-status').textContent='Reconnecting signals';
  $('trial-current-detail').textContent='The live strategy feed is refreshing. The price chart remains available.';
  $('trial-trade-rows').innerHTML='<tr><td colspan="6">Historical results will appear when the strategy feed reconnects.</td></tr>';
 }
+function signalText(event){
+ if(event.type==='EXIT')return 'EXIT '+event.side;
+ return event.side==='LONG'?'BUY':'SELL';
+}
+function focusOnSignal(atTime){
+ if(!chart||!latestChartBars.length)return;
+ const candleTime=Math.floor(atTime/1000);
+ const index=latestChartBars.findIndex(b=>b.time===candleTime);
+ if(index<0)return;
+ const start=Math.max(0,index-70),stop=Math.min(latestChartBars.length+4,index+48);
+ chart.timeScale().setVisibleLogicalRange({from:start,to:Math.max(start+20,stop)});
+ chartViewMode='signal';
+}
+function focusLatestSignal(){
+ const last=model?.events?.at(-1);
+ if(last)focusOnSignal(last.time);
+}
+function focusLatestBars(){
+ if(!chart||!latestChartBars.length)return;
+ const last=latestChartBars.length;
+ chart.timeScale().setVisibleLogicalRange({from:Math.max(0,last-165),to:last+3});
+ chartViewMode='latest';
+}
+$('trial-show-last-signal').addEventListener('click',focusLatestSignal);
+$('trial-show-latest-bars').addEventListener('click',focusLatestBars);
+function showSignalHistory(item){
+ const entries=item.events.filter(e=>e.type==='ENTRY');
+ const exits=item.events.filter(e=>e.type==='EXIT');
+ $('trial-signal-count').textContent=entries.length+' entries · '+exits.length+' exits on 15m';
+ $('trial-show-last-signal').hidden=item.events.length===0;
+ $('trial-show-latest-bars').hidden=item.candles.length===0;
+ const list=$('trial-signal-history');list.replaceChildren();
+ if(!item.events.length){
+  const span=document.createElement('span');span.className='trial-signals-loading';
+  span.textContent='No confirmed breakout entry or exit appears in the available 15-minute history.';
+  list.append(span);return;
+ }
+ const label=document.createElement('span');label.className='trial-signal-history-heading';
+ label.textContent='Recent 15m signals';list.append(label);
+ for(const event of [...item.events].reverse().slice(0,7)){
+  const button=document.createElement('button');button.type='button';button.className='trial-signal-event';
+  button.setAttribute('aria-label','Show '+signalText(event)+' on the 15-minute chart, '+fmtTime(event.time));
+  const direction=document.createElement('strong');
+  direction.className=event.type==='EXIT'?'signal-event-exit':event.side==='LONG'?'signal-event-buy':'signal-event-sell';
+  direction.textContent=signalText(event);
+  const detail=document.createElement('span');detail.textContent=fmtTime(event.time);
+  const price=document.createElement('small');price.textContent='$'+fmtPrice(event.price);
+  button.append(direction,detail,price);
+  button.addEventListener('click',()=>focusOnSignal(event.time));
+  list.append(button);
+ }
+}
 function drawChart(item){
  const box=$('trial-chart');
+ if(item.market.interval!=='15m'){
+  throw Error('Expected 15-minute Gold market data.');
+ }
  if(!window.LightweightCharts){
   showMarketFallback('chart library');
   return;
  }
- const barData=item.candles.map(b=>({time:Math.floor(b.time/1000),open:b.open,high:b.high,low:b.low,close:b.close}));
+ const barData=item.candles.map(b=>({time:Math.floor(b.time/1000),
+  open:b.open,high:b.high,low:b.low,close:b.close}));
  if(!barData.length)return;
+ // Plot only confirmed event timestamps present in the real 15m candle feed.
+ const barTimes=new Set(barData.map(b=>b.time));
+ const markerData=item.events.filter(e=>barTimes.has(Math.floor(e.time/1000))).map(e=>({
+  time:Math.floor(e.time/1000),
+  position:e.type==='EXIT'?(e.side==='LONG'?'aboveBar':'belowBar'):
+   e.side==='LONG'?'belowBar':'aboveBar',
+  shape:e.type==='EXIT'?'circle':e.side==='LONG'?'arrowUp':'arrowDown',
+  color:e.type==='EXIT'?'#cc8a26':e.side==='LONG'?'#078752':'#d6414a',
+  text:e.type==='EXIT'?'EXIT':e.side==='LONG'?'BUY':'SELL',
+  size:e.type==='EXIT'?1.7:2.4
+ })).sort((a,b)=>a.time-b.time);
  if(!chart){
   box.replaceChildren();
   chart=LightweightCharts.createChart(box,{width:box.clientWidth,height:box.clientHeight,
@@ -242,28 +310,27 @@ function drawChart(item){
    priceLineVisible:false,lastValueVisible:false,crosshairMarkerVisible:false});
   new ResizeObserver(()=>{if(chart)chart.applyOptions({width:box.clientWidth,height:box.clientHeight})}).observe(box);
  }
+ latestChartBars=barData;
  candles.setData(barData);
- const markerData=item.events.map(e=>({
-  time:Math.floor(e.time/1000),
-  position:e.type==='EXIT'?'inBar':e.side==='LONG'?'belowBar':'aboveBar',
-  shape:e.type==='EXIT'?'circle':e.side==='LONG'?'arrowUp':'arrowDown',
-  color:e.type==='EXIT'?'#b78a3d':e.side==='LONG'?'#22a071':'#db595e',
-  text:e.type==='EXIT'?'EXIT':e.side==='LONG'?'BUY':'SELL',
-  size:e.type==='EXIT'?1:1.4
- })).sort((a,b)=>a.time-b.time);
  candles.setMarkers(markerData);
  const ranges=item.ranges||[];
+ const rangeByDay=new Map(ranges.map(range=>[range.day,range]));
  const highs=[],lows=[];
- // Whitespace points break the prior day's lines, never connect unrelated session ranges.
  for(const b of item.candles){
   const d=new Date(b.time+3*3600000),date=d.toISOString().slice(0,10),hour=d.getUTCHours();
-  const range=ranges.find(r=>r.day===date);
+  const range=rangeByDay.get(date);
   const time=Math.floor(b.time/1000);
   if(range&&hour>=7&&hour<20){highs.push({time,value:range.high});lows.push({time,value:range.low})}
   else{highs.push({time});lows.push({time})}
  }
  highLine.setData(highs);lowLine.setData(lows);
- chart.timeScale().fitContent();
+ // A full-month fit shrinks markers into near-invisible dots. Start focused
+ // on the most recent real signal and keep the latest-price view available.
+ if(!chartViewInitialized){
+  chartViewInitialized=true;
+  if(item.events.length)focusLatestSignal();
+  else focusLatestBars();
+ }else if(chartViewMode==='latest')focusLatestBars();
 }
 async function loadData(){
  if(loading)return;
@@ -272,6 +339,7 @@ async function loadData(){
   const item=await api('data?days='+days);
   model=item;currentDetails(item);writeMetrics(item);showTrades(item.trades,item.preview);
   updateSignalInvites();
+  showSignalHistory(item);
   drawChart(item);
   $('trial-asof').textContent='Last confirmed candle '+fmtTime(Date.parse(item.market.lastClosedBar));
   $('trial-source').textContent=item.market.source+
