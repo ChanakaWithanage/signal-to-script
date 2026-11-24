@@ -97,6 +97,18 @@ The old November 30 checkout shutdown has been removed; it would have left peopl
 7. Test responsive display: 360px, 768px and desktop; verify onboarding, chart sizing, membership paywall, and keyboard tab order.
 8. Run `node --test tests/gold-trial.test.mjs` on Node 22. The GitHub workflow also checks syntax of all new Cloudflare Functions and trial browser scripts.
 
+## Gold-only chart engagement and membership conversion
+
+The **Gold workspace only** (`/trial.html`) has two related prompts:
+
+- Clicking **60 days** as a non-lifetime visitor opens a context-specific **lifetime membership** dialog describing 60-day backtesting, lifetime alerts, and current/future scripts. The selected historical period stays unchanged. Lifetime members can load the 60-day data normally; the API retains its server-side 403 gate.
+- Visitors who have **not signed up** and keep at least 25% of the Gold chart visible for **45 cumulative seconds of active visible-tab viewing** see the existing email-only trial dialog. Hidden/background tabs, non-chart page viewing, active dialogs, and signed-in visitors do not accumulate dwell time.
+- This automatic trial prompt is capped at **once per browser per 24 hours** using a Gold-specific local storage key, with an in-tab fallback when storage is inaccessible. It can be dismissed and the public chart remains available. Explicit Get Alerts buttons still open signup on demand.
+- The trial dialog shows **actual current backtest** net USD P&L, winning trade count and return percentage when trades exist, labeling gains and losses accurately and identifying the available data coverage. If the data source has no completed trades, the historical proof section stays hidden rather than manufacturing attractive numbers. The figures use the same $100,000, 1% risk basis as the public historical results.
+- The user enters only an email to start the **seven-day trial**, without an inbox verification step or payment. Signup is never triggered automatically, and neither the homepage nor articles load this engagement logic.
+
+Historical profit is not presented as profit visitors have already earned or as future profit they will certainly lose; the action promoted is receiving the *next confirmed signal*.
+
 ## Conversion-first Gold workspace
 
 The public Gold workspace follows this visual order:
