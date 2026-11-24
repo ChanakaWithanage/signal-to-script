@@ -21,26 +21,23 @@ async function api(path,options={}){
 const post=(path,data)=>api(path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
 // Only the Gold workspace loads this script. Do not show this prompt on any
 // articles, checkout pages, the homepage or unrelated site routes.
-const GOLD_SIGNUP_PROMPT_KEY='sts_gold_chart_trial_prompt_v1';
-const GOLD_SIGNUP_COOLDOWN_MS=24*60*60*1000;
 const GOLD_CHART_DWELL_SECONDS=45;
-let goldChartVisible=false,chartViewedSeconds=0,chartPromptShownInTab=false;
+const GOLD_SIGNUP_REPEAT_SECONDS=120;
+let goldChartVisible=false,chartViewedSeconds=0;
+let nextGoldSignupAt=GOLD_CHART_DWELL_SECONDS;
 function markGoldSignupPrompt(){
- chartPromptShownInTab=true;
- try{localStorage.setItem(GOLD_SIGNUP_PROMPT_KEY,String(Date.now()))}catch{}
-}
-function signupPromptOnCooldown(){
- if(chartPromptShownInTab)return true;
- try{
-  const last=Number(localStorage.getItem(GOLD_SIGNUP_PROMPT_KEY));
-  return last>0&&Date.now()-last<GOLD_SIGNUP_COOLDOWN_MS;
- }catch{return false}
+ // Reinvite after another two minutes of active chart viewing, only if
+ // the visitor still has no account. Time in a modal/background tab is excluded.
+ nextGoldSignupAt=chartViewedSeconds+GOLD_SIGNUP_REPEAT_SECONDS;
 }
 function updateSignupProof(item){
  const proof=$('trial-modal-proof'),stats=item?.stats,performance=item?.performanceUsd;
  const hasTrades=stats?.trades>0&&Number.isFinite(performance?.netUsd)&&
   Number.isFinite(performance?.returnPercent)&&Number.isFinite(stats?.wins);
  proof.hidden=!hasTrades;
+ const marketing=$('trial-modal-marketing');
+ marketing.hidden=true;
+ marketing.textContent='';
  if(!hasTrades)return;
  const daysAvailable=Number(item.market?.availableDays)||0;
  const daysShown=daysAvailable>=1?
@@ -57,6 +54,20 @@ function updateSignupProof(item){
   (performance.returnPercent>0?'+':'')+performance.returnPercent.toFixed(2)+'%';
  $('trial-modal-return').className=performance.returnPercent>0?'trial-positive':
   performance.returnPercent<0?'trial-negative':'';
+ const historyLabel=daysShown?'across '+daysShown+' days of available Gold history':'in the available Gold backtest';
+ const pct=(performance.returnPercent>0?'+':'')+performance.returnPercent.toFixed(2)+'%';
+ const wins=stats.wins+' winning '+(stats.wins===1?'trade':'trades');
+ const copy=$('trial-modal-marketing');
+ if(performance.netUsd>0){
+  copy.textContent='Don\'t miss the next setup. Gold Breakout recorded '+
+   fmtUSD(performance.netUsd,true)+' net backtest profit ('+pct+' return) and '+
+   wins+' '+historyLabel+'. Get future BUY, SELL and EXIT alerts straight to your email for free.';
+ }else{
+  copy.textContent='Gold Breakout recorded '+wins+' '+historyLabel+
+   ', with '+fmtUSD(performance.netUsd,true)+' net P&L ('+pct+' return). '+
+   'Follow the next confirmed BUY, SELL or EXIT without constantly watching the chart.';
+ }
+ copy.hidden=false;
 }
 function openEmailDialog(){
  if(session?.active)return;
@@ -102,10 +113,9 @@ function startGoldChartEngagementPrompt(){
    goldChartVisible=box.height>0&&visibleHeight/box.height>=.25;
   }
   if(document.visibilityState!=='visible'||!goldChartVisible||
-     !session||session.signedIn||accessDialog.open||upgradeDialog.open||
-     signupPromptOnCooldown())return;
+     !session||session.signedIn||accessDialog.open||upgradeDialog.open)return;
   chartViewedSeconds++;
-  if(chartViewedSeconds>=GOLD_CHART_DWELL_SECONDS)openEmailDialog();
+  if(chartViewedSeconds>=nextGoldSignupAt)openEmailDialog();
  },1000);
 }
 function updateSignalInvites(){
@@ -214,7 +224,7 @@ form.addEventListener('submit',async e=>{
   await loadSession({prompt:false});
   message('Your Gold Breakout alerts are activated. Explore your chart and alert settings below.');
  }catch(error){message(error.message)}
- finally{button.disabled=false;button.textContent='Start my 7-day free alerts →'}
+ finally{button.disabled=false;button.textContent='Get my free BUY & SELL alerts →'}
 });
 $('trial-modal-close').addEventListener('click',()=>accessDialog.close());
 $('trial-explore-preview').addEventListener('click',()=>accessDialog.close());
