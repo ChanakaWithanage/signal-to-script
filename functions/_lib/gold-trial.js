@@ -4,6 +4,7 @@ const EMAIL=/^[^\s@<>]{1,64}@[^\s@<>]{1,190}\.[A-Za-z]{2,30}$/;
 export const noCache={'Cache-Control':'private, no-store','Vary':'Cookie','X-Content-Type-Options':'nosniff'};
 export const respond=(value,status=200)=>Response.json(value,{status,headers:noCache});
 export const validEmail=value=>typeof value==='string'&&value.length<=254&&EMAIL.test(value);
+const validSender=value=>validEmail(value)||typeof value==='string'&&/^.{1,70}\s<[^<>]{3,254}>$/.test(value)&&validEmail(value.slice(value.lastIndexOf('<')+1,-1));
 export const normalizeEmail=value=>typeof value==='string'?value.trim().toLowerCase():'';
 export const sameOrigin=request=>request.headers.get('Origin')===new URL(request.url).origin;
 export async function jsonBody(request,max=4000){
@@ -63,7 +64,7 @@ export async function signedIn(db,request){
 }
 export const emailSender=env=>env.TRIAL_EMAIL_FROM||env.MANUAL_REQUEST_FROM||'';
 export async function sendEmail(env,{to,subject,text,html}){
- if(!env.RESEND_API_KEY||!validEmail(emailSender(env)))throw Error('Email delivery has not been configured.');
+ if(!env.RESEND_API_KEY||!validSender(emailSender(env)))throw Error('Email delivery has not been configured.');
  const res=await fetch('https://api.resend.com/emails',{
   method:'POST',headers:{Authorization:'Bearer '+env.RESEND_API_KEY,'Content-Type':'application/json'},
   body:JSON.stringify({from:emailSender(env),to:[to],subject,text,...(html?{html}:{})}),
