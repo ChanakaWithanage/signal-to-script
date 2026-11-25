@@ -97,18 +97,21 @@ The old November 30 checkout shutdown has been removed; it would have left peopl
 7. Test responsive display: 360px, 768px and desktop; verify onboarding, chart sizing, membership paywall, and keyboard tab order.
 8. Run `node --test tests/gold-trial.test.mjs` on Node 22. The GitHub workflow also checks syntax of all new Cloudflare Functions and trial browser scripts.
 
-## Gold-only chart engagement and membership conversion
+## Site-wide Gold alert signup prompt
 
-The **Gold workspace only** (`/trial.html`) has two related prompts:
+The prior chart-only timer could fail to appear when a visitor stayed on the homepage, an article, or the top of the Gold page without scrolling to the visible chart. That limitation is removed.
 
-- Clicking **60 days** as a non-lifetime visitor opens a context-specific **lifetime membership** dialog describing 60-day backtesting, lifetime alerts, and current/future scripts. The selected historical period stays unchanged. Lifetime members can load the 60-day data normally; the API retains its server-side 403 gate.
-- Visitors who have **not signed up** and keep at least 25% of the Gold chart visible for **45 cumulative seconds of active visible-tab viewing** see the existing email-only trial dialog. Hidden/background tabs, non-chart page viewing, active dialogs, and signed-in visitors do not accumulate dwell time.
-- After the first 45 seconds, if the visitor dismisses the popup and keeps viewing the Gold chart without signing up, **the same popup returns after each additional 120 seconds of active chart viewing**. This repetition stops when the current browser session is signed in, and does not count time while a dialog is open, the tab is backgrounded, or the chart is not in view. Deliberate Get Alerts clicks still open the popup on demand.
-- The popup leads with a **data-backed marketing sentence**, including actual historical net USD profit, percentage return, and number of winning trades when the available backtest was profitable. Losing periods display the accurate loss and return instead; missing or zero-trade periods do not invent profits. All historical figures retain the $100,000, 1% risk basis shown in the performance section.
-- A visible **Already joined? Enter the same email above to continue your existing trial** instruction shares the existing email-only activation form. Server-side signup reuses the original trial clock rather than restarting the seven days. Returning with an email alone does **not** establish ownership of a paid lifetime membership; premium features remain protected until purchase proof/receipt is validated.
-- Signup is **never submitted automatically**. The user enters an email to start or resume the seven-day trial without inbox verification or payment. Neither the homepage nor articles load this Gold-only engagement logic.
+**Every HTML page now loads** `/site.js`, which loads the shared `/site-trial-prompt.js` and its responsive CSS. These files and the HTML pages revalidate with Cloudflare after a deployment.
 
-Historical profit is not presented as profit visitors have already earned or as future profit they will certainly lose; the action promoted is receiving the *next confirmed signal*.
+- A **fresh anonymous browser profile** receives the Gold alert signup offer after **30 seconds** on any Signal to Script page, regardless of scroll position.
+- If the visitor dismisses the offer without activating their trial, it reappears **120 seconds after dismissal** while the tab is visible, including when navigating to other pages. A tab-scoped `sessionStorage` deadline carries the schedule across normal site navigations.
+- A visitor who is already signed into the **Gold trial** or the site's **Google free-script account** is excluded. The shared script queries the server-backed `/api/trial/session` and `/api/access` endpoints with credentials. Signing up in the current browser immediately stops reminders; another browser profile must independently activate its session.
+- Other open site dialogs are not interrupted. The timer does not display over hidden tabs; it resumes on visibility. The **Gold page reuses its original, more detailed signup dialog**, while other pages receive a matching site-wide email form.
+- The general modal displays verified historical **net P&L in USD, return %, winning trades and actual history coverage** from `/api/trial/data` when available, or a result-neutral free-alert invitation when data is unavailable. Losses retain their sign. Nothing is fabricated.
+- Clicking the CTA submits the email to the existing `/api/trial/start` endpoint and opens the Gold workspace. **Already joined? Enter the same email to continue your existing trial.** The backend preserves the original seven-day trial clock and never unlocks paid lifetime access from an unverified email alone.
+- Manual 60-day clicks still open the **lifetime membership** popup for non-lifetime visitors.
+
+The shared signup module owns all automatic prompting. `/trial.js` no longer runs the legacy 45-second chart-in-view timer or its separate repetition loop.
 
 ## Conversion-first Gold workspace
 
