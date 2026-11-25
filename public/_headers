@@ -38,6 +38,12 @@
 /site.js
   Cache-Control: public, max-age=0, must-revalidate
 
+/site-trial-prompt.js
+  Cache-Control: public, max-age=0, must-revalidate
+
+/site-trial-prompt.css
+  Cache-Control: public, max-age=0, must-revalidate
+
 /join.js
   Cache-Control: public, max-age=0, must-revalidate
 
