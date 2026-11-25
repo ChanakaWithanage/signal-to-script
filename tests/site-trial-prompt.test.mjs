@@ -5,9 +5,9 @@ import {readFile} from 'node:fs/promises';
 
 const script=await readFile(new URL('../public/site-trial-prompt.js',import.meta.url),'utf8');
 
-function harness({pathname='/',trialSignedIn=false,googleMember=false}={}){
- const state={now:100000,shows:0,goldShows:0,navigated:null,
-  timers:[],nodes:[],urls:[],store:new Map()};
+function harness({pathname='/',trialSignedIn=false,googleMember=false,storage=null,startAt=100000}={}){
+ const state={now:startAt,shows:0,goldShows:0,navigated:null,
+  timers:[],nodes:[],urls:[],store:storage||new Map()};
  const listeners=new Map();
  function node(name){
   const n={name,open:false,hidden:false,textContent:'',value:'',disabled:false,
@@ -126,14 +126,15 @@ test('Invitation deadline persists across internal page loads in the same browse
  h.lastDialog().close();
  const next=Number(h.state.store.get('sts_sitewide_gold_trial_next_due_v1'));
  assert.equal(next,h.state.now+120000);
- const second=harness();
- second.state.now=h.state.now+60000;
- second.state.store=h.state.store;
- // The second page stores its own current deadline; test that the shared key
- // is the stable mechanism used to preserve the real cross-navigation due date.
+ const second=harness({pathname:'/articles/gold-breakout-session-study.html',
+  storage:h.state.store,startAt:h.state.now+60000});
+ await second.settle();
+ await second.tick(59);
+ assert.equal(second.state.shows,0);
+ await second.tick(1);
+ assert.equal(second.state.shows,1);
  assert.match(script,/sessionStorage\.getItem\(NEXT_DUE_KEY\)/);
  assert.match(script,/sessionStorage\.setItem\(NEXT_DUE_KEY,String\(value\)\)/);
- assert.ok(next>h.state.now);
 });
 
 test('Every public site page includes the shared site script and no chart-only timer remains',async()=>{
