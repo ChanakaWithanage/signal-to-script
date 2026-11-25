@@ -441,22 +441,19 @@ test('Clicking 60 days opens membership offer without changing public chart data
  assert.doesNotMatch(js,/message\('Extended backtesting is available with lifetime access/);
 });
 
-test('Gold-only viewing prompts at 45 seconds and repeats every two visible minutes until joined',async()=>{
+test('Gold popup is controlled by the shared all-pages 30-second invitation',async()=>{
  const {readFile}=await import('node:fs/promises');
  const html=await readFile(new URL('../public/trial.html',import.meta.url),'utf8');
  const js=await readFile(new URL('../public/trial.js',import.meta.url),'utf8');
- assert.match(js,/GOLD_CHART_DWELL_SECONDS=45/);
- assert.match(js,/GOLD_SIGNUP_REPEAT_SECONDS=120/);
- assert.match(js,/nextGoldSignupAt=GOLD_CHART_DWELL_SECONDS/);
- assert.match(js,/nextGoldSignupAt=chartViewedSeconds\+GOLD_SIGNUP_REPEAT_SECONDS/);
- assert.match(js,/startGoldChartEngagementPrompt\(\)/);
- assert.match(js,/location\.pathname!=='\/trial\.html'/);
- assert.match(js,/new IntersectionObserver\(/);
- assert.match(js,/entry\.intersectionRatio>=\.25/);
- assert.match(js,/document\.visibilityState!=='visible'/);
- assert.match(js,/!session\|\|session\.signedIn\|\|accessDialog\.open\|\|upgradeDialog\.open/);
- assert.match(js,/chartViewedSeconds>=nextGoldSignupAt\)openEmailDialog\(\)/);
- assert.doesNotMatch(js,/GOLD_SIGNUP_COOLDOWN_MS|signupPromptOnCooldown|GOLD_SIGNUP_PROMPT_KEY/);
+ const shared=await readFile(new URL('../public/site-trial-prompt.js',import.meta.url),'utf8');
+ assert.match(shared,/FIRST_PROMPT_MS=30000/);
+ assert.match(shared,/REPEAT_PROMPT_MS=120000/);
+ assert.match(shared,/\/api\/trial\/session/);
+ assert.match(shared,/\/api\/access/);
+ assert.match(shared,/window\.SignalGoldTrial\?\.openSignup/);
+ assert.match(js,/window\.SignalGoldTrial=\{openSignup:openEmailDialog\}/);
+ assert.match(js,/window\.dispatchEvent\(new Event\('sts-gold-trial-joined'\)\)/);
+ assert.doesNotMatch(js,/startGoldChartEngagementPrompt|GOLD_CHART_DWELL_SECONDS/);
  assert.match(html,/id="trial-explore-preview"/);
  assert.match(html,/id="trial-modal-close"/);
  assert.doesNotMatch(html,/automatic signup|automatic trial/i);
