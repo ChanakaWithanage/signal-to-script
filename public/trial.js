@@ -19,17 +19,8 @@ async function api(path,options={}){
  return data;
 }
 const post=(path,data)=>api(path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
-// Only the Gold workspace loads this script. Do not show this prompt on any
-// articles, checkout pages, the homepage or unrelated site routes.
-const GOLD_CHART_DWELL_SECONDS=45;
-const GOLD_SIGNUP_REPEAT_SECONDS=120;
-let goldChartVisible=false,chartViewedSeconds=0;
-let nextGoldSignupAt=GOLD_CHART_DWELL_SECONDS;
-function markGoldSignupPrompt(){
- // Reinvite after another two minutes of active chart viewing, only if
- // the visitor still has no account. Time in a modal/background tab is excluded.
- nextGoldSignupAt=chartViewedSeconds+GOLD_SIGNUP_REPEAT_SECONDS;
-}
+// The shared /site-trial-prompt.js now schedules signup across every page.
+// This module owns the Gold-page modal and its live backtest statistics.
 function updateSignupProof(item){
  const proof=$('trial-modal-proof'),stats=item?.stats,performance=item?.performanceUsd;
  const hasTrades=stats?.trades>0&&Number.isFinite(performance?.netUsd)&&
@@ -70,17 +61,17 @@ function updateSignupProof(item){
  copy.hidden=false;
 }
 function openEmailDialog(){
- if(session?.active)return;
+ if(session?.active)return false;
  if(session?.signedIn){
   message('Your free alert access has finished. Choose lifetime access to keep alerts running.');
-  return;
+  return false;
  }
- if(upgradeDialog.open)return;
+ if(upgradeDialog.open)return false;
  if(!accessDialog.open){
   updateSignupProof(model);
-  markGoldSignupPrompt();
   accessDialog.showModal();
  }
+ return true;
 }
 function openUpgradeDialog(mode='general'){
  if(accessDialog.open)return;
@@ -94,29 +85,6 @@ function openUpgradeDialog(mode='general'){
  $('trial-upgrade-primary').textContent=history?
   'Unlock 60-day history with lifetime access →':'Explore lifetime access →';
  if(!upgradeDialog.open)upgradeDialog.showModal();
-}
-function startGoldChartEngagementPrompt(){
- // Count only time spent with at least a quarter of the chart on screen.
- // Hidden tabs and other open dialogs do not count toward the prompt.
- const chartBox=$('trial-chart');
- if(!chartBox||location.pathname!=='/trial.html')return;
- if('IntersectionObserver' in window){
-  const observer=new IntersectionObserver(entries=>{
-   goldChartVisible=entries.some(entry=>entry.isIntersecting&&entry.intersectionRatio>=.25);
-  },{threshold:[0,.25,.5]});
-  observer.observe(chartBox);
- }
- setInterval(()=>{
-  if(!('IntersectionObserver' in window)){
-   const box=chartBox.getBoundingClientRect();
-   const visibleHeight=Math.max(0,Math.min(box.bottom,innerHeight)-Math.max(box.top,0));
-   goldChartVisible=box.height>0&&visibleHeight/box.height>=.25;
-  }
-  if(document.visibilityState!=='visible'||!goldChartVisible||
-     !session||session.signedIn||accessDialog.open||upgradeDialog.open)return;
-  chartViewedSeconds++;
-  if(chartViewedSeconds>=nextGoldSignupAt)openEmailDialog();
- },1000);
 }
 function updateSignalInvites(){
  // Show the conversion invitation only while alerts have not been activated.
@@ -220,6 +188,7 @@ form.addEventListener('submit',async e=>{
    timezone:Intl.DateTimeFormat().resolvedOptions().timeZone||null
   };
   await post('start',data);
+  window.dispatchEvent(new Event('sts-gold-trial-joined'));
   accessDialog.close();
   await loadSession({prompt:false});
   message('Your Gold Breakout alerts are activated. Explore your chart and alert settings below.');
@@ -572,7 +541,7 @@ setInterval(async()=>{
   }catch(error){console.error('Trial status refresh failed',error)}
  }
 },60000);
-startGoldChartEngagementPrompt();
+window.SignalGoldTrial={openSignup:openEmailDialog};
 (async()=>{
  const verify=new URLSearchParams(location.search).get('verify');
  if(verify){
