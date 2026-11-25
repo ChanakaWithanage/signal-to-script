@@ -6,6 +6,10 @@ on:
       - 'functions/_lib/gold-*.js'
       - 'functions/api/trial/**'
       - 'public/trial.*'
+      - 'public/site.js'
+      - 'public/site-trial-prompt.js'
+      - 'public/site-trial-prompt.css'
+      - 'tests/site-trial-prompt.test.mjs'
       - 'workers/gold-alerts.js'
       - 'tests/gold-trial.test.mjs'
       - '.github/workflows/gold-trial.yml'
@@ -31,7 +35,9 @@ jobs:
           node --check functions/_lib/gold-market.js
           node --check functions/_lib/gold-trial.js
           node --check public/trial.js
+          node --check public/site.js
+          node --check public/site-trial-prompt.js
           node --check workers/gold-alerts.js
           for f in functions/api/trial/*.js; do node --check "$f"; done
       - name: Strategy and access tests
-        run: node --test tests/gold-trial.test.mjs
+        run: node --test tests/gold-trial.test.mjs tests/site-trial-prompt.test.mjs
