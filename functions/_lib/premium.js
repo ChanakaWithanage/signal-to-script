@@ -10,7 +10,8 @@ export const MEMBERSHIP_NAME='Signal to Script Lifetime Membership';
 export const PRODUCTS=Object.freeze({
  'portfolio-trend-dashboard':'Portfolio Trend Dashboard',
  'gold-breakout-15m':'Gold Breakout 15M Strategy',
- 'supertrend-dema-reversal':'Supertrend + DEMA Reversal Strategy'
+ 'supertrend-dema-reversal':'Supertrend + DEMA Reversal Strategy',
+ 'sp500-opening-range-breakout-15m':'S&P 500 Opening Range Breakout 15M'
 });
 export const CURRENCIES=Object.freeze(['trx','ltc','usdttrc20','usdtbsc']);
 export const isPremium=slug=>Object.hasOwn(PRODUCTS,slug);

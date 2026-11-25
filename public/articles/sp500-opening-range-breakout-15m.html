@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>S&amp;P 500 Opening Range Breakout (15M) for TradingView | Signal to Script</title>
+<meta name="description" content="See the S&amp;P 500 opening range breakout in action on two SPY sessions. Learn the 9:30–10:00 ET range, stop rules, and how to get the premium Pine Script v6 strategy.">
+<meta name="robots" content="index, follow">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SPY Broke Above the Opening Range. Then It Fell Through the Floor.">
+<meta property="og:description" content="See the S&amp;P 500 opening range breakout in action on two SPY sessions. Learn the 9:30–10:00 ET range, stop rules, and how to get the premium Pine Script v6 strategy.">
+<meta property="og:image" content="https://signaltoscript.com/images/sp500-orb-false-breakout.webp">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="stylesheet" href="/styles.css?v=20261123-article-layout">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9855777255503695" crossorigin="anonymous"></script>
+<link rel="canonical" href="https://signaltoscript.com/articles/sp500-opening-range-breakout-15m.html">
+<meta property="og:url" content="https://signaltoscript.com/articles/sp500-opening-range-breakout-15m.html">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "Article", "headline": "SPY Broke Above the Opening Range. Then It Fell Through the Floor.", "description": "See the S&P 500 opening range breakout in action on two SPY sessions. Learn the 9:30–10:00 ET range, stop rules, and how to get the premium Pine Script v6 strategy.", "datePublished": "2026-11-25", "author": {"@type": "Person", "name": "CW"}, "publisher": {"@type": "Organization", "name": "Signal to Script", "url": "https://signaltoscript.com/"}, "image": ["https://signaltoscript.com/images/sp500-orb-false-breakout.webp", "https://signaltoscript.com/images/sp500-orb-short-follow-through.webp"], "mainEntityOfPage": "https://signaltoscript.com/articles/sp500-opening-range-breakout-15m.html"}</script>
+</head>
+<body data-premium-article="sp500-opening-range-breakout-15m">
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header"><div class="wrap head">
+<a class="brand" href="/"><span class="brand-mark">CW.</span><span class="brand-wordmark"><span class="brand-name">Signal to Script</span><span class="brand-by">by CW</span></span></a>
+<button aria-expanded="false" aria-label="Open menu" class="menu-toggle" id="menu" type="button">☰</button>
+<nav aria-label="Main navigation" class="nav" id="nav"><a href="/#free-scripts">Free scripts</a><a href="/#articles">Articles</a><a href="/#about">About CW</a><a href="/#support">Get help</a><a href="/join.html">Join free</a></nav>
+</div></header>
+<main id="main" class="article-layout">
+<div class="read-wrap article-top">
+  <div class="breadcrumb"><a href="/">Home</a> / <a href="/#articles">Articles</a> / S&amp;P 500 Opening Range Breakout</div>
+  <div class="eyebrow">SPY · 15-minute opening range · Pine Script v6</div>
+  <h1>SPY Broke Above the Opening Range. Then It Fell Through the Floor.</h1>
+  <p class="lead">At 10:00 a.m. on Friday, November 20, SPY was five cents below its opening-range high. It crossed that line, climbed to $718.29, then closed the same 15-minute candle at $713.83. On the next candle, the low of the opening range gave way.</p>
+  <div class="article-meta">By CW · <time datetime="2026-11-25">November 25, 2026</time> · Premium TradingView strategy</div>
+  <figure class="article-lead-chart">
+    <a href="/images/sp500-orb-false-breakout.webp"><img src="/images/sp500-orb-false-breakout.webp" width="1500" height="775" fetchpriority="high" alt="November 20 SPY chart showing the 10:00 break above $717.27, the modeled stop near $714.40, and the 10:15 break below $711.72."></a>
+    <figcaption>Friday’s SPY session. The first two candles set the shaded range, and the dotted line marks the modeled long stop. <a href="https://finance.yahoo.com/quote/SPY/history/">Price source: Yahoo Finance</a>.</figcaption>
+  </figure>
+  <p class="article-meta"><a href="#download">Get the Pine Script v6 strategy with lifetime access ↓</a></p>
+</div>
+<section class="article"><div class="read-wrap article-body">
+  <h2>Two candles set the whole plan</h2>
+  <p>For the first half hour of the New York session, the S&amp;P 500 Opening Range Breakout strategy does one job. It records the high and low of the 9:30 and 9:45 candles. On Friday those levels were $717.27 and $711.72. At 10:00, with the range complete, the default setup can place a buy stop at the high and a sell stop at the low.</p>
+  <p>Friday tested the buy side first. At the range high, a 0.4% stop works out to about $714.40. The breakout candle itself closed below that level. The next candle pushed through $711.72, but the first entry had already canceled the other pending order and used the day’s one trade. If you replay the session, the strategy has a clear answer to the temptation to flip short after a losing long.</p>
+  <h2>The same rule caught a very different morning</h2>
+  <p>Go back one session to Thursday, November 19. The opening range was $735.42 to $739.90. At 10:00 the first break went the other way. SPY dropped through $735.42 and kept moving lower. It stayed below the modeled short stop near $738.36 through the scheduled exit, and the 15:45 candle opened at $716.92.</p>
+  <figure class="chart-figure">
+    <a href="/images/sp500-orb-short-follow-through.webp"><img src="/images/sp500-orb-short-follow-through.webp" width="1500" height="775" loading="lazy" alt="November 19 SPY chart showing the break below $735.42 at 10:00 and the 15:45 bar opening at $716.92."></a>
+    <figcaption>Thursday’s SPY session. The first break held below the modeled stop through the scheduled 15:45 exit.</figcaption>
+  </figure>
+  <p>Thursday shows why the strategy leaves a surviving trade open until the timed exit. Friday shows why it stops after one entry. Together, the sessions give you two concrete behaviors to test: how often the first break carries far enough to hold, and how often it reverses before the next candle.</p>
+  <h2>What I’d compare in Strategy Tester</h2>
+  <p>Start with the default 30-minute opening range, then rerun the same dates with long-only and short-only enabled separately. Open the trade list and look for Fridays like this one. If the losing trades tend to come from one side, you’ll know which setups to inspect before changing a stop or adding a filter.</p>
+  <div class="article-table" role="region" aria-label="Default S&P 500 opening range strategy settings" tabindex="0">
+    <table>
+      <thead><tr><th scope="col">Strategy setting</th><th scope="col">Default behavior</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Opening range</th><td>09:30–10:00 Eastern on a 15-minute chart</td></tr>
+        <tr><th scope="row">Entry</th><td>First eligible break of the range high or low, up to one entry per day</td></tr>
+        <tr><th scope="row">Stop and exit</th><td>0.4% stop or a scheduled 15:45 Eastern exit. The opposite range boundary is an optional stop.</td></tr>
+        <tr><th scope="row">Controls</th><td>Editable range and exit times, long/short toggles, fixed or risk-based sizing, and entry and exit alert templates</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>The charts reconstruct the setup from historical SPY candles. The levels show where the rules act. Strategy Tester uses the chart feed and its fill settings to calculate exact executions and costs.</p>
+  <div class="gold-early-download article-offer" id="download">
+    <div><div class="release-label">Premium Pine Script v6 · Lifetime membership</div>
+    <h2>Test the first break on your own chart</h2>
+    <p>Download the full S&amp;P 500 Opening Range Breakout source and change the opening window, direction, and stop from TradingView’s inputs. The lifetime pass includes the script library and setup and testing support.</p></div>
+    <div class="gold-download-action"><a class="btn" href="/checkout?script=sp500-opening-range-breakout-15m" data-buy-script="sp500-opening-range-breakout-15m">Get the S&amp;P 500 strategy</a>
+    <span class="gold-download-trust">Included in the lifetime pass</span></div>
+  </div>
+</div></section></main>
+<footer class="footer"><div class="wrap foot"><div>© 2026 Signal to Script · by CW. Independent Pine Script guides and examples.</div><div>TradingView is a trademark of its respective owner. Not financial advice.</div></div><nav class="policy-links" aria-label="Legal and business policies"><a href="/terms.html">Terms &amp; Conditions</a><a href="/refunds.html">Refund &amp; Cancellation</a><a href="/privacy.html">Privacy Policy</a><a href="mailto:support@signaltoscript.com">support@signaltoscript.com</a></nav></footer>
+<script defer src="/site.js"></script></body></html>

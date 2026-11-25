@@ -189,6 +189,16 @@ try{
  assert.equal(await result.text(),file);
  assert.equal(first.slug,'lifetime');
  assert.equal((await post('download',{...auth,slug:'supertrend-dema-reversal'})).status,200);
+ const orbSlug='sp500-opening-range-breakout-15m';
+ const orbDownload=await post('download',{...auth,slug:orbSlug},{
+  ...env,PREMIUM_BUCKET:{get:async key=>{
+   assert.equal(key,orbSlug+'.pine');
+   return {body:file};
+  }}
+ });
+ assert.equal(orbDownload.status,200);
+ assert.equal(orbDownload.headers.get('Content-Disposition'),'attachment; filename="'+orbSlug+'.pine"');
+ assert.equal(await orbDownload.text(),file);
  assert.equal((await post('download',{...auth,slug:'unknown'})).status,403);
  orders.get(first.id).slug='gold-breakout-15m';
  assert.equal((await post('download',{...auth,slug:'supertrend-dema-reversal'})).status,403);

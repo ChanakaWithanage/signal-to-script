@@ -220,6 +220,7 @@ document.querySelectorAll('a[data-download-script]').forEach(a=>a.addEventListen
 window.SignalDownloads={fileDownload,scripts,refreshCounts,mountGoogleButton};
 
 const PREMIUM_ARTICLES={
+ 'sp500-opening-range-breakout-15m':'/articles/sp500-opening-range-breakout-15m.html',
  'portfolio-trend-dashboard':'/articles/portfolio-trend-dashboard.html',
  'gold-breakout-15m':'/articles/gold-breakout-15m-strategy.html',
  'supertrend-dema-reversal':'/articles/supertrend-dema-reversal-strategy.html'
