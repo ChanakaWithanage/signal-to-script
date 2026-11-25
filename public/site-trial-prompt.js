@@ -51,11 +51,14 @@ document.addEventListener('visibilitychange',()=>{
 function hasOtherOpenDialog(){
  return Array.from(document.querySelectorAll('dialog[open]')).some(item=>item!==dialog);
 }
-function ensureDialog(){
- if(dialog)return dialog;
+// Preload the popup styles so the first offer never flashes without formatting.
+if(!GOLD_PAGE){
  const link=document.createElement('link');
  link.rel='stylesheet';link.href='/site-trial-prompt.css?v=20261125-v1';
  document.head.append(link);
+}
+function ensureDialog(){
+ if(dialog)return dialog;
  dialog=document.createElement('dialog');
  dialog.className='sts-trial-offer';
  dialog.setAttribute('aria-labelledby','sts-trial-offer-title');
@@ -181,14 +184,13 @@ function showInvite(){
 }
 const goldModal=document.getElementById('trial-access-dialog');
 if(goldModal)goldModal.addEventListener('close',()=>storeDue(Date.now()+REPEAT_PROMPT_MS));
-async function tick(){
+function tick(){
  if(opening||signedIn||!authChecked||document.visibilityState!=='visible'||
   Date.now()<nextDue||hasOtherOpenDialog())return;
  opening=true;
  try{
-  // Confirm the browser still has no trial or Google member session.
-  if(await checkMembership())return;
-  if(document.visibilityState!=='visible'||hasOtherOpenDialog())return;
+  // Membership was checked on page load (and refreshed on tab focus).
+  // Do not delay the 30-second prompt with another network round trip.
   if(showInvite())storeDue(Date.now()+REPEAT_PROMPT_MS);
  }catch(e){console.error('Gold invitation unavailable',e)}
  finally{opening=false}
