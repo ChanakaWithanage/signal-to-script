@@ -24,7 +24,7 @@ Use the existing GitHub repository and create a second Cloudflare Pages project.
 
 Create a Cloudflare D1 database for this new site (a separate DB is recommended). Bind it as **DB** in the new Pages project under Settings > Bindings. Either run schema.sql against it or let the Functions create the tables on the first request.
 
-Set **ADMIN_KEY** (required, random strong secret at least 32 characters) as a secret environment variable. To send email notifications and member codes automatically, set **RESEND_API_KEY**, **RESEND_FROM_EMAIL** (verified sender), and **OWNER_EMAIL**. Without Resend, requests are still stored and newly issued codes are displayed once in /admin.html for manual delivery.
+Set **ADMIN_KEY** (required, any nonempty value) as a secret environment variable. Existing short keys work; use a hard-to-guess secret for public deployments. To send email notifications and member codes automatically, set **RESEND_API_KEY**, **RESEND_FROM_EMAIL** (verified sender), and **OWNER_EMAIL**. Without Resend, requests are still stored and newly issued codes are displayed once in /admin.html for manual delivery.
 
 The admin secret is intentionally never persisted in localStorage. Open /admin.html, enter ADMIN_KEY each time, review D1 requests, confirm payment yourself, generate code and send it to the user. The customer enters their email and code in the site login dialog. If a customer renews early, the next 30 days are added to the existing expiry.
 
