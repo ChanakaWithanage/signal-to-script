@@ -44,6 +44,10 @@ export async function ensureSchema(db){
  if(!db)throw Error('D1 binding DB is missing');
  if(!schema)schema=(async()=>{
   await db.prepare("CREATE TABLE IF NOT EXISTS membership_requests(id TEXT PRIMARY KEY,email TEXT NOT NULL,name TEXT,note TEXT,status TEXT NOT NULL DEFAULT 'new',created_ms INTEGER NOT NULL,updated_ms INTEGER NOT NULL)").run();
+  // Existing D1 deployments initially had no requested-plan column.
+  const columns=await db.prepare("PRAGMA table_info(membership_requests)").all();
+  if(!(columns.results||[]).some(col=>col.name==='plan'))
+   await db.prepare("ALTER TABLE membership_requests ADD COLUMN plan TEXT NOT NULL DEFAULT 'monthly'").run();
   await db.prepare("CREATE INDEX IF NOT EXISTS membership_requests_recent ON membership_requests(created_ms DESC)").run();
   await db.prepare("CREATE INDEX IF NOT EXISTS membership_requests_email ON membership_requests(email,created_ms DESC)").run();
   await db.prepare("CREATE TABLE IF NOT EXISTS memberships(email TEXT PRIMARY KEY,created_ms INTEGER NOT NULL,access_until_ms INTEGER NOT NULL,updated_ms INTEGER NOT NULL)").run();
