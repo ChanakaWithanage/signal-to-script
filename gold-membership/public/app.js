@@ -71,8 +71,11 @@ function openDialog(mode='request'){
  showMode(mode);state.offerSeen=true;
 }
 function updateAccess(member,email,expiry){
- const previouslyActive=state.member;
+ const previouslyActive=state.member,previousEmail=state.email;
  state.member=!!member;state.email=email||null;state.expiresAt=expiry||null;
+ if(previouslyActive!==state.member||previousEmail!==state.email){
+  window.dispatchEvent(new CustomEvent('gold:member-access',{detail:{active:state.member,email:state.email,expiresAt:state.expiresAt}}));
+ }
  if(state.member&&!previouslyActive)state.animateOnNextData=true;
  $('member-first').hidden=!state.member;
  $('hero-title').innerHTML=state.member
