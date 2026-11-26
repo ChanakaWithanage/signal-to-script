@@ -16,5 +16,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Check all frontend and Functions JavaScript syntax
+        run: |
+          find gold-membership/public gold-membership/functions -name '*.js' -print0 | xargs -0 -n1 node --check
       - name: Test server-side membership logic
         run: node --test gold-membership/tests/*.test.mjs
