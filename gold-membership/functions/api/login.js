@@ -1,4 +1,4 @@
-import {bodyOf,emailOf,validEmail,normalizedCode,digest,randomHex,cookie,ensureSchema,json,sameOrigin,TERM_MS} from '../_lib/access.js';
+import {bodyOf,emailOf,validEmail,normalizedCode,digest,randomHex,cookie,ensureSchema,json,sameOrigin,DAY} from '../_lib/access.js';
 export async function onRequestPost({request,env}){
  if(!sameOrigin(request))return json({error:'Invalid request origin.'},403);
  if(!env.DB)return json({error:'Member login is temporarily unavailable.'},503);
@@ -10,7 +10,7 @@ export async function onRequestPost({request,env}){
   const member=await env.DB.prepare("SELECT m.access_until_ms FROM membership_codes c JOIN memberships m ON m.email=c.email WHERE c.email=? AND c.code_hash=? AND c.revoked_ms IS NULL AND c.valid_until_ms>? AND m.access_until_ms>? LIMIT 1")
    .bind(email,hash,now,now).first();
   if(!member)return json({error:'Code not recognized or membership expired. Please request renewal.'},401);
-  const session=randomHex(),expiry=Math.min(now+TERM_MS,Number(member.access_until_ms));
+  const session=randomHex(),expiry=Math.min(now+365*DAY,Number(member.access_until_ms));
   await env.DB.prepare("INSERT INTO membership_sessions(token_hash,email,created_ms,expires_ms) VALUES(?,?,?,?)")
    .bind(await digest(session),email,now,expiry).run();
   const res=json({ok:true,active:true,email,expiresAt:Number(member.access_until_ms)});
