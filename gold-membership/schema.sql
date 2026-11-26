@@ -21,3 +21,31 @@ CREATE TABLE IF NOT EXISTS membership_sessions (
  created_ms INTEGER NOT NULL, expires_ms INTEGER NOT NULL
 );
 CREATE INDEX IF NOT EXISTS membership_sessions_email ON membership_sessions(email,expires_ms);
+
+
+-- Member-only real-time notification channels (email / Discord / Telegram).
+CREATE TABLE IF NOT EXISTS gold_alert_preferences (
+ email TEXT PRIMARY KEY,
+ email_enabled INTEGER NOT NULL DEFAULT 0,
+ discord_cipher TEXT,
+ telegram_chat_id TEXT,
+ telegram_connect_hash TEXT,
+ telegram_connect_expires_ms INTEGER,
+ email_enabled_ms INTEGER,
+ discord_enabled_ms INTEGER,
+ telegram_enabled_ms INTEGER,
+ updated_ms INTEGER NOT NULL
+);
+CREATE TABLE IF NOT EXISTS gold_alert_state (
+ id TEXT PRIMARY KEY, started_bar_ms INTEGER NOT NULL, updated_ms INTEGER NOT NULL
+);
+CREATE TABLE IF NOT EXISTS gold_alert_deliveries (
+ event_id TEXT NOT NULL, email TEXT NOT NULL, channel TEXT NOT NULL,
+ status TEXT NOT NULL, attempts INTEGER NOT NULL DEFAULT 1,
+ last_error TEXT, updated_ms INTEGER NOT NULL,
+ PRIMARY KEY(event_id,email,channel)
+);
+CREATE TABLE IF NOT EXISTS gold_alert_test_limits (
+ email TEXT NOT NULL, channel TEXT NOT NULL, last_test_ms INTEGER NOT NULL,
+ PRIMARY KEY(email,channel)
+);
