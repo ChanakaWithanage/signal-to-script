@@ -1,0 +1,289 @@
+/* Gold Signal Room — light workspace theme
+   Bright, Google-inspired surfaces with warm gold CTA and vivid emerald profits. */
+:root{
+ --bg:#f6f8fb;--panel:#ffffff;--panel2:#f1f5f9;
+ --line:#e2e9f1;--text:#202b3d;--muted:#607387;
+ --gold:#bd8425;--up:#079d64;--down:#cf4e5a;
+ color:var(--text);
+ color-scheme:light;
+}
+html{background:var(--bg)}
+body{background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
+::selection{background:#fae7b3;color:#233143}
+a:hover{color:#a77218}
+.site-header{
+ background:#ffffffed;border-bottom:1px solid #e2e7ee;
+ box-shadow:0 2px 18px #2840560c;
+ backdrop-filter:blur(16px);
+}
+.brand{color:#192941}.brand:hover{color:#233143}
+.brand .mark{background:linear-gradient(135deg,#eccc86,#c99739);color:#614210;box-shadow:0 4px 14px #e4c07839}
+.brand strong{color:#1c293b;letter-spacing:.9px}.brand small{color:#718399}
+.header nav a{color:#637084;font-weight:600}.header nav a:hover{color:#a97824}
+.btn{border-radius:10px;box-shadow:0 1px 2px #17304d0d}
+.btn.gold{background:#ddb15e;border-color:#d2a44b;color:#2e2412;box-shadow:0 4px 14px #d4a24a30}
+.btn.gold:hover{background:#efc677;border-color:#e1b661;color:#352610;box-shadow:0 6px 19px #ca9e4540}
+.btn.ghost{background:#fff;color:#314358;border-color:#d9e2eb}
+.btn.ghost:hover{background:#f3f6fa;color:#24364b;border-color:#c1cfdd}
+.btn.outline{background:#fff;color:#3b4a5e;border-color:#cdd9e4}
+.btn.outline:hover{background:#fcf8ed;color:#966b22;border-color:#dfc38a}
+.kicker{color:#ae7b21;letter-spacing:1.4px}
+.pulse{background:#15b77f;box-shadow:0 0 0 5px #15b77f19}
+.hero{padding-top:77px;padding-bottom:78px;gap:60px}
+.hero h1{color:#1a2b41;font-weight:850}
+.hero h1 em,.join-block em{color:#ba821f}
+.hero-copy>p{color:#607388;line-height:1.7}
+.assurance{color:#708195}.assurance b{color:#a9b5c1}
+.hero-card{
+ background:linear-gradient(155deg,#ffffff 0%,#fbfdff 100%);
+ border:1px solid #e1e8ee;border-radius:21px;
+ box-shadow:0 18px 55px #28405c16,0 2px 7px #324d6d09;
+ padding:27px;
+}
+.hero-card:before{height:4px;background:linear-gradient(90deg,#d7a144,#f2d590,#d7a14488)}
+.hero-card .top{color:#677f8c;letter-spacing:1px}
+.tier{
+ color:#9b7020;background:#fff8e8;border:1px solid #f0d9a7;
+ font-size:10px;font-weight:800;padding:8px 12px;
+}
+.tier.member{color:#078755;background:#edfff6;border-color:#a8e2c6}
+.hero-profit{
+ background:linear-gradient(125deg,#e8fff4 0%,#f2fff9 58%,#fff 100%);
+ border:1px solid #b4edd0;
+ border-radius:15px;
+ padding:20px 21px 16px;
+ margin-top:24px;
+ position:relative;
+ overflow:hidden;
+ box-shadow:inset 0 1px 0 #ffffff;
+}
+.hero-profit:after{content:"";position:absolute;right:-28px;top:-35px;width:130px;height:130px;border-radius:50%;border:28px solid #13bd7b0b;pointer-events:none}
+.hero-profit .overline{color:#368467;font-size:10px;letter-spacing:1.1px}
+.hero-profit strong{
+ display:block;
+ color:#079d64;
+ font-size:clamp(33px,3.1vw,47px);
+ font-variant-numeric:tabular-nums;
+ letter-spacing:-1.9px;
+ line-height:1.17;
+ margin:9px 0 5px;
+ text-shadow:0 2px 10px #0ca46d1c;
+}
+.hero-profit strong.negative{color:#d34f5c}
+.hero-profit small{color:#5e897b;display:block;font-size:11px}
+.asset{margin:24px 0 23px}
+.au{background:#fff5dc;color:#997022;border:1px solid #f1dea6}
+.asset strong{color:#25334a}.asset small{color:#7b8b9e}
+.overline{color:#7b8fa2}
+.hero-event{color:#2b3647;font-size:23px;letter-spacing:-.6px}
+.hero-card>small{color:#788c9d}
+.compare{border-color:#edf0f4;margin:23px 0;padding:20px 0}
+.compare div{color:#586d7d}.compare b{color:#1f9266}
+.strip{background:#fff;border-block:1px solid #e3eaf1}
+.strip .wrap{color:#7b8895}
+.member-first{
+ display:flex;
+ flex-direction:column;
+ align-items:flex-start;
+ gap:6px;
+ margin:0 0 28px;
+ padding:20px 25px;
+ background:linear-gradient(105deg,#e1fdf0,#f4fff9 75%);
+ border:1px solid #b6eaca;
+ border-left:5px solid #0cb87e;
+ border-radius:15px;
+ box-shadow:0 8px 28px #0ca46a10;
+}
+.member-first-label{font-weight:800;font-size:10px;letter-spacing:1.25px;color:#377f62}
+.member-first strong{
+ display:block;
+ font-size:clamp(42px,5.1vw,65px);
+ line-height:1.14;
+ font-weight:900;
+ letter-spacing:-2px;
+ font-variant-numeric:tabular-nums;
+ color:#079d64;
+ text-shadow:0 2px 16px #11bb7420;
+}
+.member-first strong.negative{color:#cf4e5a}
+.member-first small{font-size:12px;color:#638a79}
+.section h2{color:#1d2e46}
+.section-head p,.panel-heading p{color:#708093}
+.section .tier{align-self:center}
+.stat{
+ background:#fff;border:1px solid #e3e9f0;
+ box-shadow:0 3px 14px #27405c0a;
+ border-radius:15px;
+}
+.stat.highlight{
+ background:linear-gradient(138deg,#e3fff0 0%,#f1fff7 62%,#ffffff 100%);
+ border-color:#aee6c5;
+ box-shadow:0 5px 20px #0b9f6413;
+}
+.stat small{color:#7b8799}
+.stat strong{color:#1e3444;font-variant-numeric:tabular-nums}
+.stat.highlight strong{color:#079e64;font-size:clamp(27px,2.4vw,37px);font-weight:900;text-shadow:0 2px 11px #11b87522}
+.stat.highlight strong.negative{color:#cf4e5a}
+.stat #stat-wins{color:#079e64}
+.stat span{color:#8595a7}
+.positive{color:#079d64!important}
+.negative{color:#d34f5c!important}
+.fine{color:#8493a4}
+.panel{background:#fff;border-color:#e0e8ef;box-shadow:0 3px 18px #27405c0a;border-radius:16px}
+.panel-heading h2{color:#26354a}
+.toggle{background:#f3f6fa;border:1px solid #e0e8f0}
+.toggle button{color:#61758a}
+.toggle button.active{background:#eed59c;color:#5b471e;font-weight:800;box-shadow:0 1px 4px #7a5c2523}
+.legend{color:#6c7d8c}
+.legend b{color:#ae7a20}
+.legend b.member{color:#078c5c}
+.chart-foot{border-top:1px solid #e8edf3;color:#7a8b9e}
+.info{background:#fff}
+.info h3{color:#20354a}
+.info p{color:#6c7e8d}
+.info>small{color:#8293a6}
+.prices>div{background:#f7f9fb;border:1px solid #e4eaf0}
+.prices small{color:#8798a9}
+.prices strong{color:#283950}
+.upsell{
+ background:linear-gradient(120deg,#fff8e8,#ffffff);
+ border-color:#efddae;
+}
+.upsell h3{color:#533c18}
+.upsell p{color:#6e6552}
+.history-title{border-color:#e4eaf0}
+.history-title strong{color:#26364b}
+.history-title span{color:#7d91a4}
+.signal{color:#364a5a;border-bottom:1px solid #e9eef3}
+.signal:hover{background:#f5fafc}
+.signal .buy{color:#078e5d}
+.signal .sell{color:#c84456}
+.signal .exit{color:#a87921}
+.signal time{color:#738a9a}
+.signal b{color:#2c4258}
+.table-scroll{background:#fff}
+th{background:#f9fbfc;color:#697d8e;border-bottom:1px solid #e4ebf1}
+td{color:#35485a;border-color:#e9eef3}
+tr:hover td{background:#fbfdfe}
+.table-note{color:#7c8fa0}
+.join-block{
+ background:linear-gradient(118deg,#fff8e9 0%,#fffdf7 50%,#ffffff 100%);
+ border-color:#ecd8a8;
+ box-shadow:0 12px 35px #7d653214;
+}
+.join-block h2{color:#243448}
+.join-block p{color:#6e7c8e}
+.benefits{color:#415c51}
+.steps>div{border-color:#eee3cd}
+.steps b{color:#bd8d36}
+.steps strong{color:#293a4b}
+.steps small{color:#7e8b9e}
+.footer{border-color:#e3eaf1;color:#7e8d9e}
+.delay-banner{
+ background:#fff;
+ border:1px solid #eccf8f;
+ color:#506377;
+ box-shadow:0 16px 55px #29405822;
+}
+.delay-banner b{color:#a87a24}
+.close-btn{color:#677789}
+dialog{
+ background:#fff;
+ border-color:#e5dcc5;
+ border-radius:21px;
+ box-shadow:0 30px 110px #1a314a4a;
+ color:#203348;
+}
+dialog::backdrop{background:#16263870;backdrop-filter:blur(5px)}
+.modal-x{color:#637689}
+.modal-pitch{
+ background:linear-gradient(150deg,#fff9eb,#f9fcfb 80%);
+ border-right:1px solid #f0e9d8;
+}
+.modal-pitch h2{color:#23384c}
+.modal-pitch>p{color:#64768a}
+.proof{
+ background:linear-gradient(125deg,#e5fff1,#f6fff9);
+ border:1px solid #b5e8ca;
+ box-shadow:0 5px 18px #16ac7312;
+}
+.proof>small{color:#348b68}
+.proof span small{color:#658f7a}
+.proof strong{color:#049d60;font-size:clamp(20px,2vw,27px);font-weight:900;letter-spacing:-.7px}
+.proof strong.negative{color:#d34f5c}
+.proof>small:last-child{color:#6d8d80}
+.modal-pitch ul{color:#3a5c54}
+.modal-form{background:#fff}
+.tabs{background:#f1f5fa;border-color:#dfe6ef}
+.tabs button{color:#64768a}
+.tabs button.active{background:#fff;color:#947023;box-shadow:0 2px 8px #31475c12;border:1px solid #e7d5b2}
+.modal-form h3{color:#21354a}
+.modal-form form>p{color:#7a8c9e}
+.modal-form label{color:#3c4b5c}
+.modal-form input,.modal-form textarea{
+ background:#fff;
+ color:#283b50;
+ border:1px solid #d4dee8;
+ box-shadow:0 1px 2px #24375105;
+}
+.modal-form input::placeholder,.modal-form textarea::placeholder{color:#a3afb9}
+.modal-form input:focus,.modal-form textarea:focus{outline:3px solid #f7e7c6;border-color:#cfa456}
+.modal-form form>small{color:#8091a1}
+.feedback{background:#e7fff3;border:1px solid #9ddec0;color:#196648}
+.feedback.error{background:#fff1f2;border-color:#eca6a9;color:#a33246}
+.modal-foot{background:#fbfcfd;border-color:#e8edf2;color:#8293a2}
+.modal-foot button{color:#a7792a}
+.toast{background:#f1fff6;color:#116b48;border:1px solid #8bd7ae;box-shadow:0 12px 45px #273a4d20}
+.toast.negative{background:#fff1f2;color:#a33145;border-color:#eda0ad}
+/* Admin shares the same bright working surfaces */
+.admin-login,.admin-table-panel,.admin-issue{background:#fff;border-color:#dfe8ef}
+.admin-login label,.admin-issue label{color:#34475d}
+.admin-login input,.admin-issue input:not([type=checkbox]){
+ background:#fff;border-color:#d1dfea;color:#23384d;
+}
+.admin-login small{color:#8191a0}
+.admin-login p{color:#977329}
+.admin-issue h3{color:#27384c}
+.admin-issue p{color:#708294}
+.admin-issue .issued,.issued{
+ background:#e8fff2;border:1px solid #9edabb;color:#234d3e;
+}
+.issued strong{color:#174f39}.issued code{color:#067d53}
+.row-note{color:#657b8b}
+.row-status{color:#aa7c2d}
+.admin-main .stat strong{color:#198663}
+/* Animation accents, with reduced-motion support in JavaScript */
+.profit-count{font-variant-numeric:tabular-nums;will-change:contents}
+@media(max-width:1050px){
+ .hero{gap:28px}
+ .hero-profit strong{font-size:37px}
+ .member-first strong{font-size:52px}
+}
+@media(max-width:780px){
+ .hero{padding-top:42px;padding-bottom:55px}
+ .hero h1{font-size:clamp(41px,10vw,57px)}
+ .hero-profit{padding:17px}
+ .hero-profit strong{font-size:39px}
+ .member-first{padding:17px 19px;margin-bottom:20px}
+ .member-first strong{font-size:clamp(38px,10vw,53px)}
+ .modal-pitch{border-right:0;border-bottom:1px solid #e8e9e4}
+ .stat.highlight strong{font-size:clamp(23px,6vw,34px)}
+ .proof strong{font-size:23px}
+ .delay-banner{background:#fff}
+}
+@media(max-width:410px){
+ .hero-profit strong{font-size:34px}
+ .member-first strong{font-size:38px}
+ .proof strong{font-size:19px}
+}
+@media(prefers-reduced-motion:reduce){
+ *,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}
+}
+
+/* A losing period is never dressed up as a positive return. */
+.hero-profit.loss,.member-first.loss,.proof.loss,.stat.highlight.loss{
+ background:linear-gradient(135deg,#fff0f1,#fffafa);
+ border-color:#f0bec6;
+}
+.hero-profit.loss .overline,.member-first.loss .member-first-label,.proof.loss>small{color:#ac4458}
+.proof.loss strong:not(.negative){color:#5d6d80}

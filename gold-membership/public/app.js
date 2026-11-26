@@ -4,9 +4,36 @@ const currency=n=>Number.isFinite(n)?(n<0?'−':'')+'$'+Math.abs(n).toLocaleStri
 const price=n=>Number.isFinite(n)?n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}):'—';
 const signed=(n,suffix='')=>Number.isFinite(n)?(n>0?'+':'')+n.toFixed(2)+suffix:'—';
 const when=ms=>ms?new Date(ms).toLocaleString('en-GB',{timeZone:'UTC',month:'short',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false})+' UTC':'—';
-const state={member:false,email:null,expiresAt:null,days:30,viewDays:7,data:null,chart:null,series:null,hi:null,lo:null,bars:[],firstRender:true,loading:false,requestSent:false,offerSeen:false};
+const state={member:false,email:null,expiresAt:null,days:30,viewDays:7,data:null,chart:null,series:null,hi:null,lo:null,bars:[],firstRender:true,loading:false,requestSent:false,offerSeen:false,animateOnNextData:false,lastEventId:null};
 let toastTimer;
 function toast(message){const el=$('toast');el.textContent=message;el.hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.hidden=true,5500)}
+// Animate actual dollar values from the API, not calculated or hard-coded marketing figures.
+// Values only count up when the result changes or a member newly signs in.
+function animateMoney(id,value,{force=false}={}){
+ const el=$(id);if(!el)return;
+ if(!Number.isFinite(value)){
+  if(el._countFrame)cancelAnimationFrame(el._countFrame);
+  el.textContent='—';delete el.dataset.moneyValue;return;
+ }
+ el.classList.toggle('negative',value<0);
+ el.classList.toggle('positive',value>0);
+ if(!force&&el.dataset.moneyValue===String(value))return;
+ el.dataset.moneyValue=String(value);
+ if(el._countFrame)cancelAnimationFrame(el._countFrame);
+ const reduced=window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+ if(reduced||document.hidden){el.textContent=currency(value);return}
+ const began=performance.now(),duration=1300;
+ function tick(now){
+  const progress=Math.min(1,(now-began)/duration);
+  const eased=1-Math.pow(1-progress,3);
+  el.textContent=currency(progress<1?value*eased:value);
+  if(progress<1)el._countFrame=requestAnimationFrame(tick);
+  else el._countFrame=null;
+ }
+ el.textContent=currency(0);
+ el._countFrame=requestAnimationFrame(tick);
+}
+
 async function api(path,method='GET',data){
  const options={method,credentials:'same-origin',cache:'no-store'};
  if(data){options.headers={'Content-Type':'application/json'};options.body=JSON.stringify(data)}
@@ -15,18 +42,19 @@ async function api(path,method='GET',data){
  if(!response.ok)throw Error(body.error||'Something went wrong. Please retry.');
  return body;
 }
-function offerText(data){
+function offerText(data,force=false){
  if(!data?.stats||!data.performanceUsd)return;
  const p=data.performanceUsd,s=data.stats;
  const good=Number.isFinite(p.netUsd)&&p.netUsd>0&&p.returnPercent>0;
- $('proof-profit').textContent=s.trades?currency(p.netUsd):'—';
+ animateMoney('proof-profit',s.trades?p.netUsd:NaN,{force});
  $('proof-return').textContent=s.trades?signed(p.returnPercent,'%'):'—';
+ $('proof-return').classList.toggle('negative',s.trades>0&&p.returnPercent<0);
  $('proof-wins').textContent=s.wins;
  $('proof-period').textContent='Historical '+Math.max(1,Math.floor(data.market.availableDays))+'-day modeled results · $100,000 capital · 1% fixed risk/trade';
  if(good&&s.wins){
-  $('dialog-title').textContent='Historical return '+signed(p.returnPercent,'%')+'. Will you see the next Gold signal in time?';
+  $('dialog-title').textContent='Historical P&L '+currency(p.netUsd)+'. Get real-time Gold alerts.';
  }else{
-  $('dialog-title').textContent='The next Gold signal should not arrive 30 minutes late.';
+  $('dialog-title').textContent='Real-time Gold alerts. No more 30-minute public delay.';
  }
 }
 function showMode(mode){
@@ -43,12 +71,21 @@ function openDialog(mode='request'){
  showMode(mode);state.offerSeen=true;
 }
 function updateAccess(member,email,expiry){
+ const previouslyActive=state.member;
  state.member=!!member;state.email=email||null;state.expiresAt=expiry||null;
- const badge=state.member?'MEMBER · LIVE SIGNALS':'PUBLIC · 30-MIN DELAY';
+ if(state.member&&!previouslyActive)state.animateOnNextData=true;
+ $('member-first').hidden=!state.member;
+ $('hero-title').innerHTML=state.member
+  ?'Your Gold dashboard. <em>Real-time alerts are active.</em>'
+  :'Don\'t watch the next Gold move <em>30 minutes late.</em>';
+ document.querySelector('.hero-copy>p').textContent=state.member
+  ?'Your Gold strategy results and real-time BUY, SELL and EXIT alerts are here. Review your historical dollar profit, trade history, and latest signals in one place.'
+  :'Explore past BUY, SELL and EXIT signals, completed trades and historical returns for free. Members get real-time Gold alerts while public signals arrive 30 minutes later.';
+ const badge=state.member?'MEMBER · REAL-TIME ALERTS':'PUBLIC · 30-MIN DELAY';
  for(const id of ['hero-tier','results-delay']){$(id).textContent=badge;$(id).classList.toggle('member',state.member)}
- $('chart-delay-label').textContent=state.member?'MEMBER · NO DELAY':'30-MIN DELAY';
+ $('chart-delay-label').textContent=state.member?'REAL-TIME MEMBER ALERTS':'30-MIN DELAY';
  $('chart-delay-label').classList.toggle('member',state.member);
- $('status-kicker').textContent=state.member?'CURRENT STRATEGY STATUS':'DELAYED STRATEGY STATUS';
+ $('status-kicker').textContent=state.member?'REAL-TIME STRATEGY STATUS':'DELAYED STRATEGY STATUS';
  $('detail-unlock').hidden=state.member;
  $('hero-card-cta').textContent=state.member?'Access valid until '+when(expiry):'Remove the 30-minute delay ↗';
  $('hero-card-cta').disabled=state.member;
@@ -58,7 +95,7 @@ function updateAccess(member,email,expiry){
   if(!btn.dataset.originalText)btn.dataset.originalText=btn.textContent;
   btn.textContent=state.member?'Renew my membership ↗':btn.dataset.originalText;
  });
- if(state.member)$('hero-event-time').textContent='Live member signals · confirmed 15m candles';
+ if(state.member)$('hero-event-time').textContent='Real-time member alerts · Gold 15M';
 }
 async function loadSession(){
  try{const s=await api('session');updateAccess(!!s.active,s.email,s.expiresAt)}catch{updateAccess(false)}
@@ -66,19 +103,33 @@ async function loadSession(){
 function setMetrics(data){
  const s=data.stats,p=data.performanceUsd;
  const valid=s?.trades>0&&p&&Number.isFinite(p.netUsd);
- $('stat-profit').textContent=valid?currency(p.netUsd):'—';
+ const force=state.animateOnNextData;state.animateOnNextData=false;
+ const net=valid?p.netUsd:NaN;
+ const isLoss=valid&&net<0;
+ document.querySelector('.hero-profit').classList.toggle('loss',isLoss);
+ $('member-first').classList.toggle('loss',isLoss);
+ document.querySelector('.stat.highlight').classList.toggle('loss',isLoss);
+ document.querySelector('.proof').classList.toggle('loss',isLoss);
+ // The member's very first number is historical dollar P&L, never the return %.
+ animateMoney('member-profit-value',net,{force});
+ animateMoney('hero-profit-value',net,{force});
+ animateMoney('stat-profit',net,{force});
+ $('member-profit-caption').textContent=valid
+  ?'Last '+Math.max(1,Math.floor(data.market.availableDays))+' days · '+s.wins+' winning trades · $100,000 model'
+  :'Waiting for completed historical trades';
+ $('hero-profit-title').textContent='HISTORICAL NET P&L · '+Math.max(1,Math.floor(data.market.availableDays))+' DAYS';
+ $('hero-profit-note').textContent='Based on $100,000 capital · 1% fixed risk per trade';
  $('stat-return').textContent=valid?signed(p.returnPercent,'%'):'—';
  $('stat-wins').textContent=s?.wins??'—';
  $('stat-trades').textContent=s?.trades??'—';
  $('stat-winrate').textContent=s?.trades?'Win rate '+s.winRate.toFixed(1)+'%':'No completed trades yet';
  $('stat-drawdown').textContent=valid?currency(p.maxDrawdownUsd):'—';
- for(const id of ['stat-profit','stat-return']){
-  $(id).classList.toggle('negative',valid&&p.netUsd<0);
-  $(id).classList.toggle('positive',valid&&p.netUsd>0&&id==='stat-return');
- }
- $('metrics-caption').textContent='Historical modeled performance · '+Math.max(1,Math.floor(data.market.availableDays))+' days available · $100,000 capital · 1% fixed risk per completed trade · 0.30 USD spread · no compounding. Not a live-account statement.';
- offerText(data);
+ $('stat-return').classList.toggle('negative',valid&&p.netUsd<0);
+ $('stat-return').classList.toggle('positive',valid&&p.netUsd>0);
+ $('metrics-caption').textContent='Historical results · '+Math.max(1,Math.floor(data.market.availableDays))+' days · $100,000 capital · 1% fixed risk per completed trade · $0.30 spread · no compounding.';
+ offerText(data,force);
 }
+
 function eventName(e){
  return e.type==='EXIT'?'EXIT '+e.side:e.side==='LONG'?'BUY':'SELL';
 }
@@ -93,7 +144,7 @@ function setStatus(data){
  $('range-low').textContent=price(current?.range?.low);
  $('last-event-description').textContent=last?'Latest '+eventName(last)+' · $'+price(last.price)+' · '+when(last.time):'No recent confirmed entry or exit';
  $('hero-event').textContent=last?eventName(last)+' · $'+price(last.price):'Waiting for next setup';
- $('hero-event-time').textContent=(last?when(last.time):'No recent signal')+(state.member?' · Confirmed feed':' · Public delayed feed');
+ $('hero-event-time').textContent=(last?when(last.time):'No recent signal')+(state.member?' · Real-time member alerts':' · Public delayed feed');
 }
 function renderSignals(data){
  const list=$('signals-list');list.replaceChildren();
@@ -145,14 +196,14 @@ function draw(data){
  if(!state.chart){
   el.replaceChildren();
   state.chart=LightweightCharts.createChart(el,{width:el.clientWidth,height:el.clientHeight,
-   layout:{background:{color:'#101f2b'},textColor:'#a4b7c0',fontFamily:'Arial,sans-serif',fontSize:11},
-   grid:{vertLines:{color:'#1a303e'},horzLines:{color:'#243944'}},
-   rightPriceScale:{borderColor:'#334652'},timeScale:{borderColor:'#334652',timeVisible:true,secondsVisible:false},
+   layout:{background:{color:'#ffffff'},textColor:'#63788b',fontFamily:'Arial,sans-serif',fontSize:11},
+   grid:{vertLines:{color:'#f1f4f8'},horzLines:{color:'#ebf0f5'}},
+   rightPriceScale:{borderColor:'#e5eaf1'},timeScale:{borderColor:'#e5eaf1',timeVisible:true,secondsVisible:false},
    handleScroll:true,handleScale:true});
-  state.series=state.chart.addCandlestickSeries({upColor:'#4ac69f',downColor:'#e37880',
-   wickUpColor:'#4ac69f',wickDownColor:'#e37880',borderUpColor:'#4ac69f',borderDownColor:'#e37880',
+  state.series=state.chart.addCandlestickSeries({upColor:'#0ba971',downColor:'#d8626e',
+   wickUpColor:'#0ba971',wickDownColor:'#d8626e',borderUpColor:'#0ba971',borderDownColor:'#d8626e',
    priceFormat:{type:'price',precision:2,minMove:.01}});
-  const settings={color:'#a69ad6',lineStyle:LightweightCharts.LineStyle.Dashed,lineWidth:1,
+  const settings={color:'#bea368',lineStyle:LightweightCharts.LineStyle.Dashed,lineWidth:1,
    priceLineVisible:false,lastValueVisible:false,crosshairMarkerVisible:false};
   state.hi=state.chart.addLineSeries(settings);state.lo=state.chart.addLineSeries(settings);
   if(window.ResizeObserver)new ResizeObserver(()=>state.chart.applyOptions({width:el.clientWidth,height:el.clientHeight})).observe(el);
@@ -162,7 +213,7 @@ function draw(data){
  const markers=(data.events||[]).filter(e=>allowedTimes.has(Math.floor(e.time/1000))).map(e=>({
   time:Math.floor(e.time/1000),position:e.type==='EXIT'?(e.side==='LONG'?'aboveBar':'belowBar'):(e.side==='LONG'?'belowBar':'aboveBar'),
   shape:e.type==='EXIT'?'circle':e.side==='LONG'?'arrowUp':'arrowDown',
-  color:e.type==='EXIT'?'#e8c67e':e.side==='LONG'?'#57dfad':'#f4898b',
+  color:e.type==='EXIT'?'#b2822e':e.side==='LONG'?'#08a56c':'#d54d5f',
   text:e.type==='EXIT'?'EXIT':e.side==='LONG'?'BUY':'SELL',size:e.type==='EXIT'?1.5:2.2
  })).sort((a,b)=>a.time-b.time);
  state.series.setMarkers(markers);
@@ -181,10 +232,17 @@ function syncPeriodButtons(){
  document.querySelectorAll('[data-days]').forEach(b=>b.classList.toggle('active',Number(b.dataset.days)===state.days));
 }
 function renderData(data){
+ const previousEventId=state.lastEventId;
  state.data=data;
  updateAccess(data.access?.tier==='member',state.email,data.access?.expiresAt);
  setMetrics(data);setStatus(data);renderSignals(data);renderTrades(data);draw(data);
- $('feed-description').textContent=data.market.symbol+' · '+data.market.interval+' candles · '+(state.member?'Member view':'30-minute delayed public view');
+ const latest=data.current?.lastEvent;
+ if(state.member&&previousEventId&&latest?.id&&latest.id!==previousEventId&&
+    Date.now()-latest.time<5*60000){
+  toast('REAL-TIME GOLD ALERT · '+eventName(latest)+' at '+currency(latest.price));
+ }
+ state.lastEventId=latest?.id||null;
+ $('feed-description').textContent=data.market.symbol+' · '+data.market.interval+' candles · '+(state.member?'Real-time member alerts':'30-minute delayed public view');
  $('chart-asof').textContent='Latest released candle closed '+when(Date.parse(data.market.lastClosedBar))+(data.market.stale?' · Feed may be stale':'');
  $('chart-source').textContent=data.market.source;
  syncPeriodButtons();
@@ -211,6 +269,8 @@ async function sendLogin(ev){
   const result=await api('login','POST',{email:$('login-email').value,code:$('login-code').value});
   updateAccess(true,result.email,result.expiresAt);$('access-dialog').close();toast('Member access activated until '+when(result.expiresAt));
   await loadData();
+  // After successful login, lead with the dollar P&L, not the percentage card.
+  $('member-first').scrollIntoView({behavior:window.matchMedia?.('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'center'});
  }catch(e){feedback(e.message,true)}finally{b.disabled=false}
 }
 function dismissModal(){
@@ -238,7 +298,7 @@ function wire(){
  // re-invitation after dismissal. Requests stop prompts for this page session.
  setTimeout(()=>{if(!state.member&&!state.requestSent&&!$('access-dialog').open)openDialog('request')},45000);
  setInterval(()=>{if(!state.member&&!state.requestSent&&state.offerSeen&&!$('access-dialog').open)openDialog('request')},120000);
- setInterval(loadData,75000);
+ setInterval(loadData,30000);
  setInterval(async()=>{
   if(state.member&&state.expiresAt&&Date.now()>=state.expiresAt){updateAccess(false);state.days=30;await loadData();openDialog('login')}
  },30000);
