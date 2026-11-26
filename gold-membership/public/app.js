@@ -38,7 +38,7 @@ function showMode(mode){
  if(mode==='login')$('login-email').focus();else $('request-email').focus();
 }
 function openDialog(mode='request'){
- if(state.member&&mode==='request')mode='login';
+ if(state.member&&mode==='request'&&state.email)$('request-email').value=state.email;
  const d=$('access-dialog');if(!d.open)d.showModal();
  showMode(mode);state.offerSeen=true;
 }
@@ -52,11 +52,11 @@ function updateAccess(member,email,expiry){
  $('detail-unlock').hidden=state.member;
  $('hero-card-cta').textContent=state.member?'Access valid until '+when(expiry):'Remove the 30-minute delay ↗';
  $('hero-card-cta').disabled=state.member;
- $('delay-banner').hidden=state.member;
+ $('delay-banner').hidden=state.member||state.requestSent;
  document.querySelectorAll('.js-join').forEach(btn=>{
   if(btn.id==='hero-card-cta')return;
-  btn.textContent=state.member?'Renew my membership ↗':btn.dataset.originalText||btn.textContent;
   if(!btn.dataset.originalText)btn.dataset.originalText=btn.textContent;
+  btn.textContent=state.member?'Renew my membership ↗':btn.dataset.originalText;
  });
  if(state.member)$('hero-event-time').textContent='Live member signals · confirmed 15m candles';
 }
