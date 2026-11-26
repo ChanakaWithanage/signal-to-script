@@ -60,8 +60,11 @@ function resumeVisibleProfits(){
   if(!rect.height||!rect.width)continue;
   const modal=document.querySelector('dialog[open]');
   if(modal&&!modal.contains(el))continue;
-  const visible=Math.min(rect.bottom,window.innerHeight*0.94)-Math.max(rect.top,70);
-  if(visible>=rect.height*0.5)startVisibleProfit(el);
+  // For scrollable mobile dialogs, use the dialog's clipped viewport too.
+  const container=modal?modal.getBoundingClientRect():null;
+  const top=Math.max(rect.top,container?.top??70,modal?0:70);
+  const bottom=Math.min(rect.bottom,container?.bottom??window.innerHeight*0.94,window.innerHeight*0.94);
+  if(bottom-top>=rect.height*0.5)startVisibleProfit(el);
  }
 }
 
