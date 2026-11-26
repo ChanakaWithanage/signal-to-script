@@ -1,7 +1,7 @@
 // One shared signup schedule for every page; load before other site UI handlers.
 (function(){
  const script=document.createElement('script');
- script.src='/site-trial-prompt.js?v=20261125-v1';
+ script.src='/site-trial-prompt.js?v=20261126-black-friday';
  script.async=true;
  document.head.append(script);
 })();
