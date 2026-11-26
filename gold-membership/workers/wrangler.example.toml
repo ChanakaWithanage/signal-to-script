@@ -1,0 +1,25 @@
+# Copy to gold-membership/workers/wrangler.toml and replace only the D1 details.
+# Deploy from the repository root:
+#   npx wrangler deploy --config gold-membership/workers/wrangler.toml
+name = "gold-signal-room-alerts"
+main = "alerts.js"
+compatibility_date = "2026-11-26"
+
+[triggers]
+crons = ["* * * * *"]
+
+[vars]
+ALERT_SITE_URL = "https://gold.signaltoscript.com"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "gold-signals-db"
+database_id = "REPLACE_WITH_GOLD_SIGNALS_D1_DATABASE_ID"
+
+# Same D1 database as the gold-signal-room Cloudflare Pages project.
+# Set Worker secrets separately from Pages (DO NOT commit real values):
+#   npx wrangler secret put RESEND_API_KEY --config gold-membership/workers/wrangler.toml
+#   npx wrangler secret put RESEND_FROM_EMAIL --config gold-membership/workers/wrangler.toml
+#   npx wrangler secret put ALERTS_ENCRYPTION_KEY --config gold-membership/workers/wrangler.toml
+#   npx wrangler secret put TELEGRAM_BOT_TOKEN --config gold-membership/workers/wrangler.toml
+# All the secret values must match corresponding Pages secrets.
