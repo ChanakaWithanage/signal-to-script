@@ -63,7 +63,7 @@ export async function runAlertScan(env,ctx,{now=Date.now(),feedProvider=fetchGol
  const members=await db.prepare(
   "SELECT p.*,m.access_until_ms FROM gold_alert_preferences p "+
   "JOIN memberships m ON p.email=m.email WHERE m.access_until_ms>? "+
-  "AND (p.email_enabled=1 OR p.discord_cipher IS NOT NULL OR p.telegram_chat_id IS NOT NULL) LIMIT 500"
+  "AND (p.email_enabled=1 OR p.discord_cipher IS NOT NULL OR p.telegram_chat_id IS NOT NULL)"
  ).bind(now).all();
  const prefs=members.results||[];
  let sent=0,failed=0;
