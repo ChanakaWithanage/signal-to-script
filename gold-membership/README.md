@@ -13,6 +13,14 @@ A separate Cloudflare Pages application for the Gold Breakout 15M strategy from 
 - New code extends an active membership from its existing expiration, or starts 30 days from issuance if expired. Nothing is auto-billed. Optional email of member code.
 - 60-day backtesting only for current members, matching the previous workspace's extended-history rule.
 
+## Member-only instant alert delivery
+
+The standalone site includes member-managed **email, Discord webhook and Telegram bot alerts** under the **Instant alerts** section. Members can opt in, disconnect and send limited test notifications. Discord webhooks are encrypted in D1. The member's 30-day expiry governs delivery.
+
+**A separate one-minute Cloudflare Cron Worker must be deployed** to deliver new confirmed Gold BUY/SELL/EXIT signals while the website is closed. Pages-only deployment does not run background notifications.
+
+Complete setup instructions: [Instant alerts — Cloudflare setup](docs/instant-alerts.md).
+
 ## Deploy as a NEW Cloudflare Pages project
 
 Use the existing GitHub repository and create a second Cloudflare Pages project. Choose:
