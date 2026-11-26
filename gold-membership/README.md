@@ -1,0 +1,41 @@
+# Gold Signal Room — standalone 30-day membership site
+
+A separate Cloudflare Pages application for the Gold Breakout 15M strategy from SignalToScript. It copies the existing real gold candle and strategy engine, without modifying the strategy logic or publishing fabricated results.
+
+## Included
+- Visitors see 30-day historical candles, completed trades, modeled net P&L, win rate, win count, returns and historical BUY/SELL/EXIT markers.
+- New public signals and the current public strategy status are delayed **30 minutes AFTER the confirming 15-minute candle closes**. The delay is enforced in /api/data before returning candles, events, trade history and status. The UI does not receive unreleased candles.
+- Member sessions receive the latest confirmed candle results. The signal algorithm uses closed 15m candles, not an intrabar live quote.
+- Visitor popup after 45 seconds and subsequent 2-minute re-invitations; dismissing retains the delayed feed. No repeating after a membership request in that page session.
+- Request form stored in Cloudflare D1, optional email to operator via Resend.
+- Admin page at /admin.html to list new requests, mark contacted/closed, and **explicitly mark payment confirmed and generate a monthly code**.
+- Login with verified email + reusable high-entropy code; server verifies hashed code, code expiry, account expiry and HttpOnly cookie each data request.
+- New code extends an active membership from its existing expiration, or starts 30 days from issuance if expired. Nothing is auto-billed. Optional email of member code.
+- 60-day backtesting only for current members, matching the previous workspace's extended-history rule.
+
+## Deploy as a NEW Cloudflare Pages project
+
+Use the existing GitHub repository and create a second Cloudflare Pages project. Choose:
+- Root directory: gold-membership
+- Build command: leave empty (static site)
+- Build output directory: public
+- Production branch: main after merging
+- Functions are found in the root directory's functions/ folder.
+
+Create a Cloudflare D1 database for this new site (a separate DB is recommended). Bind it as **DB** in the new Pages project under Settings > Bindings. Either run schema.sql against it or let the Functions create the tables on the first request.
+
+Set **ADMIN_KEY** (required, random strong secret at least 32 characters) as a secret environment variable. To send email notifications and member codes automatically, set **RESEND_API_KEY**, **RESEND_FROM_EMAIL** (verified sender), and **OWNER_EMAIL**. Without Resend, requests are still stored and newly issued codes are displayed once in /admin.html for manual delivery.
+
+The admin secret is intentionally never persisted in localStorage. Open /admin.html, enter ADMIN_KEY each time, review D1 requests, confirm payment yourself, generate code and send it to the user. The customer enters their email and code in the site login dialog. If a customer renews early, the next 30 days are added to the existing expiry.
+
+For local test: node --test tests/*.test.mjs (Node 20+). For Cloudflare Pages functions locally, use Wrangler Pages dev with an appropriately configured local D1 binding.
+
+## Important before monetizing
+
+The *original* signaltoscript.com/trial.html and its /api/trial/data endpoint currently expose immediate Gold signals to public visitors and seven-day trial members. This standalone site's /api/data correctly delays visitors, but to avoid a bypass you should also retire or restrict the old public feed when switching to the new site. Keep it unchanged until the new site is deployed and verified, to avoid breaking current visitors.
+
+P&L is a modeled result from the existing engine ($100,000 capital, 1% fixed risk per completed trade, $0.30 spread, no compounding). Do not use the historical results as a claim of realized trading profit.
+
+Protect admin access with Cloudflare Access or WAF/rate limiting before significant traffic. The code is strong and hashed, but no identity proof exists beyond possession of the assigned email + code. Never expose ADMIN_KEY to browser source, GitHub, or analytics. Separate Pages deployments must not expose the new D1/admin bindings to the original website.
+
+Existing chart ingestion uses Yahoo GC=F with a spot Gold fallback (XAUUSD), and retained D1 candle history. Symbol/source changes are reported in the API and interface. The published feed reflects latest **confirmed strategy candles**; it is not an exchange-executed trade feed.

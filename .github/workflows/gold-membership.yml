@@ -1,0 +1,20 @@
+name: Standalone Gold Membership Tests
+on:
+  push:
+    paths:
+      - 'gold-membership/**'
+      - '.github/workflows/gold-membership.yml'
+  pull_request:
+    paths:
+      - 'gold-membership/**'
+      - '.github/workflows/gold-membership.yml'
+jobs:
+  access:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Test server-side membership logic
+        run: node --test gold-membership/tests/*.test.mjs
