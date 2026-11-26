@@ -133,6 +133,7 @@
  window.addEventListener('gold:member-access',event=>{
   setMember(!!event.detail?.active,event.detail?.expiresAt);
  });
+ if(window.GoldRoomAccess?.active)setMember(true,window.GoldRoomAccess.expiresAt);
  window.addEventListener('focus',()=>{
   if(active&&(pendingTelegram||Date.now()-lastLoaded>60000))loadSettings();
  });
