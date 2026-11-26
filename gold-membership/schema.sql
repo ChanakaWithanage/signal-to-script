@@ -2,6 +2,7 @@
 CREATE TABLE IF NOT EXISTS membership_requests (
  id TEXT PRIMARY KEY, email TEXT NOT NULL, name TEXT, note TEXT,
  status TEXT NOT NULL DEFAULT 'new' CHECK(status IN ('new','contacted','paid','closed')),
+ plan TEXT NOT NULL DEFAULT 'monthly',
  created_ms INTEGER NOT NULL, updated_ms INTEGER NOT NULL
 );
 CREATE INDEX IF NOT EXISTS membership_requests_recent ON membership_requests(created_ms DESC);
