@@ -56,7 +56,10 @@ export async function runAlertScan(env,ctx,{now=Date.now(),feedProvider=fetchGol
  ).bind(ID).first();
  const model=runGoldBreakout(feed.bars);
  const events=eligibleEvents(model.events,Number(state?.started_bar_ms)||latestBarOpen,now);
- if(!events.length)return {initialized:false,events:0,sent:0};
+ if(!events.length){
+  await db.prepare("UPDATE gold_alert_state SET updated_ms=? WHERE id=?").bind(now,ID).run();
+  return {initialized:false,events:0,sent:0};
+ }
  const members=await db.prepare(
   "SELECT p.*,m.access_until_ms FROM gold_alert_preferences p "+
   "JOIN memberships m ON p.email=m.email WHERE m.access_until_ms>? "+
