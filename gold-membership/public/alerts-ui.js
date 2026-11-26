@@ -1,7 +1,7 @@
 (()=>{
  'use strict';
  const $=id=>document.getElementById(id);
- let active=false,expiresAt=null,snapshot=null,requesting=false,lastLoaded=0,pendingTelegram=false;
+ let active=false,memberEmail=null,expiresAt=null,snapshot=null,requesting=false,lastLoaded=0,pendingTelegram=false;
  function feedback(message,isError=false){
   const el=$('alert-feedback');el.hidden=false;el.textContent=message;el.classList.toggle('error',isError);
  }
@@ -56,9 +56,9 @@
   }
   $('alert-member-expiry').textContent=expiresAt?'Membership active until '+timeText(expiresAt):'';
  }
- function setMember(enabled,expiry){
-  const changed=enabled!==active;
-  active=!!enabled;expiresAt=expiry||null;
+ function setMember(enabled,expiry,email=null){
+  const changed=enabled!==active||(enabled&&email!==memberEmail);
+  active=!!enabled;memberEmail=email||null;expiresAt=expiry||null;
   $('alert-locked').hidden=active;
   $('alert-member').hidden=!active;
   $('alert-feature-tier').textContent=active?'◆ MEMBER FEATURE':'◆ MEMBERS ONLY';
@@ -131,9 +131,9 @@
   });
  }
  window.addEventListener('gold:member-access',event=>{
-  setMember(!!event.detail?.active,event.detail?.expiresAt);
+  setMember(!!event.detail?.active,event.detail?.expiresAt,event.detail?.email);
  });
- if(window.GoldRoomAccess?.active)setMember(true,window.GoldRoomAccess.expiresAt);
+ if(window.GoldRoomAccess?.active)setMember(true,window.GoldRoomAccess.expiresAt,window.GoldRoomAccess.email);
  window.addEventListener('focus',()=>{
   if(active&&(pendingTelegram||Date.now()-lastLoaded>60000))loadSettings();
  });
