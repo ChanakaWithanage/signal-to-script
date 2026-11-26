@@ -5,163 +5,80 @@ import {readFile} from 'node:fs/promises';
 
 const script=await readFile(new URL('../public/site-trial-prompt.js',import.meta.url),'utf8');
 
-function harness({pathname='/',trialSignedIn=false,googleMember=false,storage=null,startAt=100000}={}){
- const state={now:startAt,shows:0,goldShows:0,navigated:null,
-  timers:[],nodes:[],urls:[],store:storage||new Map()};
- const listeners=new Map();
- function node(name){
-  const n={name,open:false,hidden:false,textContent:'',value:'',disabled:false,
-   children:new Map(),listeners:new Map(),
-   classList:{toggle(){},add(){},remove(){}},
-   addEventListener(event,fn){this.listeners.set(event,fn)},
-   querySelector(selector){
-    if(!this.children.has(selector))this.children.set(selector,node(selector));
-    return this.children.get(selector);
-   },
-   showModal(){this.open=true;state.shows++},
-   close(){this.open=false;this.listeners.get('close')?.()},
-   setAttribute(){},append(){}};
-  return n;
- }
- const goldModal=node('trial-access-dialog');
- const dialogNodes=[];
+function harness({path='/',storage=new Map(),startAt=100000}={}){
+ const timers=[],dialogs=[],head=[],body=[];
+ let now=startAt;
+ const node=name=>({
+  name,open:false,innerHTML:'',children:new Map(),listeners:new Map(),
+  setAttribute(){},addEventListener(type,fn){this.listeners.set(type,fn)},
+  querySelector(selector){
+   if(!this.children.has(selector))this.children.set(selector,node(selector));
+   return this.children.get(selector);
+  },
+  showModal(){this.open=true},
+  close(){this.open=false;this.listeners.get('close')?.()}
+ });
  const document={
-  visibilityState:'visible',
-  body:{append(n){state.nodes.push(n)}},
-  head:{append(n){state.nodes.push(n)}},
-  createElement(tag){
-   const n=node(tag);
-   if(tag==='dialog')dialogNodes.push(n);
-   return n;
-  },
-  querySelectorAll(selector){
-   if(selector==='dialog[open]')return [...dialogNodes,goldModal].filter(n=>n.open);
-   return [];
-  },
-  getElementById(id){return id==='trial-access-dialog'&&pathname==='/trial.html'?goldModal:null},
-  addEventListener(event,fn){listeners.set(event,fn)}
+  head:{append(n){head.push(n)}},body:{append(n){body.push(n)}},visibilityState:'visible',
+  createElement(tag){const n=node(tag);if(tag==='dialog')dialogs.push(n);return n},
+  querySelectorAll(selector){return selector==='dialog[open]'?dialogs.filter(n=>n.open):[]}
  };
- const window={addEventListener(event,fn){listeners.set(event,fn)}};
- if(pathname==='/trial.html')window.SignalGoldTrial={
-  openSignup(){goldModal.open=true;state.goldShows++;return true}
- };
- const fetch=async url=>{
-  state.urls.push(String(url));
-  const data=url.includes('/trial/session')?{signedIn:trialSignedIn}:
-   url.includes('/api/access')?{member:googleMember}:
-   url.includes('/api/trial/data')?{
-    preview:false,stats:{trades:12,wins:8},
-    performanceUsd:{netUsd:4200,returnPercent:4.2},
-    market:{availableDays:30}
-   }:{ok:true};
-  return {ok:true,json:async()=>data};
- };
- const DateShim=class extends Date{static now(){return state.now}};
+ const window={};
+ const location={pathname:path};
  const sessionStorage={
-  getItem(key){return state.store.get(key)||null},
-  setItem(key,value){state.store.set(key,value)}
+  getItem(key){return storage.get(key)||null},
+  setItem(key,value){storage.set(key,value)}
  };
- const context={window,document,location:{pathname,assign(url){state.navigated=url}},
-  sessionStorage,fetch,setInterval(fn,ms){state.timers.push({fn,ms})},
-  Date:DateShim,Intl,Number,String,Array,Math,console,AbortSignal};
- vm.runInNewContext(script,context);
- return {state,document,window,goldModal,
-  async settle(){await new Promise(resolve=>setImmediate(resolve))},
-  async tick(seconds){state.now+=seconds*1000;
-   for(const timer of state.timers)await timer.fn();
-   await new Promise(resolve=>setImmediate(resolve));
-  },
-  lastDialog(){return dialogNodes.at(-1)}
+ class DateShim extends Date{static now(){return now}}
+ vm.runInNewContext(script,{window,document,location,sessionStorage,Date:DateShim,
+  setInterval(fn,ms){timers.push({fn,ms})},Array,Number,String,console});
+ return {timers,dialogs,head,storage,
+  tick(seconds){now+=seconds*1000;for(const t of timers)t.fn()},
+  last(){return dialogs.at(-1)}
  };
 }
-
-test('Fresh visitor on homepage gets a real popup by 30 seconds, then again 120 seconds after closing',async()=>{
+test('Gold Room promotion opens at 30 seconds and repeats two minutes after dismissal',()=>{
  const h=harness();
- await h.settle();
- assert.equal(h.state.timers.length,1);
- assert.ok(h.state.urls.includes('/api/trial/session'));
- assert.ok(h.state.urls.includes('/api/access'));
- await h.tick(29);
- assert.equal(h.state.shows,0);
- await h.tick(1);
- assert.equal(h.state.shows,1);
- assert.equal(h.lastDialog().open,true);
- assert.ok(h.lastDialog().querySelector('.sts-trial-marketing').textContent.includes('+$4,200'));
- assert.ok(h.lastDialog().querySelector('.sts-trial-marketing').textContent.includes('4.20%'));
- assert.ok(h.lastDialog().querySelector('.sts-trial-marketing').textContent.includes('8 winning trades'));
- h.lastDialog().close();
- await h.tick(119);
- assert.equal(h.state.shows,1);
- await h.tick(1);
- assert.equal(h.state.shows,2);
+ h.tick(29);assert.equal(h.dialogs.length,0);
+ h.tick(1);assert.equal(h.dialogs.length,1);
+ assert.equal(h.last().open,true);
+ assert.match(h.last().innerHTML,/BLACK FRIDAY.*60% OFF/);
+ assert.match(h.last().innerHTML,/\$4\.99/);
+ assert.match(h.last().innerHTML,/<del>\$12\.49<\/del>/);
+ assert.match(h.last().innerHTML,/https:\/\/gold\.signaltoscript\.com\/pricing\.html/);
+ h.last().close();h.tick(119);assert.equal(h.last().open,false);
+ h.tick(1);assert.equal(h.last().open,true);
 });
-
-test('Existing Gold trial sessions and Google members receive no popup',async()=>{
- for(const credentials of [{trialSignedIn:true},{googleMember:true}]){
-  const h=harness(credentials);
-  await h.settle();
-  await h.tick(31);
-  await h.tick(125);
-  assert.equal(h.state.shows,0);
-  assert.equal(h.state.goldShows,0);
- }
+test('Clicking the Gold pricing link prevents repeating the promotion in the same tab',()=>{
+ const h=harness();h.tick(30);
+ h.last().querySelector('.sts-trial-primary').listeners.get('click')?.();
+ assert.equal(h.storage.get('sts_gold_room_offer_clicked_v2'),'1');
+ h.last().close();h.tick(300);
+ assert.equal(h.last().open,false);
 });
-
-test('Gold page uses existing signup dialog without a chart visibility requirement',async()=>{
- const h=harness({pathname:'/trial.html'});
- await h.settle();
- await h.tick(30);
- assert.equal(h.state.shows,0);
- assert.equal(h.state.goldShows,1);
- h.goldModal.open=false;
- h.goldModal.listeners.get('close')?.();
- await h.tick(120);
- assert.equal(h.state.goldShows,2);
+test('Invitation remembers its next due time across page navigation',()=>{
+ const storage=new Map(),first=harness({storage});
+ first.tick(30);first.last().close();
+ const second=harness({storage,startAt:100000+30*1000+60000,path:'/articles/gold-breakout-session-study.html'});
+ second.tick(59);assert.equal(second.dialogs.length,0);
+ second.tick(1);assert.equal(second.last().open,true);
 });
-
-test('Invitation deadline persists across internal page loads in the same browser tab',async()=>{
- const h=harness();
- await h.settle();
- await h.tick(30);
- h.lastDialog().close();
- const next=Number(h.state.store.get('sts_sitewide_gold_trial_next_due_v1'));
- assert.equal(next,h.state.now+120000);
- const second=harness({pathname:'/articles/gold-breakout-session-study.html',
-  storage:h.state.store,startAt:h.state.now+60000});
- await second.settle();
- await second.tick(59);
- assert.equal(second.state.shows,0);
- await second.tick(1);
- assert.equal(second.state.shows,1);
- assert.match(script,/sessionStorage\.getItem\(NEXT_DUE_KEY\)/);
- assert.match(script,/sessionStorage\.setItem\(NEXT_DUE_KEY,String\(value\)\)/);
+test('Retired trial page does not launch the promotional popup',()=>{
+ const h=harness({path:'/trial.html'});
+ h.tick(300);assert.equal(h.dialogs.length,0);
+ assert.equal(h.timers.length,0);
 });
-
-test('Every public site page includes the shared site script and no chart-only timer remains',async()=>{
- const treePaths=[
-  '404.html','index.html','trial.html','join.html','checkout.html',
+test('Every main-domain HTML page retains site.js; new offer does not call legacy Gold trial APIs',async()=>{
+ const pages=['404.html','index.html','trial.html','join.html','checkout.html',
   'privacy.html','terms.html','refunds.html',
-  'articles/1r-bear-breakout-achievements.html',
-  'articles/automate-tradingview-strategies-chrome-extension.html',
-  'articles/free-pine-script-backtester-tradingview-alternative.html',
   'articles/gold-breakout-15m-strategy.html',
-  'articles/gold-breakout-session-study.html',
-  'articles/no-wick-ema-retest-strategy.html',
-  'articles/pinbar-3-line-strike-combo-alerts.html',
-  'articles/portfolio-trend-dashboard.html',
-  'articles/supertrend-dema-reversal-strategy.html'
- ];
- for(const path of treePaths){
-  const html=await readFile(new URL('../public/'+path,import.meta.url),'utf8');
-  assert.match(html,/src="\/site\.js"/,path);
+  'articles/gold-breakout-session-study.html'];
+ for(const p of pages){
+  const html=await readFile(new URL('../public/'+p,import.meta.url),'utf8');
+  assert.match(html,/src="\/site\.js"/,p);
  }
  const site=await readFile(new URL('../public/site.js',import.meta.url),'utf8');
- const gold=await readFile(new URL('../public/trial.js',import.meta.url),'utf8');
- assert.match(site,/site-trial-prompt\.js\?v=20261125-v1/);
- assert.match(gold,/window\.SignalGoldTrial=\{openSignup:openEmailDialog\}/);
- assert.doesNotMatch(gold,/startGoldChartEngagementPrompt/);
- assert.match(script,/FIRST_PROMPT_MS=30000/);
- assert.match(script,/REPEAT_PROMPT_MS=120000/);
- assert.doesNotMatch(script,/chartViewedSeconds|IntersectionObserver|localStorage/);
- assert.match(script,/sts-gold-trial-joined/);
+ assert.match(site,/site-trial-prompt\.js\?v=20261126-black-friday/);
+ assert.doesNotMatch(script,/\/api\/trial\//);
+ assert.doesNotMatch(script,/Get my free/);
 });

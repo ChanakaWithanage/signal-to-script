@@ -19,7 +19,6 @@ pages = {
     "articles/pinbar-3-line-strike-combo-alerts.html": "/articles/pinbar-3-line-strike-combo-alerts.html",
     "articles/automate-tradingview-strategies-chrome-extension.html": "/articles/automate-tradingview-strategies-chrome-extension.html",
     "join.html": "/join.html",
-    "trial.html": "/trial.html",
     "privacy.html": "/privacy.html",
     "terms.html": "/terms.html",
     "refunds.html": "/refunds.html"
@@ -42,10 +41,13 @@ xml = ET.parse(public / "sitemap.xml")
 urls = [n.text for n in xml.findall(".//s:loc", ns)]
 expected = {domain + path for path in pages.values()}
 assert set(urls) == expected and len(urls) == len(expected), "Unexpected sitemap URLs"
+assert domain + "/trial.html" not in urls, "Retired Gold trial must not be indexed"
 checkout=(public/"checkout.html").read_text(encoding="utf-8")
 assert 'name="robots" content="noindex, nofollow"' in checkout
 assert "https://signaltoscript.com/checkout.html" not in urls
 for page in public.rglob("*.html"):
+    if page.name == "trial.html":
+        continue  # Redirect-only page is not standalone indexed content.
     html = page.read_text(encoding="utf-8")
     assert 'class="policy-links"' in html, f"Policy footer missing: {page}"
     assert 'href="mailto:support@signaltoscript.com"' in html, f"Support email link missing: {page}"

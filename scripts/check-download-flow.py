@@ -8,7 +8,7 @@ public=root/"public"
 slugs={p.stem for p in (public/"scripts").glob("*.pine")}
 assert slugs == {"1r-bear-breakout-achievements", "goat-trap-pinbar-3ls-combo", "supertrend-visual-bridge", "no-wick-ema-retest-strategy"}
 for page in public.rglob("*.html"):
-    if page.name=="404.html":
+    if page.name in {"404.html","trial.html"}:
         continue
     html=page.read_text(encoding="utf-8")
     assert "—" not in html, f"Em dash in {page}"
@@ -77,9 +77,9 @@ print("One guest download and unlimited Google access remain for the free script
 # Gold strategy conversion placement and source wiring.
 gold = (public/"articles/gold-breakout-15m-strategy.html").read_text(encoding="utf-8")
 assert gold.index('class="gold-lead-image"') < gold.index('id="download"') < gold.index("What makes this breakout"), "Early download CTA should immediately follow hero chart"
-assert gold.count('href="/trial.html"') >= 2
-assert gold.count("Get Gold Breakout alerts for free") >= 2
-assert "$4.99" not in gold and "before buying" not in gold
+assert gold.count('href="https://gold.signaltoscript.com/pricing.html"') >= 2
+assert gold.count("Unlock Gold alerts from $4.99") >= 2
+assert "$4.99" in gold and "before buying" not in gold
 assert "2026" in gold and "59.7%" in gold and "1.893" in gold
 assert "'gold-breakout-15m':'Gold Breakout 15M Strategy'" not in site
 assert 'href="/checkout.html?script=gold-breakout-15m"' not in gold

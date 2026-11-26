@@ -86,20 +86,6 @@ test('Membership prompt is limited to once per account every 24 hours',async()=>
  assert.equal(await claimUpgradePrompt(db,account,first+24*3600000),true);
  assert.equal(await claimUpgradePrompt(db,{...account,lifetime:true},first+48*3600000),false);
 });
-test('Gold alert marketing opens the workspace before collecting email',async()=>{
- const {readFile}=await import('node:fs/promises');
- const home=await readFile(new URL('../public/index.html',import.meta.url),'utf8');
- const page=await readFile(new URL('../public/trial.html',import.meta.url),'utf8');
- const article=await readFile(new URL('../public/articles/gold-breakout-15m-strategy.html',import.meta.url),'utf8');
- assert.match(home,/Get Gold Breakout alerts for free/);
- assert.doesNotMatch(home,/Try it before you buy|7 days free|Email only/i);
- assert.match(page,/<section class="trial-workspace" id="trial-workspace">/);
- assert.match(page,/<dialog class="trial-access-dialog"/);
- assert.match(page,/Don.t miss the next Gold Breakout opportunity/);
- assert.match(page,/<dialog class="trial-upgrade-dialog"/);
- assert.doesNotMatch(article,/\$4\.99|before buying/);
-});
-
 test('Gold candle adapter falls back to actual XAUUSD 15m bars if Yahoo is unavailable',async()=>{
  const oldFetch=globalThis.fetch;
  const end=Math.floor((Date.now()-20*60000)/900000)*900000;
@@ -126,29 +112,6 @@ test('Fallback candle parser excludes a still-open bar and rejects malformed OHL
   {openTime:now,open:-3,high:4001,low:3999,close:4000,isOpen:false}
  ]}).length,1);
 });
-test('Email submission activates a browser trial immediately and stores lead metadata',async()=>{
- const statements=[];
- const db={prepare(sql){
-  const stmt={values:[],bind(...values){this.values=values;return this},
-   async run(){statements.push({sql,values:this.values});return {meta:{changes:1}}},
-   async first(){return null}};
-  return stmt;
- }};
- const request=new Request('https://signaltoscript.com/api/trial/start',{
-  method:'POST',headers:{Origin:'https://signaltoscript.com','Content-Type':'application/json'},
-  body:JSON.stringify({email:'  free@example.com  ',source:'gold-workspace',
-   utmSource:'social',utmCampaign:'gold-alerts'})
- });
- const response=await startTrial({request,env:{DB:db}});
- const data=await response.json();
- assert.equal(response.status,200);
- assert.equal(data.ok,true);
- assert.equal(data.active,true);
- assert.match(response.headers.get('Set-Cookie'),/__Host-sts_trial=[a-f0-9]{64}/);
- assert.ok(statements.some(x=>x.sql.includes('INSERT INTO gold_trial_subscribers')&&x.values[0]==='free@example.com'));
- assert.ok(statements.some(x=>x.sql.includes('gold_trial_instant_sessions')));
- assert.ok(statements.some(x=>x.sql.includes('gold_trial_accounts')&&x.sql.includes('ON CONFLICT(email) DO NOTHING')));
-});
 test('Unproven email-only session never inherits an existing paid membership',async()=>{
  const token='a'.repeat(64);
  const request=new Request('https://signaltoscript.com/api/trial/session',{headers:{Cookie:'__Host-sts_trial='+token}});
@@ -166,55 +129,6 @@ test('Subscriber list is never accessible without the owner admin key',async()=>
  const request=new Request('https://signaltoscript.com/api/trial/subscribers');
  const response=await listSubscribers({request,env:{DB:{},TRIAL_ADMIN_KEY:'x'.repeat(48)}});
  assert.equal(response.status,404);
-});
-test('Workspace presents instant signup and a real chart fallback',async()=>{
- const {readFile}=await import('node:fs/promises');
- const html=await readFile(new URL('../public/trial.html',import.meta.url),'utf8');
- const js=await readFile(new URL('../public/trial.js',import.meta.url),'utf8');
- assert.match(html,/Get my free BUY &amp; SELL alerts/);
- assert.doesNotMatch(html,/Check your inbox|trial-email-sent|trial-try-another/);
- assert.match(js,/await post\('start',data\)/);
- assert.match(js,/await loadSession\(\{prompt:false\}\)/);
- assert.match(js,/showMarketFallback/);
- assert.match(js,/s\.tradingview\.com\/widgetembed/);
-});
-
-test('Historical Gold signals and 30-day results can be seen without email signup',async()=>{
- // The real-data adapter is shared with the previous mocked fallback test.
- const guest=new Request('https://signaltoscript.com/api/trial/data?days=30');
- const response=await goldData({request:guest,env:{}});
- const result=await response.json();
- assert.equal(response.status,200);
- assert.equal(result.preview,false);
- assert.ok(Array.isArray(result.candles)&&result.candles.length>0);
- assert.ok(Array.isArray(result.trades));
- assert.ok(Array.isArray(result.events));
- assert.equal(typeof result.stats.trades,'number');
- assert.ok(result.market.source);
- assert.equal(result.trial.signedIn,false);
-});
-test('An anonymous viewer still cannot request extended lifetime backtests',async()=>{
- const request=new Request('https://signaltoscript.com/api/trial/data?days=60');
- const response=await goldData({request,env:{}});
- const result=await response.json();
- assert.equal(response.status,403);
- assert.equal(result.code,'UPGRADE_REQUIRED');
-});
-test('Gold workspace presents free BUY SELL CTA followed by chart and historical results',async()=>{
- const {readFile}=await import('node:fs/promises');
- const html=await readFile(new URL('../public/trial.html',import.meta.url),'utf8');
- const js=await readFile(new URL('../public/trial.js',import.meta.url),'utf8');
- const article=await readFile(new URL('../public/articles/gold-breakout-15m-strategy.html',import.meta.url),'utf8');
- assert.match(html,/Get BUY &amp; SELL Alerts Free/);
- assert.match(html,/FROM PAST RESULTS TO FUTURE SIGNALS/);
- assert.match(html,/Get future entry &amp; exit alerts for free/);
- assert.match(html,/No verification step/);
- assert.match(js,/trial-activate'\)\.addEventListener\('click',openEmailDialog\)/);
- assert.match(js,/trial-results-invite-button'\)\.addEventListener\('click',openEmailDialog\)/);
- assert.match(js,/const canSubscribe=!session\?\.signedIn/);
- assert.doesNotMatch(js,/if\(!session\.signedIn&&prompt\)openEmailDialog\(\)/);
- assert.match(article,/Explore past Gold Breakout entries, exits and backtest results/);
- assert.doesNotMatch(html,/\$4\.99|before you buy/i);
 });
 test('COMEX 15m maintenance gap does not suppress a valid overnight breakout',()=>{
  const complete=dayBars('2026-11-18');
@@ -238,25 +152,6 @@ test('Incomplete midday-only data never invents a valid overnight 15m range',()=
  assert.equal(result.events.length,0);
  assert.equal(result.ranges.length,0);
 });
-test('15m Gold chart explicitly renders and navigates historical BUY SELL EXIT markers',async()=>{
- const {readFile}=await import('node:fs/promises');
- const html=await readFile(new URL('../public/trial.html',import.meta.url),'utf8');
- const js=await readFile(new URL('../public/trial.js',import.meta.url),'utf8');
- assert.match(html,/Gold · 15-minute candles/);
- assert.doesNotMatch(html,/id="trial-show-last-signal"/);
- assert.doesNotMatch(html,/id="trial-show-latest-bars"/);
- assert.match(html,/id="trial-signal-history"/);
- assert.match(html,/id="trial-signal-count"/);
- assert.match(js,/function showSignalHistory/);
- assert.doesNotMatch(js,/function focusLatestSignal/);
- assert.doesNotMatch(js,/function focusLatestBars/);
- assert.match(js,/candles\.setMarkers\(markerData\)/);
- assert.match(js,/setVisibleLogicalRange/);
- assert.doesNotMatch(js,/chart\.timeScale\(\)\.fitContent\(\)/);
- assert.match(js,/item\.market\.interval!=='15m'/);
- assert.match(js,/15-minute price-only fallback/);
-});
-
 test('Thirty-day strategy data is restored from a full Yahoo proxy even if direct Yahoo is blocked',async()=>{
  // Use the unused 60d cache lane so this test is independent of earlier
  // cached 30d biquote fixture.
@@ -329,24 +224,6 @@ test('D1 retention merges real candles chronologically and deduplicates overlaps
  assert.deepEqual(mergeGoldCandles(bars.slice(-5),saved),saved);
  assert.equal((await getArchivedGold(db,'XAUUSD',30)).length,0);
 });
-test('Chart exposes separate 7-day and 30-day windows and shows all loaded signals',async()=>{
- const {readFile}=await import('node:fs/promises');
- const html=await readFile(new URL('../public/trial.html',import.meta.url),'utf8');
- const js=await readFile(new URL('../public/trial.js',import.meta.url),'utf8');
- const adapter=await readFile(new URL('../functions/_lib/gold-market.js',import.meta.url),'utf8');
- const endpoint=await readFile(new URL('../functions/api/trial/data.js',import.meta.url),'utf8');
- assert.match(html,/data-view-days="7" class="active"/);
- assert.match(html,/data-view-days="30"/);
- assert.match(html,/id="trial-history-coverage"/);
- assert.match(js,/chartHistoryWindow\(7\)/);
- assert.match(js,/chartHistoryWindow\(30\)/);
- assert.match(js,/reverse\(\)\.slice\(0,100\)/);
- assert.match(js,/trial-history-coverage/);
- assert.match(adapter,/proxy\.cors\.dev/);
- assert.match(adapter,/getArchivedGold/);
- assert.match(endpoint,/waitUntil:typeof waitUntil/);
-});
-
 test('Illustrative $100k performance is calculated from backtest R not fabricated returns',()=>{
  assert.equal(EXAMPLE_CAPITAL_USD,100000);
  assert.equal(EXAMPLE_RISK_PERCENT,1);
@@ -364,54 +241,6 @@ test('Illustrative $100k performance is calculated from backtest R not fabricate
  assert.equal(loss.maxDrawdownUsd,4200);
  assert.equal(illustrativeGoldResults(null),null);
 });
-test('Public trial response contains historical strategy results without a hypothetical account figure',async()=>{
- const request=new Request('https://signaltoscript.com/api/trial/data?days=30');
- const response=await goldData({request,env:{}});
- const result=await response.json();
- assert.equal(response.status,200);
- assert.equal(typeof result.stats.netR,'number');
- assert.equal(typeof result.stats.maxDrawdownR,'number');
- assert.equal(Object.hasOwn(result,'exampleAccount'),false);
- assert.equal(result.performanceUsd.capitalUsd,100000);
- assert.equal(result.performanceUsd.riskUsd,1000);
- assert.equal(result.performanceUsd.netUsd,Math.round(result.stats.netR*100000)/100);
- assert.equal(result.performanceUsd.maxDrawdownUsd,
-  Math.round(result.stats.maxDrawdownR*100000)/100);
- for(const trade of result.trades){
-  assert.equal(trade.resultUsd,goldTradeUsd(trade.r,1000));
- }
-});
-test('Workspace orders signup, 15m chart, performance and completed trade history',async()=>{
- const {readFile}=await import('node:fs/promises');
- const html=await readFile(new URL('../public/trial.html',import.meta.url),'utf8');
- const js=await readFile(new URL('../public/trial.js',import.meta.url),'utf8');
- const css=await readFile(new URL('../public/trial.css',import.meta.url),'utf8');
- const signup=html.indexOf('id="trial-activate"');
- const chart=html.indexOf('id="trial-chart"');
- const performance=html.indexOf('id="trial-performance"');
- const status=html.indexOf('class="trial-status-card"');
- const alerts=html.indexOf('class="trial-alerts-card"');
- const trades=html.indexOf('id="trial-trade-history"');
- assert.ok(signup>=0&&signup<chart&&chart<performance&&performance<status);
- assert.ok(status<alerts&&alerts<trades);
- assert.match(html,/id="trial-metric-net"/);
- assert.match(html,/id="trial-metric-win"/);
- assert.match(html,/id="trial-metric-dd"/);
- assert.match(html,/\$100,000/);
- assert.match(html,/1% risk per trade/);
- assert.match(html,/id="trial-metric-return"/);
- assert.match(html,/Result \(USD\)/);
- assert.doesNotMatch(html,/No compounding|Illustrative net P|trial-performance-cta|example account/i);
- assert.doesNotMatch(html,/trial-metric-profit|trial-chart-invite|Combined trade results in R|Peak-to-trough in R/i);
- assert.doesNotMatch(js,/trial-metric-profit|example\.netUsd|trial-performance-cta/);
- assert.match(js,/fmtUSD\(performance\.netUsd,true\)/);
- assert.match(js,/fmtUSD\(performance\.maxDrawdownUsd\)/);
- assert.match(js,/fmtUSD\(item\.resultUsd,true\)/);
- assert.match(css,/trial-hero-alert-action/);
- assert.doesNotMatch(html,/trial-show-last-signal|trial-show-latest-bars/);
- assert.doesNotMatch(js,/trial-show-last-signal|trial-show-latest-bars/);
-});
-
 test('Every $100,000-based trade result uses the same risk unit as the summary',()=>{
  assert.equal(goldTradeUsd(1),1000);
  assert.equal(goldTradeUsd(-.75),-750);
@@ -425,82 +254,31 @@ test('Every $100,000-based trade result uses the same risk unit as the summary',
  assert.equal(summary.maxDrawdownUsd,1250);
 });
 
-test('Clicking 60 days opens membership offer without changing public chart data',async()=>{
- const {readFile}=await import('node:fs/promises');
- const html=await readFile(new URL('../public/trial.html',import.meta.url),'utf8');
- const js=await readFile(new URL('../public/trial.js',import.meta.url),'utf8');
- assert.match(html,/data-days="60"/);
- assert.match(html,/id="trial-upgrade-dialog"/);
- assert.match(html,/id="trial-upgrade-kicker"/);
- assert.match(html,/id="trial-upgrade-primary"/);
- assert.match(html,/checkout\.html\?script=gold-breakout-15m/);
- assert.match(js,/if\(next===60&&!session\?\.lifetime\)/);
- assert.match(js,/openUpgradeDialog\('history'\)/);
- assert.match(js,/Unlock 60 days of Gold Breakout results/);
- assert.match(js,/Unlock 60-day history with lifetime access/);
- assert.doesNotMatch(js,/message\('Extended backtesting is available with lifetime access/);
-});
 
-test('Gold popup is controlled by the shared all-pages 30-second invitation',async()=>{
+test('Legacy main-domain Gold trial routes permanently redirect to Gold Signal Room',async()=>{
  const {readFile}=await import('node:fs/promises');
+ const redirects=await readFile(new URL('../public/_redirects',import.meta.url),'utf8');
  const html=await readFile(new URL('../public/trial.html',import.meta.url),'utf8');
- const js=await readFile(new URL('../public/trial.js',import.meta.url),'utf8');
- const shared=await readFile(new URL('../public/site-trial-prompt.js',import.meta.url),'utf8');
- assert.match(shared,/FIRST_PROMPT_MS=30000/);
- assert.match(shared,/REPEAT_PROMPT_MS=120000/);
- assert.match(shared,/\/api\/trial\/session/);
- assert.match(shared,/\/api\/access/);
- assert.match(shared,/window\.SignalGoldTrial\?\.openSignup/);
- assert.match(js,/window\.SignalGoldTrial=\{openSignup:openEmailDialog\}/);
- assert.match(js,/window\.dispatchEvent\(new Event\('sts-gold-trial-joined'\)\)/);
- assert.doesNotMatch(js,/startGoldChartEngagementPrompt|GOLD_CHART_DWELL_SECONDS/);
- assert.match(html,/id="trial-explore-preview"/);
- assert.match(html,/id="trial-modal-close"/);
- assert.doesNotMatch(html,/automatic signup|automatic trial/i);
+ const home=await readFile(new URL('../public/index.html',import.meta.url),'utf8');
+ const article=await readFile(new URL('../public/articles/gold-breakout-15m-strategy.html',import.meta.url),'utf8');
+ assert.match(redirects,/\/trial\.html https:\/\/gold\.signaltoscript\.com\/ 301/);
+ assert.match(html,/http-equiv="refresh"/);
+ assert.doesNotMatch(html,/id="trial-workspace"/);
+ assert.match(home,/60% OFF/);
+ assert.match(home,/https:\/\/gold\.signaltoscript\.com\//);
+ assert.doesNotMatch(home,/Get Gold Breakout alerts for free/);
+ assert.match(article,/https:\/\/gold\.signaltoscript\.com\/pricing\.html/);
 });
-
-test('Free email offer displays actual signed historical P&L, winning trades and return',async()=>{
- const {readFile}=await import('node:fs/promises');
- const html=await readFile(new URL('../public/trial.html',import.meta.url),'utf8');
- const js=await readFile(new URL('../public/trial.js',import.meta.url),'utf8');
- const css=await readFile(new URL('../public/trial.css',import.meta.url),'utf8');
- assert.match(html,/id="trial-modal-proof"/);
- assert.match(html,/id="trial-modal-profit"/);
- assert.match(html,/id="trial-modal-wins"/);
- assert.match(html,/id="trial-modal-return"/);
- assert.match(html,/RECENT HISTORICAL RESULTS/);
- assert.match(html,/Based on the \$100,000 backtest/);
- assert.match(js,/function updateSignupProof\(item\)/);
- assert.match(js,/stats\?\.trades>0&&Number\.isFinite\(performance\?\.netUsd\)/);
- assert.match(js,/stats\.wins/);
- assert.match(js,/performance\.returnPercent\.toFixed\(2\)/);
- assert.match(js,/Historical net gain/);
- assert.match(js,/Historical net loss/);
- assert.match(js,/proof\.hidden=!hasTrades/);
- assert.match(js,/model=item;updateSignupProof\(item\)/);
- assert.match(css,/trial-modal-proof-grid/);
- assert.doesNotMatch(html,/guaranteed|will earn|miss out on \$[0-9]/i);
-});
-
-test('Signup message leads with real profitable USD backtest evidence and offers return-by-email',async()=>{
- const {readFile}=await import('node:fs/promises');
- const html=await readFile(new URL('../public/trial.html',import.meta.url),'utf8');
- const js=await readFile(new URL('../public/trial.js',import.meta.url),'utf8');
- const css=await readFile(new URL('../public/trial.css',import.meta.url),'utf8');
- assert.match(html,/id="trial-modal-marketing"/);
- assert.match(html,/Don.t miss the next Gold Breakout opportunity/);
- assert.match(html,/Already joined\?/);
- assert.match(html,/Enter the same email above to continue your existing trial/);
- assert.match(html,/No verification step/);
- assert.match(js,/if\(performance\.netUsd>0\)/);
- assert.match(js,/fmtUSD\(performance\.netUsd,true\).*net backtest profit/);
- assert.match(js,/return\) and '/);
- assert.match(js,/wins\+' '\+historyLabel/);
- assert.match(js,/winning .*trade/);
- assert.match(js,/if\(!hasTrades\)return/);
- assert.match(js,/copy\.hidden=false/);
- assert.match(js,/copy\.textContent='Gold Breakout recorded '/);
- assert.match(css,/trial-modal-marketing/);
- assert.match(css,/trial-returning-member/);
- assert.doesNotMatch(html,/guaranteed return|guaranteed profit/i);
+test('Retired main-domain Gold API no longer leaks real-time signals or creates free accounts',async()=>{
+ const guest=new Request('https://signaltoscript.com/api/trial/data?days=30');
+ const dataRes=await goldData({request:guest,env:{}});
+ assert.equal(dataRes.status,410);
+ const body=await dataRes.json();
+ assert.equal(body.code,'GOLD_ROOM_MOVED');
+ assert.equal('candles' in body,false);
+ const signup=await startTrial({request:new Request('https://signaltoscript.com/api/trial/start',{
+  method:'POST',headers:{Origin:'https://signaltoscript.com','Content-Type':'application/json'},
+  body:JSON.stringify({email:'old@example.com'})}),env:{}});
+ assert.equal(signup.status,410);
+ assert.equal((await signup.json()).code,'GOLD_ROOM_MOVED');
 });

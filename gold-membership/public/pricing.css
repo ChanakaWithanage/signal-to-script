@@ -1,0 +1,64 @@
+/* Black Friday Gold memberships — light app style, vivid discount and profit cues. */
+.sale-ribbon{display:block;background:#173e36;color:#f4fff9;text-align:center;text-decoration:none;padding:11px 18px;font-size:12px;font-weight:750;letter-spacing:.1px}
+.sale-ribbon:hover{background:#0d6b52;color:#fff}
+.sale-ribbon strong{display:inline-block;padding:3px 8px;border-radius:5px;background:#ddbd67;color:#2c2514;margin:0 5px;font-size:10px;letter-spacing:1px}
+.sale-price-flash{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:21px 0 0;font-size:14px;color:#3d6651}
+.sale-price-flash strong{font-size:22px;color:#0a9d60;letter-spacing:-.6px;font-weight:900}
+.sale-price-flash del{font-size:14px;color:#91a4b1;text-decoration-color:#b87462;text-decoration-thickness:2px}
+.sale-price-flash .sale-pill{background:#dfffed;color:#087d4c;font-size:10px;padding:5px 9px;border:1px solid #b4e4ca;border-radius:35px;font-weight:900}
+.pricing-section{scroll-margin-top:94px}
+.price-heading-right{display:flex;flex-direction:column;gap:7px;align-items:flex-end}
+.price-heading-right a{font-size:11px;color:#a17728;font-weight:750;text-decoration:underline}
+.sale-label{color:#916223;background:#fff1cc;border:1px solid #edcb81;border-radius:999px;font-size:11px;font-weight:900;padding:8px 13px;letter-spacing:.5px}
+.price-intro{color:#688092;font-size:13px;line-height:1.7;max-width:760px;margin:0 0 25px}
+.price-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:17px;align-items:stretch}
+.price-card{position:relative;border:1px solid #e4e9ee;border-radius:18px;background:#fff;padding:28px 27px;box-shadow:0 8px 30px #3046620c;display:flex;flex-direction:column;min-width:0}
+.price-card.featured{background:linear-gradient(160deg,#fff8e9,#fff 36%);border:2px solid #dcb66f;box-shadow:0 15px 45px #af8a4b24}
+.price-card-head{display:flex;gap:12px;justify-content:space-between;align-items:center;min-height:24px}
+.price-plan{font-size:12px;letter-spacing:1.2px;color:#6f7e8c;font-weight:900}
+.price-chip{background:#ecfff5;border:1px solid #a8dfbf;color:#137e51;font-weight:850;font-size:10px;padding:5px 8px;border-radius:999px}
+.price-card.featured .price-chip{background:#ffecbe;border-color:#ebd095;color:#8e6125}
+.price-card h3{font-size:25px;color:#263b4f;letter-spacing:-.7px;margin:15px 0 5px}
+.price-card>p{font-size:12px;color:#718397;margin:0 0 20px;min-height:37px;line-height:1.55}
+.price-discount{font-size:10px;color:#1c9060;font-weight:850;letter-spacing:1px;margin:0 0 9px}
+.price-amount{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px}
+.price-amount strong{font-size:clamp(36px,3.8vw,49px);line-height:1.05;color:#1f3448;font-weight:950;letter-spacing:-2px;font-variant-numeric:tabular-nums}
+.price-card.featured .price-amount strong{color:#0a9961}
+.price-amount small{font-size:12px;color:#8595a6;font-weight:650}
+.price-compare{color:#8c9ca9;font-size:12px;margin:10px 0 20px}
+.price-compare del{color:#7e909e;font-weight:700;text-decoration-color:#cd7075;text-decoration-thickness:2px}
+.price-card .price-benefits{border-top:1px solid #edf0f3;margin:0 0 24px;padding:17px 0 0;list-style:none;flex:1;display:grid;gap:10px;align-content:start}
+.price-benefits li{font-size:12px;color:#475e69;padding-left:21px;position:relative;line-height:1.5}
+.price-benefits li:before{content:"✓";position:absolute;left:0;top:0;color:#0b9a66;font-weight:900}
+.price-card .btn{width:100%;justify-content:center}
+.price-footer{font-size:11px;color:#718c86;margin:22px 0 0;text-align:center}
+.price-footer strong{color:#246951}
+.price-mini{text-align:center;font-size:11px;color:#8495a3;margin:12px 0 0}
+.pricing-faq{margin-top:24px;display:flex;justify-content:center;gap:16px;flex-wrap:wrap;color:#6b7e8b;font-size:12px}
+.pricing-faq span{display:flex;gap:6px;align-items:center}
+.pricing-faq b{color:#19976a}
+.pricing-banner{margin:28px 0 0;border-radius:14px;padding:20px 23px;border:1px solid #c3e6d1;background:linear-gradient(112deg,#e9fff2,#fff);display:flex;align-items:center;justify-content:space-between;gap:17px;flex-wrap:wrap}
+.pricing-banner strong{display:block;font-size:16px;color:#12774c}
+.pricing-banner p{color:#507b69;font-size:12px;margin:5px 0 0}
+.pricing-banner .btn{flex:none}
+.modal-plan-options{margin:12px 0 18px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.modal-plan-option{border:1px solid #dce5e7;border-radius:11px;background:#fff;padding:9px 5px;cursor:pointer;text-align:center;display:flex;flex-direction:column;align-items:center;gap:2px;min-width:0}
+.modal-plan-option:has(input:checked){border:2px solid #c99b46;background:#fff6e3;padding:8px 4px}
+.modal-plan-option input{position:absolute!important;opacity:0!important;width:1px!important;height:1px!important}
+.modal-plan-option input:focus-visible+span{outline:2px solid #d7af58;outline-offset:3px}
+.modal-plan-option span{color:#647b85;font-size:10px;font-weight:800}
+.modal-plan-option strong{font-size:16px;color:#078b59;font-weight:900}
+.modal-plan-option del{font-size:10px;color:#9da4ad}
+.modal-selected-price{font-size:11px;color:#27644d;background:#f2fff6;padding:10px 12px;border-radius:8px;margin:5px 0 12px;border:1px solid #c7e9d4}
+.modal-selected-price b{color:#0b915c}
+.pricing-page-hero{text-align:center;max-width:810px;margin:0 auto;padding:72px 0 20px}
+.pricing-page-hero h1{font-size:clamp(38px,6vw,66px);line-height:1.07;letter-spacing:-2px;margin:15px 0;color:#203348}
+.pricing-page-hero h1 em{font-style:normal;color:#b78029}
+.pricing-page-hero p{color:#647d8d;font-size:16px;line-height:1.7}
+.pricing-page-header .btn{white-space:normal}
+.pricing-page-more{max-width:760px;margin:65px auto 95px;text-align:center}
+.pricing-page-more h2{font-size:29px;color:#233e4b}
+.pricing-page-more p{color:#657e88;line-height:1.7}
+@media(max-width:960px){.price-grid{gap:12px}.price-card{padding:22px 17px}.price-amount strong{font-size:36px}}
+@media(max-width:720px){.price-grid{grid-template-columns:1fr;gap:13px}.price-card{padding:25px 23px}.price-card>p{min-height:0}.price-amount strong{font-size:43px}.pricing-section{padding-top:44px}.price-heading-right{align-items:flex-start}.sale-ribbon{font-size:11px;line-height:1.5}.pricing-page-hero{padding-top:38px}}
+@media(max-width:370px){.modal-plan-options{gap:4px}.modal-plan-option strong{font-size:14px}.modal-plan-option{padding:8px 2px}}

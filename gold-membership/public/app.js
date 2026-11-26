@@ -4,7 +4,7 @@ const currency=n=>Number.isFinite(n)?(n<0?'−':'')+'$'+Math.abs(n).toLocaleStri
 const price=n=>Number.isFinite(n)?n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}):'—';
 const signed=(n,suffix='')=>Number.isFinite(n)?(n>0?'+':'')+n.toFixed(2)+suffix:'—';
 const when=ms=>ms?new Date(ms).toLocaleString('en-GB',{timeZone:'UTC',month:'short',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false})+' UTC':'—';
-const state={member:false,email:null,expiresAt:null,days:30,viewDays:7,data:null,chart:null,series:null,hi:null,lo:null,bars:[],firstRender:true,loading:false,requestSent:false,offerSeen:false,animateOnNextData:false,lastEventId:null};
+const state={selectedPlan:'weekly',member:false,email:null,expiresAt:null,days:30,viewDays:7,data:null,chart:null,series:null,hi:null,lo:null,bars:[],firstRender:true,loading:false,requestSent:false,offerSeen:false,animateOnNextData:false,lastEventId:null};
 let toastTimer;
 function toast(message){const el=$('toast');el.textContent=message;el.hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.hidden=true,5500)}
 // Each actual profit figure counts up only when its own card is visible.
@@ -132,7 +132,18 @@ function showMode(mode){
  $('form-feedback').hidden=true;
  if(mode==='login')$('login-email').focus();else $('request-email').focus();
 }
+const PLAN_LABELS={weekly:{name:'Weekly',days:7,price:'$4.99'},monthly:{name:'Monthly',days:30,price:'$14.99'},yearly:{name:'Yearly',days:365,price:'$89.99'}};
+function choosePlan(plan){
+ if(!PLAN_LABELS[plan])return;
+ state.selectedPlan=plan;
+ const radio=document.querySelector('#request-form input[name=plan][value="'+plan+'"]');
+ if(radio)radio.checked=true;
+ const info=PLAN_LABELS[plan];
+ const msg=document.querySelector('.modal-selected-price');
+ if(msg)msg.innerHTML='BLACK FRIDAY <b>60% OFF</b> · '+info.name+' plan: <b>'+info.price+'</b> / '+info.days+' days';
+}
 function openDialog(mode='request'){
+ choosePlan(state.selectedPlan);
  if(state.member&&mode==='request'&&state.email)$('request-email').value=state.email;
  const d=$('access-dialog');if(!d.open)d.showModal();
  showMode(mode);state.offerSeen=true;
@@ -330,8 +341,8 @@ async function sendRequest(ev){
  ev.preventDefault();
  const b=ev.currentTarget.querySelector('button[type=submit]');b.disabled=true;
  try{
-  const result=await api('request','POST',{name:$('request-name').value,email:$('request-email').value,note:$('request-note').value,website:$('website').value});
-  state.requestSent=true;feedback('Request received'+(result.id?' ('+result.id+')':'')+'. We will contact you by email with payment instructions. After payment, you will receive your 30-day access code.');
+  const result=await api('request','POST',{name:$('request-name').value,email:$('request-email').value,note:$('request-note').value,website:$('website').value,plan:document.querySelector('#request-form input[name=plan]:checked')?.value||state.selectedPlan});
+  state.requestSent=true;const chosen=PLAN_LABELS[result.plan||state.selectedPlan];feedback('Your '+chosen.name.toLowerCase()+' membership request'+(result.id?' ('+result.id+')':'')+' is received. We will email the payment instructions for '+chosen.price+'. After payment, we will send your '+chosen.days+'-day access code.');
   $('delay-banner').hidden=true;
  }catch(e){feedback(e.message,true)}finally{b.disabled=false}
 }
@@ -350,6 +361,13 @@ function dismissModal(){
  if(!state.member&&!state.requestSent)$('delay-banner').hidden=false;
 }
 function wire(){
+ document.querySelectorAll('#request-form input[name=plan]').forEach(radio=>radio.addEventListener('change',()=>{
+  if(radio.checked)choosePlan(radio.value);
+ }));
+ document.querySelectorAll('.js-plan').forEach(btn=>btn.addEventListener('click',()=>{
+  choosePlan(btn.dataset.plan);
+  openDialog('request');
+ }));
  document.querySelectorAll('.js-join').forEach(b=>b.addEventListener('click',()=>openDialog('request')));
  document.querySelectorAll('.js-login').forEach(b=>b.addEventListener('click',()=>openDialog('login')));
  $('tab-request').addEventListener('click',()=>showMode('request'));
@@ -378,4 +396,11 @@ function wire(){
   if(state.member&&state.expiresAt&&Date.now()>=state.expiresAt){updateAccess(false);state.days=30;await loadData();openDialog('login')}
  },30000);
 }
-wire();loadSession().then(loadData);
+wire();
+const requestedPlan=new URLSearchParams(location.search).get('plan');
+if(PLAN_LABELS[requestedPlan]){
+ choosePlan(requestedPlan);
+ // Preserve the plan in the popup without leaving a query string on the page.
+ history.replaceState(null,'',location.pathname+location.hash);
+ loadSession().then(async()=>{await loadData();openDialog('request')});
+}else loadSession().then(loadData);

@@ -22,11 +22,11 @@ function render(data){
  if(!rows.length){const tr=document.createElement('tr'),td=cell('No membership requests yet.');td.colSpan=5;tr.append(td);body.append(tr);return}
  for(const r of rows){
   const tr=document.createElement('tr');
-  tr.append(cell(r.id+'\n'+utc(r.created_ms)),cell(r.email+(r.name?'\n'+r.name:''),'row-email'),cell(r.note||'—','row-note'),cell(r.status,'row-status'));
+  tr.append(cell(r.id+'\n'+utc(r.created_ms)),cell(r.email+(r.name?'\n'+r.name:''),'row-email'),cell((r.note||'—')+'\n'+(r.plan||'monthly').toUpperCase()+' PLAN','row-note'),cell(r.status,'row-status'));
   const actions=document.createElement('td');
   if(r.status==='new')action(actions,'Mark contacted',()=>changeStatus(r,'contacted'));
   if(r.status!=='paid'&&r.status!=='closed'){
-   action(actions,'Mark paid & issue',()=>{$('issue-email').value=r.email;$('issue-ref').value=r.id;$('issue-paid').checked=false;document.getElementById('issue-form').scrollIntoView({behavior:'smooth',block:'center'});});
+   action(actions,'Mark paid & issue',()=>{$('issue-email').value=r.email;$('issue-ref').value=r.id;$('issue-plan').value=['weekly','monthly','yearly'].includes(r.plan)?r.plan:'monthly';$('issue-paid').checked=false;document.getElementById('issue-form').scrollIntoView({behavior:'smooth',block:'center'});});
    action(actions,'Close',()=>changeStatus(r,'closed'));
   }
   if(r.status==='closed')action(actions,'Reopen',()=>changeStatus(r,'new'));
@@ -48,13 +48,14 @@ $('reload-requests').addEventListener('click',reload);
 $('issue-form').addEventListener('submit',async ev=>{
  ev.preventDefault();
  if(!$('issue-paid').checked){feedback('Confirm payment first.');return}
- const email=$('issue-email').value.trim(),requestId=$('issue-ref').value.trim();
- if(!confirm('You have verified payment from '+email+'. Activate/extend for 30 days?'))return;
+ const email=$('issue-email').value.trim(),requestId=$('issue-ref').value.trim(),plan=$('issue-plan').value;
+ const days=plan==='weekly'?7:plan==='yearly'?365:30;
+ if(!confirm('You verified payment for the '+plan+' plan from '+email+'. Activate/extend for '+days+' days?'))return;
  const btn=ev.currentTarget.querySelector('button[type=submit]');btn.disabled=true;
  try{
-  const result=await call('issue','POST',{email,requestId:requestId||undefined,confirmPaid:true});
+  const result=await call('issue','POST',{email,plan,requestId:requestId||undefined,confirmPaid:true});
   $('issued').hidden=false;$('issued-code').textContent=result.code;
-  $('issued-expiry').textContent='Membership access expires '+utc(result.expiresAt);
+  $('issued-expiry').textContent=result.days+'-day '+result.plan+' membership expires '+utc(result.expiresAt);
   $('issued-mail').textContent=result.emailed?'Access code was emailed to the customer.':(result.mailError||'Email service not configured. Copy the code and send it securely yourself.');
   $('issue-paid').checked=false;feedback('Membership activated for '+result.email);await reload();
  }catch(e){feedback(e.message)}finally{btn.disabled=false}
