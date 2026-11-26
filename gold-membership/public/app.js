@@ -7,32 +7,93 @@ const when=ms=>ms?new Date(ms).toLocaleString('en-GB',{timeZone:'UTC',month:'sho
 const state={member:false,email:null,expiresAt:null,days:30,viewDays:7,data:null,chart:null,series:null,hi:null,lo:null,bars:[],firstRender:true,loading:false,requestSent:false,offerSeen:false,animateOnNextData:false,lastEventId:null};
 let toastTimer;
 function toast(message){const el=$('toast');el.textContent=message;el.hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.hidden=true,5500)}
-// Animate actual dollar values from the API, not calculated or hard-coded marketing figures.
-// Values only count up when the result changes or a member newly signs in.
-function animateMoney(id,value,{force=false}={}){
- const el=$(id);if(!el)return;
- if(!Number.isFinite(value)){
-  if(el._countFrame)cancelAnimationFrame(el._countFrame);
-  el.textContent='—';delete el.dataset.moneyValue;return;
+// Each actual profit figure counts up only when its own card is visible.
+// This preserves the animation on mobile when results load before scrolling.
+const profitCounters=new Map();
+const profitObserver=typeof IntersectionObserver==='function'?
+ new IntersectionObserver(entries=>{
+  for(const entry of entries){
+   if(entry.isIntersecting){
+    if(entry.intersectionRatio>=0.5)startVisibleProfit(entry.target);
+   }else{
+    pauseProfit(entry.target);
+   }
+  }
+ },{threshold:[0,0.5],rootMargin:'-70px 0px -6% 0px'}):null;
+
+function pauseProfit(el){
+ const counter=profitCounters.get(el);
+ if(!counter?.frame)return;
+ cancelAnimationFrame(counter.frame);counter.frame=null;
+ counter.pending=true;
+ el.textContent=currency(0);
+}
+
+function startVisibleProfit(el){
+ const counter=profitCounters.get(el);
+ if(!counter?.pending||document.hidden)return;
+ // A membership modal may cover the chart; don't animate behind it.
+ const modal=document.querySelector('dialog[open]');
+ if(modal&&!modal.contains(el))return;
+ counter.pending=false;
+ if(window.matchMedia?.('(prefers-reduced-motion: reduce)').matches){
+  el.textContent=currency(counter.value);profitObserver?.unobserve(el);return;
  }
- el.classList.toggle('negative',value<0);
- el.classList.toggle('positive',value>0);
- if(!force&&el.dataset.moneyValue===String(value))return;
- el.dataset.moneyValue=String(value);
- if(el._countFrame)cancelAnimationFrame(el._countFrame);
- const reduced=window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
- if(reduced||document.hidden){el.textContent=currency(value);return}
+ if(counter.frame)cancelAnimationFrame(counter.frame);
  const began=performance.now(),duration=1300;
  function tick(now){
   const progress=Math.min(1,(now-began)/duration);
   const eased=1-Math.pow(1-progress,3);
-  el.textContent=currency(progress<1?value*eased:value);
-  if(progress<1)el._countFrame=requestAnimationFrame(tick);
-  else el._countFrame=null;
+  el.textContent=currency(progress<1?counter.value*eased:counter.value);
+  if(progress<1)counter.frame=requestAnimationFrame(tick);
+  else{counter.frame=null;profitObserver?.unobserve(el)}
  }
  el.textContent=currency(0);
- el._countFrame=requestAnimationFrame(tick);
+ counter.frame=requestAnimationFrame(tick);
 }
+
+function resumeVisibleProfits(){
+ if(document.hidden)return;
+ for(const [el,counter] of profitCounters){
+  if(!counter.pending)continue;
+  const rect=el.getBoundingClientRect();
+  if(!rect.height||!rect.width)continue;
+  const modal=document.querySelector('dialog[open]');
+  if(modal&&!modal.contains(el))continue;
+  const visible=Math.min(rect.bottom,window.innerHeight*0.94)-Math.max(rect.top,70);
+  if(visible>=rect.height*0.5)startVisibleProfit(el);
+ }
+}
+
+function animateMoney(id,value,{force=false}={}){
+ const el=$(id);if(!el)return;
+ let counter=profitCounters.get(el);
+ if(!counter){
+  counter={value:null,pending:false,frame:null};
+  profitCounters.set(el,counter);
+ }
+ if(!Number.isFinite(value)){
+  if(counter.frame)cancelAnimationFrame(counter.frame);
+  counter.frame=null;counter.pending=false;counter.value=null;
+  profitObserver?.unobserve(el);el.textContent='—';el.removeAttribute('aria-label');return;
+ }
+ el.classList.toggle('negative',value<0);
+ el.classList.toggle('positive',value>0);
+ if(!force&&counter.value===value)return;
+ if(counter.frame)cancelAnimationFrame(counter.frame);
+ counter.frame=null;counter.value=value;counter.pending=true;
+ // Keep the true amount accessible even before the counter comes on screen.
+ el.setAttribute('aria-label',currency(value));
+ if(!profitObserver||window.matchMedia?.('(prefers-reduced-motion: reduce)').matches){
+  counter.pending=false;el.textContent=currency(value);return;
+ }
+ el.textContent=currency(0);
+ profitObserver.observe(el);
+}
+
+document.addEventListener('visibilitychange',()=>{
+ if(!document.hidden)requestAnimationFrame(resumeVisibleProfits);
+});
 
 async function api(path,method='GET',data){
  const options={method,credentials:'same-origin',cache:'no-store'};
@@ -69,6 +130,7 @@ function openDialog(mode='request'){
  if(state.member&&mode==='request'&&state.email)$('request-email').value=state.email;
  const d=$('access-dialog');if(!d.open)d.showModal();
  showMode(mode);state.offerSeen=true;
+ requestAnimationFrame(resumeVisibleProfits);
 }
 function updateAccess(member,email,expiry){
  const previouslyActive=state.member,previousEmail=state.email;
@@ -288,7 +350,10 @@ function wire(){
  $('tab-login').addEventListener('click',()=>showMode('login'));
  $('modal-close').addEventListener('click',dismissModal);
  $('modal-explore').addEventListener('click',dismissModal);
- $('access-dialog').addEventListener('close',()=>{if(!state.member&&!state.requestSent)$('delay-banner').hidden=false});
+ $('access-dialog').addEventListener('close',()=>{
+  if(!state.member&&!state.requestSent)$('delay-banner').hidden=false;
+  requestAnimationFrame(resumeVisibleProfits);
+ });
  $('request-form').addEventListener('submit',sendRequest);$('login-form').addEventListener('submit',sendLogin);
  $('refresh').addEventListener('click',loadData);
  $('hide-banner').addEventListener('click',()=>$('delay-banner').hidden=true);
