@@ -73,6 +73,7 @@ function openDialog(mode='request'){
 function updateAccess(member,email,expiry){
  const previouslyActive=state.member,previousEmail=state.email;
  state.member=!!member;state.email=email||null;state.expiresAt=expiry||null;
+ window.GoldRoomAccess={active:state.member,email:state.email,expiresAt:state.expiresAt};
  if(previouslyActive!==state.member||previousEmail!==state.email){
   window.dispatchEvent(new CustomEvent('gold:member-access',{detail:{active:state.member,email:state.email,expiresAt:state.expiresAt}}));
  }
