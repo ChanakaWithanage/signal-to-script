@@ -3,3 +3,6 @@ node_modules/
 .dev.vars*
 .env*
 .DS_Store
+
+# Local scheduled Gold alert Worker configuration (D1 bindings / local settings)
+gold-membership/workers/wrangler.toml
