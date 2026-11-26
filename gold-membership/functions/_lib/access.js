@@ -68,8 +68,10 @@ export function releasedBars(bars,member,now=Date.now()){
  return bars.filter(b=>b.time+BAR_MS<=now-DELAY_MS);
 }
 export async function adminAllowed(req,env){
- const supplied=(req.headers.get('Authorization')||'').match(/^Bearer (.{32,200})$/)?.[1];
- if(!supplied||typeof env.ADMIN_KEY!=='string'||env.ADMIN_KEY.length<32)return false;
+ const supplied=(req.headers.get('Authorization')||'').match(/^Bearer (.{1,200})$/)?.[1];
+ // Accept the operator's configured key regardless of its length; still require
+ // a nonempty secret and compare hashed values rather than plaintext.
+ if(!supplied||typeof env.ADMIN_KEY!=='string'||!env.ADMIN_KEY.length)return false;
  const [a,b]=await Promise.all([digest(supplied),digest(env.ADMIN_KEY)]);
  let different=0;for(let i=0;i<a.length;i++)different|=a.charCodeAt(i)^b.charCodeAt(i);
  return different===0;
