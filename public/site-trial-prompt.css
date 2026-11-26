@@ -54,3 +54,22 @@
  .sts-trial-proof-grid>div{padding:8px 6px}
  .sts-trial-proof-grid strong{font-size:17px}
 }
+
+/* Black Friday Gold Room promotion: light surfaces and emerald launch price. */
+.sts-gold-launch-offer{width:min(470px,calc(100% - 22px));padding:32px;background:#fff;border:1px solid #dce9e1;color:#253d45;box-shadow:0 26px 95px #1d3b3a47}
+.sts-gold-launch-offer .sts-trial-kicker{display:inline-block;background:#fff0c6;color:#8a6025;border:1px solid #e7c985;border-radius:50px;padding:8px 13px;font-size:11px;font-weight:900;letter-spacing:1px}
+.sts-gold-launch-offer h2{font-size:clamp(26px,5vw,36px);line-height:1.13;letter-spacing:-1px;color:#213c44;margin:17px 0 12px;font-weight:900}
+.sts-gold-launch-offer .sts-trial-description{line-height:1.7;font-size:14px;color:#677f83;margin:0 0 19px}
+.sts-gold-price-box{background:linear-gradient(120deg,#e6fff1,#f9fffb);border:1px solid #b7e9ce;border-radius:14px;padding:18px 19px;margin:17px 0}
+.sts-gold-price-box>span{display:block;font-size:10px;letter-spacing:1px;color:#3b8666;font-weight:900}
+.sts-gold-price-line{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin:6px 0 4px}
+.sts-gold-price-line strong{color:#079b65;font-weight:950;font-size:clamp(39px,9vw,54px);letter-spacing:-2px}
+.sts-gold-price-line del{color:#91a49f;font-size:18px;text-decoration-color:#c66f6c;text-decoration-thickness:2px}
+.sts-gold-price-line b{color:#0b8259;background:#d1f9e3;border:1px solid #a2daba;border-radius:10px;padding:5px 8px;font-size:10px}
+.sts-gold-price-box small{font-size:11px;color:#65897c}
+.sts-gold-launch-offer .sts-trial-benefits{display:flex;flex-wrap:wrap;gap:8px 14px;color:#457867;font-size:12px;font-weight:750;margin:0 0 21px}
+.sts-gold-launch-offer .sts-trial-primary{display:flex;align-items:center;justify-content:center;background:#dbac56;color:#2b2317;font-weight:900;border:1px solid #d0a252;border-radius:10px;padding:15px 17px;text-decoration:none;text-align:center}
+.sts-gold-launch-offer .sts-trial-primary:hover{background:#efc577;color:#2b2317}
+.sts-gold-launch-offer .sts-trial-assurance{text-align:center;color:#758783;font-size:11px;margin:13px 0}
+.sts-gold-launch-offer .sts-trial-later{display:block;width:100%;border:0;color:#7e9198;background:none;padding:8px;text-decoration:underline;font-size:11px;cursor:pointer}
+@media(max-width:450px){.sts-gold-launch-offer{padding:23px 18px}.sts-gold-price-line{gap:8px}}
