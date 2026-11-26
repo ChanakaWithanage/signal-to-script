@@ -3,7 +3,12 @@ import {ensureAlertsSchema,ensureAlertPreferences,alertPreferences,alertReady,
  discordWebhookUrl,encryptDiscord,publicAlertPreferences,createTelegramLink,
  claimTestSend,sendAlert,signalMessage} from '../_lib/alerts.js';
 
-const status=async(db,email,env)=>publicAlertPreferences(await ensureAlertPreferences(db,email),env);
+const status=async(db,email,env)=>{
+ const prefs=publicAlertPreferences(await ensureAlertPreferences(db,email),env);
+ const worker=await db.prepare("SELECT updated_ms FROM gold_alert_state WHERE id='gold-15m'").first();
+ const lastScanAt=Number(worker?.updated_ms)||null;
+ return {...prefs,deliveryOnline:!!lastScanAt&&Date.now()-lastScanAt<7*60000,lastScanAt};
+ };
 async function authorized(request,env){
  await ensureSchema(env.DB);await ensureAlertsSchema(env.DB);
  return currentMember(env.DB,request);
