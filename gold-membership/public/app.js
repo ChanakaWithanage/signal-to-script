@@ -83,6 +83,7 @@ function animateMoney(id,value,{force=false}={}){
  el.classList.toggle('negative',value<0);
  el.classList.toggle('positive',value>0);
  if(!force&&counter.value===value)return;
+ const wasAnimating=!!counter.frame;
  if(counter.frame)cancelAnimationFrame(counter.frame);
  counter.frame=null;counter.value=value;counter.pending=true;
  // Keep the true amount accessible even before the counter comes on screen.
@@ -92,8 +93,8 @@ function animateMoney(id,value,{force=false}={}){
  }
  el.textContent=currency(0);
  profitObserver.observe(el);
- // Also handle a newer API result arriving during an in-progress count.
- requestAnimationFrame(resumeVisibleProfits);
+ // The observer is already attached when a refresh interrupts an active count.
+ if(wasAnimating)requestAnimationFrame(resumeVisibleProfits);
 }
 
 document.addEventListener('visibilitychange',()=>{
