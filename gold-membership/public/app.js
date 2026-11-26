@@ -92,6 +92,8 @@ function animateMoney(id,value,{force=false}={}){
  }
  el.textContent=currency(0);
  profitObserver.observe(el);
+ // Also handle a newer API result arriving during an in-progress count.
+ requestAnimationFrame(resumeVisibleProfits);
 }
 
 document.addEventListener('visibilitychange',()=>{
