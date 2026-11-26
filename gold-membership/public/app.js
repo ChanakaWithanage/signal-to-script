@@ -48,6 +48,7 @@ function offerText(data,force=false){
  const good=Number.isFinite(p.netUsd)&&p.netUsd>0&&p.returnPercent>0;
  animateMoney('proof-profit',s.trades?p.netUsd:NaN,{force});
  $('proof-return').textContent=s.trades?signed(p.returnPercent,'%'):'—';
+ $('proof-return').classList.toggle('negative',s.trades>0&&p.returnPercent<0);
  $('proof-wins').textContent=s.wins;
  $('proof-period').textContent='Historical '+Math.max(1,Math.floor(data.market.availableDays))+'-day modeled results · $100,000 capital · 1% fixed risk/trade';
  if(good&&s.wins){
@@ -104,6 +105,11 @@ function setMetrics(data){
  const valid=s?.trades>0&&p&&Number.isFinite(p.netUsd);
  const force=state.animateOnNextData;state.animateOnNextData=false;
  const net=valid?p.netUsd:NaN;
+ const isLoss=valid&&net<0;
+ document.querySelector('.hero-profit').classList.toggle('loss',isLoss);
+ $('member-first').classList.toggle('loss',isLoss);
+ document.querySelector('.stat.highlight').classList.toggle('loss',isLoss);
+ document.querySelector('.proof').classList.toggle('loss',isLoss);
  // The member's very first number is historical dollar P&L, never the return %.
  animateMoney('member-profit-value',net,{force});
  animateMoney('hero-profit-value',net,{force});
