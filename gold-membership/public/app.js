@@ -239,7 +239,9 @@ function renderData(data){
  const latest=data.current?.lastEvent;
  if(state.member&&previousEventId&&latest?.id&&latest.id!==previousEventId&&
     Date.now()-latest.time<5*60000){
-  toast('REAL-TIME GOLD ALERT · '+eventName(latest)+' at 
+  toast('REAL-TIME GOLD ALERT · '+eventName(latest)+' at '+currency(latest.price));
+ }
+ state.lastEventId=latest?.id||null;
  $('feed-description').textContent=data.market.symbol+' · '+data.market.interval+' candles · '+(state.member?'Real-time member alerts':'30-minute delayed public view');
  $('chart-asof').textContent='Latest released candle closed '+when(Date.parse(data.market.lastClosedBar))+(data.market.stale?' · Feed may be stale':'');
  $('chart-source').textContent=data.market.source;
