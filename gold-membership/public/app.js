@@ -4,7 +4,7 @@ const currency=n=>Number.isFinite(n)?(n<0?'−':'')+'$'+Math.abs(n).toLocaleStri
 const price=n=>Number.isFinite(n)?n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}):'—';
 const signed=(n,suffix='')=>Number.isFinite(n)?(n>0?'+':'')+n.toFixed(2)+suffix:'—';
 const when=ms=>ms?new Date(ms).toLocaleString('en-GB',{timeZone:'UTC',month:'short',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false})+' UTC':'—';
-const state={selectedPlan:'monthly',member:false,email:null,expiresAt:null,days:30,viewDays:7,data:null,chart:null,series:null,hi:null,lo:null,bars:[],firstRender:true,loading:false,requestSent:false,offerSeen:false,animateOnNextData:false,lastEventId:null};
+const state={selectedPlan:'weekly',member:false,email:null,expiresAt:null,days:30,viewDays:7,data:null,chart:null,series:null,hi:null,lo:null,bars:[],firstRender:true,loading:false,requestSent:false,offerSeen:false,animateOnNextData:false,lastEventId:null};
 let toastTimer;
 function toast(message){const el=$('toast');el.textContent=message;el.hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.hidden=true,5500)}
 // Each actual profit figure counts up only when its own card is visible.
