@@ -66,7 +66,7 @@ test('settings never disclose the Discord webhook or Telegram chat ID',()=>{
 test('first cron run establishes its baseline without dispatching historical signals',async()=>{
  let baselineCalled=false;
  const db={prepare(sql){
-  return {bind(...args){this.args=args;return this},async run(){
+  return {bind(...args){this.args=args;return this},async all(){return {results:[{name:'plan'}]}},async run(){
    if(sql.includes('INSERT OR IGNORE INTO gold_alert_state'))baselineCalled=true;
    return {meta:{changes:1}};
   }};
@@ -80,7 +80,7 @@ test('first cron run establishes its baseline without dispatching historical sig
 });
 
 test('member notification API denies unauthenticated and cross-origin requests',async()=>{
- const db={prepare(){return {bind(){return this},async run(){return {meta:{changes:1}}}}}};
+ const db={prepare(){return {bind(){return this},async all(){return {results:[{name:'plan'}]}},async run(){return {meta:{changes:1}}}}}};
  const origin='https://gold.signaltoscript.com';
  const getResult=await onRequestGet({request:new Request(origin+'/api/alerts'),env:{DB:db}});
  assert.equal(getResult.status,401);
