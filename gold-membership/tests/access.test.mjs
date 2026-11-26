@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {releasedBars,DELAY_MS,BAR_MS,TERM_MS,generatedCode,normalizedCode,emailOf,validEmail} from '../functions/_lib/access.js';
+import {releasedBars,DELAY_MS,BAR_MS,TERM_MS,generatedCode,normalizedCode,emailOf,validEmail,adminAllowed} from '../functions/_lib/access.js';
 
 test('public receives only candles at least 30 minutes past confirmed close',()=>{
  const now=Date.UTC(2026,10,26,12,0,0);
@@ -24,4 +24,14 @@ test('email normalization and validation rejects malformed email',()=>{
  assert.equal(emailOf(' ADMIN@Example.com '),'admin@example.com');
  assert.equal(validEmail(emailOf(' ADMIN@Example.com ')),true);
  assert.equal(validEmail('not an email'),false);
+});
+
+test('admin access accepts the configured short secret without a length requirement',async()=>{
+ const request=key=>new Request('https://gold.signaltoscript.com/api/admin/requests',{
+  headers:{Authorization:'Bearer '+key}
+ });
+ assert.equal(await adminAllowed(request('demo'),{ADMIN_KEY:'demo'}),true);
+ assert.equal(await adminAllowed(request('a'),{ADMIN_KEY:'a'}),true);
+ assert.equal(await adminAllowed(request('wrong'),{ADMIN_KEY:'demo'}),false);
+ assert.equal(await adminAllowed(request('demo'),{ADMIN_KEY:''}),false);
 });
