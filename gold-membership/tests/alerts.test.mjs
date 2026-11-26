@@ -1,9 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {alertReady,activeChannels,discordWebhookUrl,encryptDiscord,decryptDiscord,
- eligibleEvents,signalMessage,publicAlertPreferences} from '../functions/_lib/alerts.js';
+ eligibleEvents,signalMessage,publicAlertPreferences,sendAlert} from '../functions/_lib/alerts.js';
 import {BAR_MS} from '../functions/_lib/access.js';
 import {runAlertScan} from '../workers/alerts.js';
+import {onRequestGet,onRequestPost} from '../functions/api/alerts.js';
 
 const validDiscord='https://discord.com/api/webhooks/123456789012345678/'+('Abc_1234567890xyz-'.repeat(3));
 test('Discord URL validation accepts only a genuine webhook endpoint',()=>{
@@ -76,4 +77,28 @@ test('first cron run establishes its baseline without dispatching historical sig
   {now:Date.UTC(2026,10,26,12,16),feedProvider:async()=>fakeFeed});
  assert.equal(baselineCalled,true);
  assert.deepEqual(result,{initialized:true,events:0,sent:0});
+});
+
+test('member notification API denies unauthenticated and cross-origin requests',async()=>{
+ const db={prepare(){return {bind(){return this},async run(){return {meta:{changes:1}}}}}};
+ const origin='https://gold.signaltoscript.com';
+ const getResult=await onRequestGet({request:new Request(origin+'/api/alerts'),env:{DB:db}});
+ assert.equal(getResult.status,401);
+ const crossOrigin=new Request(origin+'/api/alerts',{method:'POST',
+  headers:{Origin:'https://another.example','Content-Type':'application/json'},
+  body:JSON.stringify({action:'email',enabled:true})});
+ const postResult=await onRequestPost({request:crossOrigin,env:{DB:db}});
+ assert.equal(postResult.status,403);
+});
+test('Discord delivery uses encrypted verified destination and disables mentions',async()=>{
+ const cipher=await encryptDiscord(validDiscord,'a1'.repeat(32));
+ const prev=globalThis.fetch;const calls=[];
+ globalThis.fetch=async(url,options)=>{calls.push({url,options});return {ok:true,status:204}};
+ try{
+  await sendAlert({ALERTS_ENCRYPTION_KEY:'a1'.repeat(32)},'discord','member@example.com',
+   {discord_cipher:cipher},'GOLD BREAKOUT 15M · BUY');
+ }finally{globalThis.fetch=prev}
+ assert.equal(calls.length,1);
+ assert.equal(calls[0].url,validDiscord);
+ assert.deepEqual(JSON.parse(calls[0].options.body).allowed_mentions,{parse:[]});
 });
