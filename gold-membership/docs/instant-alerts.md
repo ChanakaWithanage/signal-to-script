@@ -1,6 +1,6 @@
 # Gold Signal Room — Instant member alerts
 
-The standalone Gold Signal Room supports **email, Discord and Telegram notifications**, independently of the open browser. Active 30-day members configure their channels under **Instant alerts** on https://gold.signaltoscript.com; visitors see a member-only invitation.
+The standalone Gold Signal Room supports **email, Discord and Telegram notifications**, independently of the open browser. Active weekly, monthly or yearly members configure their channels under **Instant alerts** on https://gold.signaltoscript.com; visitors see a member-only invitation.
 
 Notifications are sent for new BUY, SELL and EXIT events **after the 15-minute signal candle closes**. A separate scheduled Cloudflare Worker checks for events every minute. The existing Gold breakout strategy is unchanged.
 
@@ -59,7 +59,7 @@ The first successful run establishes a baseline and does not spam users with his
 
 On Gold Signal Room, log in with your email and paid membership code. Go to **Instant alerts**, enable **Email notifications**, then click **Send test email**. The email is sent to the membership address, not a user-entered arbitrary destination.
 
-Members can disable email at any time. Automatic delivery pauses when their monthly membership expires.
+Members can disable email at any time. Automatic delivery pauses when their paid membership expires.
 
 ## 4. Member Discord setup
 
@@ -117,5 +117,5 @@ Cloudflare reference: https://developers.cloudflare.com/workers/configuration/cr
 - The same RESEND_API_KEY and RESEND_FROM_EMAIL can be used for manual membership emails and instant alerts.
 - Discord encryption key rotation requires members to reconnect their webhooks.
 - Active members may enable any number of supported channels; one signal is independently delivered to each.
-- Members whose 30-day access has expired receive no new notifications until they renew.
+- Members whose purchased 7, 30 or 365 days have expired receive no new notifications until they renew.
 - Alert delivery operates through a separate Cron Worker. A Pages deployment alone does not activate background alerts.
