@@ -279,3 +279,11 @@ dialog::backdrop{background:#16263870;backdrop-filter:blur(5px)}
 @media(prefers-reduced-motion:reduce){
  *,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}
 }
+
+/* A losing period is never dressed up as a positive return. */
+.hero-profit.loss,.member-first.loss,.proof.loss,.stat.highlight.loss{
+ background:linear-gradient(135deg,#fff0f1,#fffafa);
+ border-color:#f0bec6;
+}
+.hero-profit.loss .overline,.member-first.loss .member-first-label,.proof.loss>small{color:#ac4458}
+.proof.loss strong:not(.negative){color:#5d6d80}
