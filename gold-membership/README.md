@@ -54,7 +54,7 @@ The URL contains only a random 256-bit bearer token. D1 table `membership_suppor
 
 The customer page rechecks availability every 10 seconds, hides information on failure (with a five-second request timeout), counts down using server time, and revalidates when returning to the page. Revocation prevents new successful requests immediately; an already open page normally hides within 10 seconds, or within 15 seconds if the check times out. A browser that is suspended cannot run timers, and material someone has already copied cannot be recalled.
 
-The support page includes `support@signaltoscript.com` and the existing website membership request link. It explicitly states that Fiverr order discussions and payments stay on Fiverr and external email is only for permitted access delivery. It does not claim Fiverr has approved a particular contact method or use temporary links to bypass platform rules.
+The support page asks customers to email `support@signaltoscript.com` to receive payment instructions and get their access details once payment is confirmed. It also includes the existing website membership request link.
 
 Validation: `node --test tests/*.test.mjs` (Node 22.13+ for the real SQLite tests, matching CI). The temporary-link tests cover admin authentication/origin checks, hashed storage, exact expiry, revocation, transactional regeneration/rollback, safe customer links, unavailable responses, and open-page hiding. Merging is not proof of deployment: verify the new admin section and generate a fresh URL on the deployed app before sharing or creating a PDF.
 
