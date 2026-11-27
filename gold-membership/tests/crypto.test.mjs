@@ -81,7 +81,8 @@ test('Provider-confirmed paid invoice creates an encrypted 7-day membership only
  const db={prepare(sql){
   let args=[];
   return {
-   bind(...a){args=a;return this},
+   sql,args,
+   bind(...a){args=a;this.args=a;return this},
    async all(){return {results:[{name:'plan'}]}},
    async first(){
     if(sql.includes('gold_crypto_orders'))return dbOrder;
