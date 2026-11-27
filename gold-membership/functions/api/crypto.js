@@ -1,5 +1,5 @@
 import {bodyOf,json,sameOrigin,emailOf,validEmail,randomHex,digest,ensureSchema,cookie,DAY} from '../_lib/access.js';
-import {planOf} from '../_lib/plans.js';
+import {salePlanOf} from '../_lib/plans.js';
 import {paymentReady,CRYPTO_COINS,ensureCryptoSchema,paymentProvider,minimumSupported,
  validInvoiceUrl,findOrder,orderPublic,decryptCode} from '../_lib/crypto.js';
 const fail=(message,status=400)=>json({error:message},status);
@@ -39,7 +39,7 @@ export async function onRequestPost({request,env}){
   }catch(error){console.error('Gold crypto status failed',error);return fail('Unable to check crypto payment status.',503)}
  }
  if(!paymentReady(env))return fail('Instant crypto checkout is not configured yet.',503);
- const email=emailOf(body.email),plan=planOf(body.plan),coin=String(body.coin||'auto').toLowerCase();
+ const email=emailOf(body.email),plan=salePlanOf(body.plan),coin=String(body.coin||'auto').toLowerCase();
  if(!validEmail(email)||!plan||!CRYPTO_COINS.includes(coin))return fail('Enter a valid email, membership plan and cryptocurrency.',400);
  const now=Date.now();
  try{
