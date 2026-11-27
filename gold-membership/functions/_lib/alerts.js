@@ -69,11 +69,18 @@ export function publicAlertPreferences(row,env){
 }
 export function alertTitle(e){return e.type==='EXIT'?'EXIT '+e.side:e.side==='LONG'?'BUY':'SELL'}
 export function signalMessage(e,{siteUrl='https://gold.signaltoscript.com',test=false}={}){
- if(test)return 'GOLD SIGNAL ROOM · TEST ALERT\n\nYour instant Gold alerts are connected.\n'+siteUrl;
+ if(test)return 'GOLD SIGNAL ROOM VIP · TEST ALERT\n\nYour instant VIP alerts are connected.\n'+siteUrl;
  if(!Number.isFinite(Number(e.price)))throw Error('Invalid Gold price');
  const time=new Date(Number(e.time)+BAR_MS);
- const stop=e.type==='ENTRY'&&Number.isFinite(Number(e.stop))?'\nStop loss: 
+ const stop=e.type==='ENTRY'&&Number.isFinite(Number(e.stop))?'\nStop loss: $'+Number(e.stop).toFixed(2):'';
+ const follow=e.type==='ENTRY'?'\nTake profit: strategy-managed, no fixed TP. We will notify you when the trade exits.':
+  '\nTrade closed. The next entry will be notified when confirmed.';
+ return '🥇 GOLD SIGNAL ROOM VIP · '+alertTitle(e)+'\n\nPrice: $'+Number(e.price).toFixed(2)+stop+follow+
+  '\nCandle closed: '+time.toISOString().replace('T',' ').slice(0,16)+' UTC'+
+  '\nReason: '+String(e.reason||'Gold signal').slice(0,90)+
+  '\n\nVIP live dashboard: '+siteUrl;
 }
+
 async function postJson(url,payload,headers={}){
  const response=await fetch(url,{method:'POST',
   headers:{'Content-Type':'application/json',...headers},body:JSON.stringify(payload),
