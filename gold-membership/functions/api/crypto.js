@@ -3,27 +3,28 @@ import {planOf} from '../_lib/plans.js';
 import {paymentReady,CRYPTO_COINS,ensureCryptoSchema,paymentProvider,minimumSupported,
  validInvoiceUrl,findOrder,orderPublic,decryptCode} from '../_lib/crypto.js';
 const fail=(message,status=400)=>json({error:message},status);
-export async function onRequestGet({request,env}){
- if(!env.DB)return fail('Membership checkout is unavailable.',503);
- const q=new URL(request.url).searchParams,id=q.get('id'),secret=q.get('secret');
- if(!id||!secret)return json({ready:paymentReady(env),coins:CRYPTO_COINS});
- try{
-  await ensureCryptoSchema(env.DB);
-  const order=await findOrder(env.DB,id,secret);
-  if(!order)return fail('Order not found in this browser.',403);
-  const answer={...orderPublic(order)};
-  if(order.provisioned_ms){
-   answer.accessCode=await decryptCode(order.code_cipher,env.GOLD_CRYPTO_CODE_KEY);
-   if(!answer.accessCode)return fail('Your payment is verified. Contact support to retrieve your membership code.',503);
-   answer.email=order.email;
-  }
-  return json({order:answer});
- }catch(error){console.error('Gold crypto status failed',error);return fail('Unable to check crypto payment status.',503)}
+export async function onRequestGet({env}){
+ return json({ready:paymentReady(env),coins:CRYPTO_COINS});
 }
 export async function onRequestPost({request,env}){
  if(!sameOrigin(request))return fail('Invalid origin.',403);
- if(!paymentReady(env))return fail('Instant crypto checkout is not configured yet.',503);
+ if(!env.DB)return fail('Membership checkout is unavailable.',503);
  let body;try{body=await bodyOf(request)}catch{return fail('Invalid request.',400)}
+ if(body.action==='check'){
+  try{
+   await ensureCryptoSchema(env.DB);
+   const order=await findOrder(env.DB,body.id,body.secret);
+   if(!order)return fail('Order not found in this browser.',403);
+   const answer={...orderPublic(order)};
+   if(order.provisioned_ms){
+    answer.accessCode=await decryptCode(order.code_cipher,env.GOLD_CRYPTO_CODE_KEY);
+    if(!answer.accessCode)return fail('Payment verified. Contact support for the code.',503);
+    answer.email=order.email;
+   }
+   return json({order:answer});
+  }catch(error){console.error('Gold crypto status failed',error);return fail('Unable to check crypto payment status.',503)}
+ }
+ if(!paymentReady(env))return fail('Instant crypto checkout is not configured yet.',503);
  const email=emailOf(body.email),plan=planOf(body.plan),coin=String(body.coin||'auto').toLowerCase();
  if(!validEmail(email)||!plan||!CRYPTO_COINS.includes(coin))return fail('Enter a valid email, membership plan and cryptocurrency.',400);
  const now=Date.now();
