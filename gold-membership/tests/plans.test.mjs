@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {GOLD_PLANS,planOf,planDays,money} from '../functions/_lib/plans.js';
+import {GOLD_PLANS,SALE_PLANS,salePlanOf,planOf,planDays,money} from '../functions/_lib/plans.js';
 import {DAY} from '../functions/_lib/access.js';
 import {onRequestPost as requestMembership} from '../functions/api/request.js';
 import {onRequestPost as issueMembership} from '../functions/api/admin/issue.js';
@@ -27,23 +27,26 @@ function dbStub({previousExpiry=0}={}){
  };
  return {db,statements,batches};
 }
-test('Black Friday prices and planned regular prices match the three offers',()=>{
+test('Temporary sale prices match the two active offers and preserve legacy weekly',()=>{
  assert.deepEqual(Object.keys(GOLD_PLANS),['weekly','monthly','yearly']);
  for(const [id,days,price,regular] of [
-  ['weekly',7,499,1249],['monthly',30,1499,3749],['yearly',365,8999,22499]
+  ['weekly',7,499,1249],['monthly',30,2500,4000],['yearly',365,20000,32000]
  ]){
   const p=planOf(id);
   assert.equal(p.days,days);
   assert.equal(p.priceCents,price);
   assert.equal(p.regularCents,regular);
-  assert.ok((regular-price)/regular>=0.60);
+  if(id!=='weekly')assert.equal((regular-price)/regular,0.375);
  }
  assert.equal(money(499),'$4.99');
  assert.equal(planOf('lifetime'),null);
+ assert.deepEqual(SALE_PLANS,['monthly','yearly']);
+ assert.equal(salePlanOf('weekly'),null);
+ assert.equal(planOf('weekly').days,7);
  assert.equal(planDays('monthly'),30);
 });
-test('Public membership request persists the selected weekly or annual plan',async()=>{
- for(const plan of ['weekly','monthly','yearly']){
+test('Public membership request persists the selected monthly or annual plan',async()=>{
+ for(const plan of SALE_PLANS){
   const {db,statements}=dbStub();
   const req=new Request(origin+'/api/request',{
    method:'POST',headers:{Origin:origin,'Content-Type':'application/json'},
@@ -62,7 +65,7 @@ test('Invalid membership plan is rejected before storing requests',async()=>{
  const {db,statements}=dbStub();
  const req=new Request(origin+'/api/request',{
   method:'POST',headers:{Origin:origin,'Content-Type':'application/json'},
-  body:JSON.stringify({email:'buyer@example.com',plan:'unlimited'})
+  body:JSON.stringify({email:'buyer@example.com',plan:'weekly'})
  });
  const response=await requestMembership({request:req,env:{DB:db}});
  assert.equal(response.status,400);
