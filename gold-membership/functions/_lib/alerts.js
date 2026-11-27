@@ -130,11 +130,6 @@ export function activeChannels(p,e){
  if(p.telegram_chat_id&&p.telegram_enabled_ms&&p.telegram_enabled_ms<=t)channels.push('telegram');
  return channels;
 }
-+Number(e.stop).toFixed(2):'';
- const follow=e.type==='ENTRY'?'\nTake profit: strategy-managed (no fixed TP). We will notify you on EXIT.':
-  '\nTrade closed. Next entry will be notified when confirmed.';
- return '🥇 GOLD SIGNAL ROOM VIP · '+alertTitle(e)+'\n\nPrice: 
-}
 async function postJson(url,payload,headers={}){
  const response=await fetch(url,{method:'POST',
   headers:{'Content-Type':'application/json',...headers},body:JSON.stringify(payload),
