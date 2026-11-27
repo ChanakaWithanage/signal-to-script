@@ -2,7 +2,7 @@ import {digest,generatedCode,normalizedCode,DAY,mail} from './access.js';
 import {planOf} from './plans.js';
 
 export const CRYPTO_COINS=Object.freeze(['auto','usdtbsc','usdttrc20','ltc','trx']);
-export const paymentReady=env=>!!(env.DB&&env.GOLD_CRYPTO_ENABLED==='true'&&env.NOWPAYMENTS_API_KEY&&env.NOWPAYMENTS_IPN_SECRET&&env.NOWPAYMENTS_PAYOUT_CURRENCY);
+export const paymentReady=env=>!!(env.DB&&env.GOLD_CRYPTO_ENABLED==='true'&&env.NOWPAYMENTS_API_KEY&&env.NOWPAYMENTS_IPN_SECRET&&env.NOWPAYMENTS_PAYOUT_CURRENCY&&/^[a-f0-9]{64}$/i.test(env.GOLD_CRYPTO_CODE_KEY||''));
 export const validOrderId=id=>typeof id==='string'&&/^[a-f0-9]{24}$/.test(id);
 export const validOrderSecret=s=>typeof s==='string'&&/^[a-f0-9]{64}$/.test(s);
 export const validInvoiceUrl=s=>{try{const u=new URL(s);return u.protocol==='https:'&&(u.hostname==='nowpayments.io'||u.hostname.endsWith('.nowpayments.io'))&&u.username===''&&u.password===''}catch{return false}};
