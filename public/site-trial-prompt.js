@@ -26,17 +26,17 @@
   dialog.setAttribute('aria-labelledby','sts-trial-offer-title');
   dialog.innerHTML=[
    '<button type="button" class="sts-trial-close" aria-label="Close Gold membership offer">×</button>',
-   '<span class="sts-trial-kicker">BLACK FRIDAY · 60% OFF</span>',
+   '<span class="sts-trial-kicker">BLACK FRIDAY · 37.5% OFF</span>',
    '<h2 id="sts-trial-offer-title">Get the next Gold signal before everyone else.</h2>',
    '<p class="sts-trial-description">Real-time Gold BUY, SELL and EXIT alerts delivered directly to email, Discord or Telegram—even when the chart is closed.</p>',
    '<div class="sts-gold-price-box">',
    ' <span>STARTING FROM</span>',
-   ' <div class="sts-gold-price-line"><strong>$4.99</strong><del>$12.49</del><b>60% OFF</b></div>',
-   ' <small>7 days of Gold signals · Choose weekly, monthly or yearly</small>',
+   ' <div class="sts-gold-price-line"><strong>$25.00</strong><del>$40.00</del><b>37.5% OFF</b></div>',
+   ' <small>30 days of Gold signals · Choose monthly or yearly</small>',
    '</div>',
-   '<div class="sts-trial-benefits"><span>✓ Instant member alerts</span><span>✓ Real signal history</span><span>✓ 7 / 30 / 365-day access</span></div>',
+   '<div class="sts-trial-benefits"><span>✓ Instant member alerts</span><span>✓ Real signal history</span><span>✓ 30 / 365-day access</span></div>',
    '<a class="sts-trial-primary" href="'+OFFER_URL+'">Unlock Black Friday pricing ↗</a>',
-   '<p class="sts-trial-assurance">Weekly $4.99 · Monthly $14.99 · Yearly $89.99</p>',
+   '<p class="sts-trial-assurance">Monthly $25.00 · Yearly $200.00</p>',
    '<button type="button" class="sts-trial-later">Keep browsing</button>'
   ].join('');
   document.body.append(dialog);
