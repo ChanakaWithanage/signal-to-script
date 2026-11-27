@@ -43,10 +43,13 @@ test('worker ignores old and unconfirmed alerts, including on first deployment',
  assert.deepEqual(eligibleEvents(list,fresh.time,now),[]);
 });
 test('notification content reflects real event price, type and candle closing time',()=>{
- const signal={type:'ENTRY',side:'SHORT',price:4225.35,time:Date.UTC(2026,10,26,12,0),reason:'Range breakout'};
+ const signal={type:'ENTRY',side:'SHORT',price:4225.35,stop:4267.60,time:Date.UTC(2026,10,26,12,0),reason:'Range breakout'};
  const text=signalMessage(signal);
  assert.match(text,/SELL/);
  assert.match(text,/\$4225.35/);
+ assert.match(text,/Stop loss: \$4267.60/);
+ assert.match(text,/no fixed TP/i);
+ assert.match(text,/notify you when the trade exits/i);
  assert.match(text,/12:15 UTC/);
  assert.match(text,/gold.signaltoscript.com/);
  assert.match(signalMessage(null,{test:true}),/TEST ALERT/);
