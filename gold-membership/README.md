@@ -1,4 +1,4 @@
-# Gold Signal Room — standalone weekly, monthly and yearly Gold alerts
+# Gold Signal Room — standalone monthly and yearly Gold alerts
 
 A separate Cloudflare Pages application for the Gold Breakout 15M strategy from SignalToScript. It copies the existing real gold candle and strategy engine, without modifying the strategy logic or publishing fabricated results.
 
@@ -7,8 +7,8 @@ A separate Cloudflare Pages application for the Gold Breakout 15M strategy from 
 - New public signals and the current public strategy status are delayed **30 minutes AFTER the confirming 15-minute candle closes**. The delay is enforced in /api/data before returning candles, events, trade history and status. The UI does not receive unreleased candles.
 - Member sessions receive the latest confirmed candle results. The signal algorithm uses closed 15m candles, not an intrabar live quote.
 - Visitor popup after 45 seconds and subsequent 2-minute re-invitations; dismissing retains the delayed feed.
-- Black Friday prices: **7 days $4.99 (regular $12.49)**, **30 days $14.99 (regular $37.49)** and **365 days $89.99 (regular $224.99)** — all advertised at 60% off; see `/pricing.html` and the home-page cards. No repeating after a membership request in that page session.
-- Request form stores the selected weekly/monthly/yearly plan in Cloudflare D1, optional email to operator via Resend.
+- Black Friday prices: **30 days $25 (planned regular $40)** and **365 days $200 (planned regular $320)** — 37.5% below planned regular prices. Weekly sales temporarily disabled; previously issued weekly requests and invoices remain supported; see `/pricing.html` and the home-page cards. No repeating after a membership request in that page session.
+- Request form stores the selected monthly/yearly plan in Cloudflare D1, optional email to operator via Resend.
 - Admin page at /admin.html to list new requests, mark contacted/closed, and **explicitly mark payment confirmed and generate a monthly code**.
 - Login with verified email + reusable high-entropy code; server verifies hashed code, code expiry, account expiry and HttpOnly cookie each data request.
 - New code extends an active membership by the selected 7, 30 or 365 days from existing expiration, or starts that term from issuance if expired. Nothing is auto-billed. Optional email of member code.
