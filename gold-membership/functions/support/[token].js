@@ -13,6 +13,7 @@ export async function onRequest({request,env,params}){
   const content=`<span class="eyebrow">GOLD SIGNAL ROOM</span><h1>Membership support</h1>
 <p id="link-status" role="status">This private information link is available for a limited time.</p>
 <section id="support-details" hidden>
+<p>We can’t share these contact details in Fiverr chat.</p>
 <p>To proceed with payment and membership access, please email us at <a href="mailto:support@signaltoscript.com">support@signaltoscript.com</a>.</p>
 <p>We’ll reply by email with payment instructions and send your access details once payment is confirmed.</p>
 <p>For website memberships, you can <a href="/?plan=monthly#pricing" rel="noreferrer">request access on our website</a>.</p>
