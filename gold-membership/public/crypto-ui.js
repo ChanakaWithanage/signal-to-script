@@ -15,7 +15,7 @@ dialog.innerHTML=[
 '<div class="crypto-icon">₿</div><span class="kicker">VIP MEMBERSHIP · CRYPTO CHECKOUT</span>',
 '<h2>Pay securely with crypto</h2><p class="crypto-lead">Complete NOWPayments checkout to activate VIP membership after your payment is confirmed.</p>',
 '<div id="crypto-form-wrap"><form id="crypto-buy-form">',
-'<label for="crypto-plan">Membership</label><select id="crypto-plan" required><option value="weekly">Weekly · 7 days · $4.99</option><option value="monthly">Monthly · 30 days · $14.99</option><option value="yearly">Yearly · 365 days · $89.99</option></select>',
+'<label for="crypto-plan">Membership</label><select id="crypto-plan" required><option value="monthly">Monthly · 30 days · $25.00</option><option value="yearly">Yearly · 365 days · $200.00</option></select>',
 '<label for="crypto-email">Membership email</label><input type="email" id="crypto-email" required maxlength="254" placeholder="you@example.com" autocomplete="email">',
 '<label for="crypto-coin">Cryptocurrency</label><select id="crypto-coin"><option value="usdtbsc">USDT · BSC (BEP20)</option><option value="usdttrc20">USDT · TRON (TRC20)</option><option value="ltc">Litecoin (LTC)</option><option value="trx">Tron (TRX)</option><option value="auto">Choose coin on NOWPayments</option></select>',
 '<button type="submit" class="btn gold wide" id="crypto-pay">Continue to NOWPayments ↗</button></form>',
@@ -36,8 +36,8 @@ const feedback=(msg,error=false)=>{$('crypto-feedback').textContent=msg;$('crypt
 const pending=()=>{try{return JSON.parse(localStorage.getItem(key)||'null')}catch{return null}};
 function save(x){try{localStorage.setItem(key,JSON.stringify(x))}catch{}}
 function clear(){try{localStorage.removeItem(key)}catch{}}
-function open(plan='weekly'){
- if(['weekly','monthly','yearly'].includes(plan))$('crypto-plan').value=plan;
+function open(plan='monthly'){
+ $('crypto-plan').value=plan==='yearly'?'yearly':'monthly';
  $('crypto-form-wrap').hidden=false;$('crypto-status-wrap').hidden=true;
  feedback('');if(!dialog.open)dialog.showModal();
 }
@@ -99,7 +99,7 @@ form.addEventListener('submit',async e=>{
  }catch(e){feedback(e.message,true)}
  finally{pay.disabled=false}
 });
-document.querySelectorAll('.js-crypto').forEach(button=>button.addEventListener('click',e=>{e.preventDefault();open(button.dataset.plan||'weekly')}));
+document.querySelectorAll('.js-crypto').forEach(button=>button.addEventListener('click',e=>{e.preventDefault();open(button.dataset.plan||'monthly')}));
 dialog.querySelector('.crypto-x').addEventListener('click',()=>dialog.close());
 dialog.addEventListener('click',e=>{if(e.target===dialog)dialog.close()});
 dialog.querySelector('.crypto-manual').addEventListener('click',()=>{
@@ -115,7 +115,7 @@ if(url.searchParams.has('crypto')){
  if(pending())showPending();
 }else if(pending()&&location.pathname==='/')showPending();
 if(url.searchParams.get('pay')==='crypto'){
- const plan=url.searchParams.get('plan')||'weekly';
+ const plan=url.searchParams.get('plan')||'monthly';
  url.searchParams.delete('pay');history.replaceState(null,'',url.pathname+url.search+url.hash);
  open(plan);
 }
