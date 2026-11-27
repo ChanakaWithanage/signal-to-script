@@ -1,6 +1,11 @@
 (()=>{
 'use strict';
 const $=id=>document.getElementById(id),key='gold_crypto_pending_v1';
+const cryptoButtons=[...document.querySelectorAll('.js-crypto')];
+cryptoButtons.forEach(b=>b.hidden=true);
+fetch('/api/crypto',{cache:'no-store'}).then(r=>r.json()).then(data=>{
+ cryptoButtons.forEach(b=>b.hidden=!data.ready);
+}).catch(()=>{});
 const dialog=document.createElement('dialog');dialog.className='crypto-checkout-modal';dialog.id='crypto-checkout-dialog';
 dialog.innerHTML=[
 '<button class="crypto-x" type="button" aria-label="Close crypto checkout">×</button>',
@@ -52,6 +57,15 @@ async function check(){
    $('crypto-status-copy').textContent='Payment confirmed. Your access code is ready. We also email it when email delivery is configured.';
    $('crypto-access').hidden=false;$('crypto-access-code').textContent=value.accessCode||'Check your email';
    $('crypto-access-expiry').textContent=value.expiresAt?'Active until '+new Date(value.expiresAt).toLocaleDateString():'';
+   try{
+    const activation=await fetch('/api/crypto',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},
+     body:JSON.stringify({action:'activate',id:order.id,secret:order.secret})});
+    if(activation.ok){
+     $('crypto-status-copy').textContent='Payment verified. Your VIP membership is active and you are signed in. Connect Telegram to enter your private VIP channel.';
+     $('crypto-go-login').href='/#instant-alerts';
+     $('crypto-go-login').textContent='Open my VIP alerts ↗';
+    }
+   }catch{}
    clear();feedback('');
   }else if(value.status==='failed'){
    $('crypto-status-title').textContent='Payment unavailable';
