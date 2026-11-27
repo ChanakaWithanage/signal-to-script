@@ -37,7 +37,26 @@ Set **ADMIN_KEY** (required, any nonempty value) as a secret environment variabl
 
 The admin secret is intentionally never persisted in localStorage. Open /admin.html, enter ADMIN_KEY each time, review D1 requests, confirm payment yourself, generate code and send it to the user. The customer enters their email and code in the site login dialog. If a customer renews early, their selected plan's 7, 30 or 365 days are added to the existing expiry.
 
-For local test: node --test tests/*.test.mjs (Node 20+). For Cloudflare Pages functions locally, use Wrangler Pages dev with an appropriately configured local D1 binding.
+For local test: node --test tests/*.test.mjs (Node 22.13+). For Cloudflare Pages functions locally, use Wrangler Pages dev with an appropriately configured local D1 binding.
+
+## Temporary customer information links
+
+After deploying this change, open `/admin.html` and authenticate with the existing `ADMIN_KEY`. Under **Temporary customer information links**:
+
+- **Generate 30-minute link** creates a new independent URL. Copy it immediately; the complete URL is available only in the current admin page session. You can paste that URL into a message or PDF yourself. Refreshing the page cannot recover the token.
+- **Revoke** immediately blocks future requests to that URL.
+- **Regenerate** atomically revokes the selected URL and creates a fresh 30-minute replacement. It also works for expired or revoked links; an already replaced link cannot be regenerated again. Other independent links remain valid.
+- **Refresh links** lists the latest 100 records, including expired/revoked ones. Tokens and their hashes are never returned in the list.
+
+The URL contains only a random 256-bit bearer token. D1 table `membership_support_links` stores its SHA-256 hash, a separate random management ID, creation/expiration timestamps and revocation/replacement metadata; no customer data is accepted or stored. The table and index are created automatically on first use with the existing `DB` binding (also included in `schema.sql`). No new secrets, packages, or deployment bindings are needed. This link never creates a membership, session, payment or access code.
+
+`GET /support/<token>` and `HEAD` check D1 server-side on every request. Unknown, expired (including the exact expiration boundary) or revoked tokens receive the same 404 page without contact details. Database errors fail closed with 503. HTML and JSON responses, including errors, use `private, no-store`, `noindex, nofollow, noarchive` and `no-referrer`; there are no analytics or third-party resources on this page. Do not add a cache override to `/support/*` or `/api/admin/support-links`, or log full bearer URLs in application/edge analytics. Platform infrastructure may otherwise retain request paths; treat shared URLs as secrets while active.
+
+The customer page rechecks availability every 10 seconds, hides information on failure (with a five-second request timeout), counts down using server time, and revalidates when returning to the page. Revocation prevents new successful requests immediately; an already open page normally hides within 10 seconds, or within 15 seconds if the check times out. A browser that is suspended cannot run timers, and material someone has already copied cannot be recalled.
+
+The support page includes `support@signaltoscript.com` and the existing website membership request link. It explicitly states that Fiverr order discussions and payments stay on Fiverr and external email is only for permitted access delivery. It does not claim Fiverr has approved a particular contact method or use temporary links to bypass platform rules.
+
+Validation: `node --test tests/*.test.mjs` (Node 22.13+ for the real SQLite tests, matching CI). The temporary-link tests cover admin authentication/origin checks, hashed storage, exact expiry, revocation, transactional regeneration/rollback, safe customer links, unavailable responses, and open-page hiding. Merging is not proof of deployment: verify the new admin section and generate a fresh URL on the deployed app before sharing or creating a PDF.
 
 ## Important before monetizing
 

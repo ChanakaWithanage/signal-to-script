@@ -34,7 +34,7 @@ function render(data){
  }
 }
 async function reload(){
- try{render(await call('requests'));feedback('Requests loaded.')}catch(e){feedback(e.message)}
+ try{render(await call('requests'));feedback('Requests loaded.');await reloadSupportLinks()}catch(e){$('admin-content').hidden=true;clearSupportURL();feedback(e.message)}
 }
 async function changeStatus(item,status){
  if(status==='closed'&&!confirm('Close request '+item.id+'?'))return;
@@ -61,3 +61,54 @@ $('issue-form').addEventListener('submit',async ev=>{
  }catch(e){feedback(e.message)}finally{btn.disabled=false}
 });
 $('copy-code').addEventListener('click',async()=>{try{await navigator.clipboard.writeText($('issued-code').textContent);feedback('Code copied')}catch{feedback('Select and copy the code manually.')}});
+
+let supportLinks=[],generatedSupportId=null,supportBusy=false,supportClockOffset=0;
+const supportFeedback=t=>$('support-feedback').textContent=t;
+function clearSupportURL(){
+ generatedSupportId=null;$('support-url').value='';$('generated-support-link').hidden=true;
+}
+function renderSupportLinks(){
+ const now=Date.now()+supportClockOffset,body=$('support-link-rows');body.replaceChildren();
+ if(!supportLinks.length){const tr=document.createElement('tr'),td=cell('No temporary links yet.');td.colSpan=3;tr.append(td);body.append(tr)}
+ for(const link of supportLinks){
+  const active=link.revoked_ms===null&&link.expires_ms>now;
+  if(link.id===generatedSupportId&&!active)clearSupportURL();
+  const tr=document.createElement('tr'),actions=document.createElement('td');
+  tr.append(cell(utc(link.created_ms)+' / '+utc(link.expires_ms)),cell(link.replaced_by?'Regenerated':link.revoked_ms!==null?'Revoked':active?'Active':'Expired'));
+  if(active)action(actions,'Revoke',()=>mutateSupportLink('revoke',link.id));
+  if(!link.replaced_by)action(actions,'Regenerate',()=>mutateSupportLink('regenerate',link.id));
+  for(const button of actions.querySelectorAll('button'))button.disabled=supportBusy;
+  tr.append(actions);body.append(tr);
+ }
+}
+async function reloadSupportLinks(){
+ try{
+  const data=await call('support-links');supportLinks=data.links||[];
+  supportClockOffset=data.serverNow-Date.now();renderSupportLinks();
+ }catch(e){supportFeedback(e.message);throw e}
+}
+async function mutateSupportLink(action,id){
+ if(supportBusy)return;
+ supportBusy=true;$('generate-support-link').disabled=true;renderSupportLinks();
+ supportFeedback('Updating temporary links…');
+ try{
+  const result=await call('support-links','POST',{action,id});
+  if(id===generatedSupportId)clearSupportURL();
+  if(result.url){
+   generatedSupportId=result.id;$('support-url').value=result.url;
+   $('support-expiry').textContent='Expires '+utc(result.expiresAt);
+   $('generated-support-link').hidden=false;
+   supportLinks.unshift({id:result.id,created_ms:result.createdAt,expires_ms:result.expiresAt,revoked_ms:null,replaced_by:null});
+  }
+  supportFeedback(action==='revoke'?'Link revoked.':action==='regenerate'?'Old link revoked. Copy the new URL now.':'Link generated. Copy the URL now.');
+  await reloadSupportLinks();
+ }catch(e){supportFeedback(e.message)}finally{supportBusy=false;$('generate-support-link').disabled=false;renderSupportLinks()}
+}
+$('generate-support-link').addEventListener('click',()=>mutateSupportLink('generate'));
+$('reload-support-links').addEventListener('click',()=>reloadSupportLinks().then(()=>supportFeedback('Links refreshed.')).catch(()=>{}));
+$('copy-support-link').addEventListener('click',async()=>{
+ renderSupportLinks();
+ if(!generatedSupportId){supportFeedback('This URL is no longer active. Generate a new link.');return}
+ try{await navigator.clipboard.writeText($('support-url').value);supportFeedback('URL copied. You can paste it into a message or PDF.')}catch{$('support-url').select();supportFeedback('Select and copy the URL manually.')}
+});
+setInterval(()=>{if(!$('admin-content').hidden)renderSupportLinks()},1000);
