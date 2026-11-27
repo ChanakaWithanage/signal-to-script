@@ -43,7 +43,7 @@ async function check(){
  const order=pending();if(!order?.id||!order?.secret||polling)return;
  polling=true;
  try{
-  const res=await fetch('/api/crypto?id='+encodeURIComponent(order.id)+'&secret='+encodeURIComponent(order.secret),{cache:'no-store'});
+  const res=await fetch('/api/crypto',{method:'POST',cache:'no-store',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'check',id:order.id,secret:order.secret})});
   const data=await res.json();if(!res.ok)throw Error(data.error||'Unable to check payment');
   const value=data.order;if(!value)return;
   if(value.status==='active'){
