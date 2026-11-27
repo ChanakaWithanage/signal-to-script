@@ -341,7 +341,7 @@ async function sendRequest(ev){
  ev.preventDefault();
  const b=ev.currentTarget.querySelector('button[type=submit]');b.disabled=true;
  try{
-  const result=await api('request','POST',{name:$('request-name').value,email:$('request-email').value,note:$('request-note').value,website:$('website').value,plan:document.querySelector('#request-form input[name=plan]:checked')?.value||state.selectedPlan});
+  const result=await api('request','POST',{name:$('request-name').value,email:$('request-email').value,note:$('request-note').value,source:window.GoldTelegramSource||undefined,website:$('website').value,plan:document.querySelector('#request-form input[name=plan]:checked')?.value||state.selectedPlan});
   state.requestSent=true;const chosen=PLAN_LABELS[result.plan||state.selectedPlan];feedback('Your '+chosen.name.toLowerCase()+' membership request'+(result.id?' ('+result.id+')':'')+' is received. We will email the payment instructions for '+chosen.price+'. After payment, we will send your '+chosen.days+'-day access code.');
   $('delay-banner').hidden=true;
  }catch(e){feedback(e.message,true)}finally{b.disabled=false}
@@ -402,5 +402,5 @@ if(PLAN_LABELS[requestedPlan]){
  choosePlan(requestedPlan);
  // Preserve the plan in the popup without leaving a query string on the page.
  history.replaceState(null,'',location.pathname+location.hash);
- loadSession().then(async()=>{await loadData();openDialog('request')});
+ loadSession().then(async()=>{if(!state.member)openDialog('request');await loadData()});
 }else loadSession().then(loadData);
