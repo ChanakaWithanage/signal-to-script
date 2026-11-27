@@ -74,8 +74,8 @@ test('generation stores only a hash, fixes lifetime to 30 minutes, and produces 
   assert.equal(new URL(access,origin).pathname,'/');
   const app=await readFile(new URL('../public/app.js',import.meta.url),'utf8');
   assert.match(app,/openDialog\('request'\)/);
-  assert.match(html,/Keep all Fiverr order discussions and payments on Fiverr/);
-  assert.match(html,/only for access delivery when permitted by Fiverr/);
+  assert.match(html,/To proceed with payment and membership access, please email us/);
+  assert.match(html,/reply by email with payment instructions and send your access details once payment is confirmed/);
   assert.ok(!html.includes(token));assert.doesNotMatch(html,/google-analytics|gtag|cdn\./);
   const validJSON=await page(env,link.url,{accept:'application/json'});
   assert.equal((await validJSON.json()).expiresAt,link.expiresAt);

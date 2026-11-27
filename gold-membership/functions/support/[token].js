@@ -13,10 +13,9 @@ export async function onRequest({request,env,params}){
   const content=`<span class="eyebrow">GOLD SIGNAL ROOM</span><h1>Membership support</h1>
 <p id="link-status" role="status">This private information link is available for a limited time.</p>
 <section id="support-details" hidden>
-<p>Need help with membership access or delivery?</p>
-<p><a href="mailto:support@signaltoscript.com">support@signaltoscript.com</a></p>
+<p>To proceed with payment and membership access, please email us at <a href="mailto:support@signaltoscript.com">support@signaltoscript.com</a>.</p>
+<p>We’ll reply by email with payment instructions and send your access details once payment is confirmed.</p>
 <p>For website memberships, you can <a href="/?plan=monthly#pricing" rel="noreferrer">request access on our website</a>.</p>
-<aside><h2>If your order is on Fiverr</h2><p>Keep all Fiverr order discussions and payments on Fiverr. Use external email only for access delivery when permitted by Fiverr and needed to fulfill your order. This page does not authorize contact or payment outside Fiverr's rules.</p></aside>
 <p class="note">This link provides information only. It does not grant membership or confirm payment. Share it only with the intended recipient.</p>
 </section><noscript><p>Enable JavaScript to view the support information and keep checking this link's availability.</p></noscript>`;
   return new Response(head?null:shell('Membership support',content,'<script defer src="/support.js"></script>'),{headers:{...supportHeaders,'Content-Type':'text/html; charset=utf-8'}});
