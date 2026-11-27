@@ -3,8 +3,11 @@
 const $=id=>document.getElementById(id),key='gold_crypto_pending_v1';
 const cryptoButtons=[...document.querySelectorAll('.js-crypto')];
 cryptoButtons.forEach(b=>b.hidden=true);
+const heroCrypto=document.querySelector('.crypto-hero-cta');
+if(heroCrypto)heroCrypto.hidden=true;
 fetch('/api/crypto',{cache:'no-store'}).then(r=>r.json()).then(data=>{
  cryptoButtons.forEach(b=>b.hidden=!data.ready);
+ if(heroCrypto)heroCrypto.hidden=!data.ready;
 }).catch(()=>{});
 const dialog=document.createElement('dialog');dialog.className='crypto-checkout-modal';dialog.id='crypto-checkout-dialog';
 dialog.innerHTML=[
