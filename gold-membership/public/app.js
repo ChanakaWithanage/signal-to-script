@@ -4,7 +4,7 @@ const currency=n=>Number.isFinite(n)?(n<0?'−':'')+'$'+Math.abs(n).toLocaleStri
 const price=n=>Number.isFinite(n)?n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}):'—';
 const signed=(n,suffix='')=>Number.isFinite(n)?(n>0?'+':'')+n.toFixed(2)+suffix:'—';
 const when=ms=>ms?new Date(ms).toLocaleString('en-GB',{timeZone:'UTC',month:'short',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false})+' UTC':'—';
-const state={selectedPlan:'weekly',member:false,email:null,expiresAt:null,days:30,viewDays:7,data:null,chart:null,series:null,hi:null,lo:null,bars:[],firstRender:true,loading:false,requestSent:false,offerSeen:false,animateOnNextData:false,lastEventId:null};
+const state={selectedPlan:'monthly',member:false,email:null,expiresAt:null,days:30,viewDays:7,data:null,chart:null,series:null,hi:null,lo:null,bars:[],firstRender:true,loading:false,requestSent:false,offerSeen:false,animateOnNextData:false,lastEventId:null};
 let toastTimer;
 function toast(message){const el=$('toast');el.textContent=message;el.hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.hidden=true,5500)}
 // Each actual profit figure counts up only when its own card is visible.
@@ -132,7 +132,7 @@ function showMode(mode){
  $('form-feedback').hidden=true;
  if(mode==='login')$('login-email').focus();else $('request-email').focus();
 }
-const PLAN_LABELS={weekly:{name:'Weekly',days:7,price:'$4.99'},monthly:{name:'Monthly',days:30,price:'$14.99'},yearly:{name:'Yearly',days:365,price:'$89.99'}};
+const PLAN_LABELS={monthly:{name:'Monthly',days:30,price:'$25.00'},yearly:{name:'Yearly',days:365,price:'$200.00'}};
 function choosePlan(plan){
  if(!PLAN_LABELS[plan])return;
  state.selectedPlan=plan;
@@ -140,7 +140,7 @@ function choosePlan(plan){
  if(radio)radio.checked=true;
  const info=PLAN_LABELS[plan];
  const msg=document.querySelector('.modal-selected-price');
- if(msg)msg.innerHTML='BLACK FRIDAY <b>60% OFF</b> · '+info.name+' plan: <b>'+info.price+'</b> / '+info.days+' days';
+ if(msg)msg.innerHTML='BLACK FRIDAY <b>37.5% OFF</b> · '+info.name+' plan: <b>'+info.price+'</b> / '+info.days+' days';
 }
 function openDialog(mode='request'){
  choosePlan(state.selectedPlan);
@@ -397,7 +397,8 @@ function wire(){
  },30000);
 }
 wire();
-const requestedPlan=new URLSearchParams(location.search).get('plan');
+const rawPlan=new URLSearchParams(location.search).get('plan');
+const requestedPlan=rawPlan==='weekly'?'monthly':rawPlan;
 if(PLAN_LABELS[requestedPlan]&&new URLSearchParams(location.search).get('pay')!=='crypto'){
  choosePlan(requestedPlan);
  // Preserve the plan in the popup without leaving a query string on the page.

@@ -78,8 +78,8 @@ print("One guest download and unlimited Google access remain for the free script
 gold = (public/"articles/gold-breakout-15m-strategy.html").read_text(encoding="utf-8")
 assert gold.index('class="gold-lead-image"') < gold.index('id="download"') < gold.index("What makes this breakout"), "Early download CTA should immediately follow hero chart"
 assert gold.count('href="https://gold.signaltoscript.com/pricing.html"') >= 2
-assert gold.count("Unlock Gold alerts from $4.99") >= 2
-assert "$4.99" in gold and "before buying" not in gold
+assert gold.count("Unlock Gold alerts from $25.00") >= 2
+assert "$25.00" in gold and "before buying" not in gold
 assert "2026" in gold and "59.7%" in gold and "1.893" in gold
 assert "'gold-breakout-15m':'Gold Breakout 15M Strategy'" not in site
 assert 'href="/checkout.html?script=gold-breakout-15m"' not in gold

@@ -19,7 +19,7 @@ This runs on the existing gold-signal-room-alerts Worker and its existing DB bin
 
 ## Channel description (copy into Telegram)
 
-Gold Breakout 15M | Free delayed BUY, SELL & EXIT updates, daily ranges and weekly strategy scorecards. See every recorded win and loss. Members get confirmed signals without the added delay. Instant alerts from $4.99 / 7 days: https://gold.signaltoscript.com/pricing.html
+Gold Breakout 15M | Free delayed BUY, SELL & EXIT updates, daily ranges and weekly strategy scorecards. See every recorded win and loss. Members get confirmed signals without the added delay. Instant alerts from $25 / 30 days: https://gold.signaltoscript.com/pricing.html
 
 ## Pinned welcome post (post and pin manually once)
 
@@ -31,11 +31,11 @@ Follow our rule-based 15-minute Gold breakout strategy. Here you can see the del
 
 ⚡ Member access: confirmed BUY, SELL & EXIT notifications without the added public delay, sent to Telegram, Discord or email.
 
-Weekly $4.99 · Monthly $14.99 · Yearly $89.99
+Monthly $25 · Yearly $200
 No automatic billing. Choose a plan and request access.
 
 Start with 7 days:
-https://gold.signaltoscript.com/?plan=weekly&utm_source=telegram&utm_medium=channel&utm_campaign=gold_room&utm_content=welcome#pricing
+https://gold.signaltoscript.com/?plan=monthly&utm_source=telegram&utm_medium=channel&utm_campaign=gold_room&utm_content=welcome#pricing
 
 See results and all plans:
 https://gold.signaltoscript.com/pricing.html?utm_source=telegram&utm_medium=channel&utm_campaign=gold_room&utm_content=welcome
@@ -46,10 +46,10 @@ https://gold.signaltoscript.com/pricing.html?utm_source=telegram&utm_medium=chan
 - BUY/SELL and EXIT events computed exclusively from delayed candles (at least 30 minutes after the 15m candle closes).
 - Exit posts show modeled trade results; daily recaps include the actual available recorded outcomes.
 - Friday scorecard if five session ranges and adequate history are available. Includes wins, losses and modeled net P&L, never cherry-picked winning trades.
-- Inline buttons: direct weekly plan request, all pricing plans, and historical dashboard. Every button includes Telegram campaign attribution.
+- Inline buttons: direct monthly plan request, all pricing plans, and historical dashboard. Every button includes Telegram campaign attribution.
 - A request originating from Telegram has a source tag such as [Telegram: signal_exit] in the existing admin notes and operator email. This is request attribution, not a click counter or payment attribution.
 - First activation records a baseline rather than flooding the channel with old signals. No automated private DMs, scraping or unsolicited messages.
-- No extra membership prompt step for users clicking the $4.99 button: after checking login status the selected weekly request dialog opens immediately.
+- No extra membership prompt step for users clicking the $25 button: after checking login status the selected monthly request dialog opens immediately.
 
 The messages use the actual feed instrument, UTC confirmation time, and modeled figures on $100,000 with fixed 1% risk, $0.30 spread and no compounding. They do not claim actual account profits. If history is unavailable or a session is incomplete, the applicable reports are skipped. The schedule follows the strategy's UTC+3 session, not the user's phone timezone.
 

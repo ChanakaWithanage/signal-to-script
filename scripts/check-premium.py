@@ -26,14 +26,14 @@ for slug in slugs:
         assert f'data-buy-script="{slug}"' in home, f"Missing buy tracker: {slug}"
     assert f'data-download-script="{slug}"' not in home, f"Paid CTA marked as free: {slug}"
 assert home.index('id="premium-scripts"')<home.index('id="free-scripts"')
-assert "60% OFF" in home and "Gold Room from $4.99" in home
-assert "$4.99" in home.split('gold-library-feature',1)[1].split('<div class="feature"',1)[0]
+assert "37.5% OFF" in home and "Gold Room from $25.00" in home
+assert "$25.00" in home.split('gold-library-feature',1)[1].split('<div class="feature"',1)[0]
 assert "$4.99" in checkout and "$12.99 crypto" in checkout
 assert 'href="/trial.html"' not in home and "Try it before you buy" not in home
 assert "CURRENT_USER_PASSWORD" not in premium
 assert 'name="robots" content="noindex, nofollow"' in checkout
 assert "Planned regular price" in checkout and "$12.99 crypto" in checkout
-assert "FOUNDERS LAUNCH" in checkout and "60% off Gold memberships" in checkout
+assert "FOUNDERS LAUNCH" in checkout and "37.5% off Gold memberships" in checkout
 assert "NOWPayments" in checkout and "NOWPayments" in premium
 assert "NOWPAYMENTS_API_KEY" in provider and "NOWPAYMENTS_IPN_SECRET" in provider
 assert "PREMIUM_CHECKOUT_ENABLED" in provider, "Checkout must be disabled until explicitly enabled"

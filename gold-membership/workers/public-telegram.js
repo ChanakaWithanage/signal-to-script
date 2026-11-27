@@ -10,14 +10,14 @@ const dayStart=t=>Date.parse(dateAt(t)+'T00:00:00Z')-OFFSET;
 const usd=n=>(n<0?'−':n>0?'+':'')+'$'+Math.abs(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
 const price=n=>'$'+Number(n).toFixed(2);
 const utc=t=>new Date(t).toISOString().slice(0,16).replace('T',' ')+' UTC';
-const weeklyPrice=money(GOLD_PLANS.weekly.priceCents);
+const monthlyPrice=money(GOLD_PLANS.monthly.priceCents);
 const root='https://gold.signaltoscript.com';
 const tag=kind=>'utm_source=telegram&utm_medium=channel&utm_campaign=gold_room&utm_content='+encodeURIComponent(kind);
 const buttons=kind=>({inline_keyboard:[
- [{text:'🔒 Join Gold VIP · '+weeklyPrice,url:root+'/?plan=weekly&'+tag(kind)+'#pricing'}],
+ [{text:'🔒 Join Gold VIP · '+monthlyPrice,url:root+'/?plan=monthly&'+tag(kind)+'#pricing'}],
  [{text:'View all plans',url:root+'/pricing.html?'+tag(kind)},{text:'See every trade',url:root+'/?'+tag(kind)+'#results'}]
 ]});
-const footer='Public updates are delayed by at least 30 minutes. Gold VIP members get confirmed signals without the added delay, from '+weeklyPrice+' for 7 days.';
+const footer='Public updates are delayed by at least 30 minutes. Gold VIP members get confirmed signals without the added delay, from '+monthlyPrice+' for 30 days.';
 const modelNote='Modeled strategy P&L · $100,000 starting capital · fixed 1% risk per trade · $0.30 spread · no compounding.';
 const source=feed=>feed.symbol==='GC=F'?'COMEX Gold futures (GC=F)':feed.symbol==='XAUUSD'?'Gold spot (XAUUSD)':'Gold data';
 const post=(id,kind,text,due)=>({id,kind,text,due,reply_markup:buttons(kind)});
