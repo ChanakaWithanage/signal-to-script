@@ -36,3 +36,14 @@ test('Membership administration offers all durations and script sends plan to se
  assert.match(js,/email,plan,requestId/);
  assert.match(app,/plan:document\.querySelector/);
 });
+
+test('Direct membership help is available on both pricing pages and in the request dialog',async()=>{
+ const index=await readFile(new URL('../public/index.html',import.meta.url),'utf8');
+ const pricing=await readFile(new URL('../public/pricing.html',import.meta.url),'utf8');
+ for(const html of [index,pricing]){
+  assert.match(html,/Need more information or help getting VIP access/);
+  assert.ok(html.includes('mailto:support@signaltoscript.com?subject=Gold%20VIP%20membership%20inquiry'));
+  assert.match(html,/Email us now/);
+ }
+ assert.match(index,/gold-contact-modal/);
+});
