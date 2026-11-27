@@ -83,7 +83,7 @@ Gold Pages → Production Variables and Secrets:
 
 The Gold payment IPN callback is https://gold.signaltoscript.com/api/crypto-ipn. Do not replace the main site's script checkout callback. Each Gold invoice explicitly configures this Gold-specific callback.
 
-Plans: weekly $4.99, monthly $14.99, yearly $89.99. The gateway may have a minimum amount higher than $4.99 on some currencies. The server checks minimums for selected currencies and shows the actual provider limit without silently raising the charge. Manual requests remain available.
+Current plans: monthly $25, yearly $200. Weekly is temporarily unavailable for new orders; existing invoices and access retain their original terms. The gateway may have a minimum amount higher than $25 on some currencies. The server checks minimums for selected currencies and shows the actual provider limit without silently raising the charge. Manual requests remain available.
 
 When NOWPayments reports finished, the Gold Pages Function verifies its HMAC-SHA512 signature, independently fetches merchant payment details, checks invoice/order/amount, and adds 7, 30 or 365 days to the correct account. The encrypted access code is displayed only to the purchasing browser holding its private receipt and emailed if Resend is configured. A browser redirect alone never grants membership.
 
