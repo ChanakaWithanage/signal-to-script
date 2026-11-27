@@ -50,3 +50,11 @@ CREATE TABLE IF NOT EXISTS gold_alert_test_limits (
  email TEXT NOT NULL, channel TEXT NOT NULL, last_test_ms INTEGER NOT NULL,
  PRIMARY KEY(email,channel)
 );
+
+-- Temporary information pages; never store a plaintext bearer token or customer details.
+CREATE TABLE IF NOT EXISTS membership_support_links (
+ id TEXT PRIMARY KEY, token_hash TEXT NOT NULL UNIQUE,
+ created_ms INTEGER NOT NULL, expires_ms INTEGER NOT NULL,
+ revoked_ms INTEGER, replaced_by TEXT
+);
+CREATE INDEX IF NOT EXISTS membership_support_links_recent ON membership_support_links(created_ms DESC);
