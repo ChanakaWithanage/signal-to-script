@@ -1,4 +1,4 @@
-import {bodyOf,json,sameOrigin,emailOf,validEmail,randomHex,digest,ensureSchema} from '../_lib/access.js';
+import {bodyOf,json,sameOrigin,emailOf,validEmail,randomHex,digest,ensureSchema,cookie,DAY} from '../_lib/access.js';
 import {planOf} from '../_lib/plans.js';
 import {paymentReady,CRYPTO_COINS,ensureCryptoSchema,paymentProvider,minimumSupported,
  validInvoiceUrl,findOrder,orderPublic,decryptCode} from '../_lib/crypto.js';
@@ -10,6 +10,20 @@ export async function onRequestPost({request,env}){
  if(!sameOrigin(request))return fail('Invalid origin.',403);
  if(!env.DB)return fail('Membership checkout is unavailable.',503);
  let body;try{body=await bodyOf(request)}catch{return fail('Invalid request.',400)}
+ if(body.action==='activate'){
+  try{
+   await ensureSchema(env.DB);await ensureCryptoSchema(env.DB);
+   const order=await findOrder(env.DB,body.id,body.secret);
+   const now=Date.now(),expiry=Number(order?.expires_ms)||0;
+   if(!order?.provisioned_ms||expiry<=now)return fail('No active paid VIP membership for this order.',403);
+   const token=randomHex(),sessionExpiry=Math.min(expiry,now+365*DAY);
+   await env.DB.prepare("INSERT INTO membership_sessions(token_hash,email,created_ms,expires_ms) VALUES(?,?,?,?)")
+    .bind(await digest(token),order.email,now,sessionExpiry).run();
+   const response=json({ok:true,active:true,email:order.email,expiresAt:expiry});
+   response.headers.append('Set-Cookie',cookie(token,(sessionExpiry-now)/1000));
+   return response;
+  }catch(error){console.error('Gold paid membership activation failed',error);return fail('Unable to sign in. Use your access code instead.',503)}
+ }
  if(body.action==='check'){
   try{
    await ensureCryptoSchema(env.DB);
