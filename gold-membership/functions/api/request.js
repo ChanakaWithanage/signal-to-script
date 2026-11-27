@@ -5,7 +5,8 @@ export async function onRequestPost({request,env,waitUntil}){
  if(!env.DB)return json({error:'Membership requests are temporarily unavailable.'},503);
  try{
   const body=await bodyOf(request),email=emailOf(body.email),name=String(body.name||'').trim().slice(0,90);
-  const note=String(body.note||'').trim().slice(0,500);
+  const source=['signal_entry','signal_exit','daily_range','daily_recap','weekly_recap','welcome','channel'].includes(body.source)?body.source:null;
+  const note=((source?'[Telegram: '+source+']\n':'')+String(body.note||'').trim()).slice(0,500);
   const selected=planOf(body.plan||'monthly');
   if(!selected)return json({error:'Choose a valid membership plan.'},400);
   if(body.website)return json({ok:true});
