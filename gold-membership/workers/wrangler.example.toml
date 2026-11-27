@@ -10,6 +10,10 @@ crons = ["* * * * *"]
 
 [vars]
 ALERT_SITE_URL = "https://gold.signaltoscript.com"
+# Enable after creating a PUBLIC Telegram channel and adding the bot as admin.
+PUBLIC_TELEGRAM_ENABLED = "false"
+PUBLIC_TELEGRAM_CHANNEL = "@REPLACE_WITH_YOUR_CHANNEL"
+# Reuse TELEGRAM_BOT_TOKEN, or set PUBLIC_TELEGRAM_BOT_TOKEN as a separate Worker secret.
 
 [[d1_databases]]
 binding = "DB"

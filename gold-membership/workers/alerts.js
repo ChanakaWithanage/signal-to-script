@@ -1,3 +1,4 @@
+import {publicChannelConfig,runPublicChannel} from './public-telegram.js';
 import {BAR_MS,ensureSchema} from '../functions/_lib/access.js';
 import {fetchGoldCandles,runGoldBreakout} from '../functions/_lib/gold-market.js';
 import {ensureAlertsSchema,eligibleEvents,activeChannels,sendAlert,signalMessage} from '../functions/_lib/alerts.js';
@@ -45,6 +46,16 @@ export async function runAlertScan(env,ctx,{now=Date.now(),feedProvider=fetchGol
  const asOf=Date.parse(feed.asOf);
  const latestBarOpen=asOf-BAR_MS;
  if(!Number.isFinite(latestBarOpen)||!feed.bars?.length)throw Error('Gold feed has no confirmed candles');
+ // Public marketing is independent of private delivery and runs even when
+ // there are no new member events. Reuse the same fetched market data.
+ if(publicChannelConfig(env)){
+  const task=runPublicChannel(env,feed,now)
+   .then(r=>{if(r.sent)console.log('Public Telegram posts sent',r.sent)})
+   .catch(()=>console.error('Public Telegram scan failed'));
+  if(typeof ctx?.waitUntil==='function')ctx.waitUntil(task);
+  else await task;
+ }
+
  // First scheduled run starts at the latest candle; never blast historic trades
  // to new members when the alert system is first deployed.
  const began=await db.prepare(
