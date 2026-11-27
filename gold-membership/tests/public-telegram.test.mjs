@@ -12,7 +12,7 @@ function day(start){
   return {time,open:115,high:116,low:114,close:115};
  });
 }
-const bars=Array.from({length:5},(_,i)=>day(monday+i*DAY)).flat();
+const bars=[...day(monday-3*DAY),...Array.from({length:5},(_,i)=>day(monday+i*DAY)).flat()];
 const feed={symbol:'GC=F',bars};
 const entry=monday+7*HOUR,release=entry+BAR_MS+DELAY_MS;
 test('The public channel cannot disclose entry until a full 30 minutes after candle close',()=>{
@@ -49,7 +49,7 @@ test('Weekly scorecard requires five observed sessions, not truncated history',(
  assert.match(score.text,/Closed trades: 5/);
  assert.match(score.text,/Wins: 5 · Losses: 0/);
  assert.match(score.text,/Modeled net P&L/);
- assert.ok(!buildPublicPosts({...feed,bars:bars.slice(96)},now,monday-1).some(p=>p.kind==='weekly_recap'));
+ assert.ok(!buildPublicPosts({...feed,bars:bars.filter(b=>b.time>=monday+DAY)},now,monday-1).some(p=>p.kind==='weekly_recap'));
 });
 test('Public publishing is explicitly opt-in and targets only a named channel',()=>{
  assert.equal(publicChannelConfig({PUBLIC_TELEGRAM_CHANNEL:'@goldroom',TELEGRAM_BOT_TOKEN:'token'}),null);
