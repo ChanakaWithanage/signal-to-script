@@ -1,4 +1,4 @@
-import {planOf} from '../_lib/plans.js';
+import {salePlanOf} from '../_lib/plans.js';
 import {bodyOf,emailOf,validEmail,ensureSchema,randomHex,json,sameOrigin,mail} from '../_lib/access.js';
 export async function onRequestPost({request,env,waitUntil}){
  if(!sameOrigin(request))return json({error:'Invalid request origin.'},403);
@@ -7,7 +7,7 @@ export async function onRequestPost({request,env,waitUntil}){
   const body=await bodyOf(request),email=emailOf(body.email),name=String(body.name||'').trim().slice(0,90);
   const source=['signal_entry','signal_exit','daily_range','daily_recap','weekly_recap','welcome','channel'].includes(body.source)?body.source:null;
   const note=((source?'[Telegram: '+source+']\n':'')+String(body.note||'').trim()).slice(0,500);
-  const selected=planOf(body.plan||'monthly');
+  const selected=salePlanOf(body.plan||'monthly');
   if(!selected)return json({error:'Choose a valid membership plan.'},400);
   if(body.website)return json({ok:true});
   if(!validEmail(email))return json({error:'Enter a valid email to request membership.'},400);
