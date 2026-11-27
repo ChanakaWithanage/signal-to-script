@@ -264,7 +264,7 @@ test('Legacy main-domain Gold trial routes permanently redirect to Gold Signal R
  assert.match(redirects,/\/trial\.html https:\/\/gold\.signaltoscript\.com\/ 301/);
  assert.match(html,/http-equiv="refresh"/);
  assert.doesNotMatch(html,/id="trial-workspace"/);
- assert.match(home,/60% OFF/);
+ assert.match(home,/37\.5% OFF/);
  assert.match(home,/https:\/\/gold\.signaltoscript\.com\//);
  assert.doesNotMatch(home,/Get Gold Breakout alerts for free/);
  assert.match(article,/https:\/\/gold\.signaltoscript\.com\/pricing\.html/);
