@@ -1,3 +1,4 @@
+import {vipReady} from '../../workers/vip.js';
 import {bodyOf,sameOrigin,currentMember,ensureSchema,json} from '../_lib/access.js';
 import {ensureAlertsSchema,ensureAlertPreferences,alertPreferences,alertReady,
  discordWebhookUrl,encryptDiscord,publicAlertPreferences,createTelegramLink,
@@ -7,7 +8,7 @@ const status=async(db,email,env)=>{
  const prefs=publicAlertPreferences(await ensureAlertPreferences(db,email),env);
  const worker=await db.prepare("SELECT updated_ms FROM gold_alert_state WHERE id='gold-15m'").first();
  const lastScanAt=Number(worker?.updated_ms)||null;
- return {...prefs,deliveryOnline:!!lastScanAt&&Date.now()-lastScanAt<7*60000,lastScanAt};
+ return {...prefs,vipChannelEnabled:vipReady(env),deliveryOnline:!!lastScanAt&&Date.now()-lastScanAt<7*60000,lastScanAt};
  };
 async function authorized(request,env){
  await ensureSchema(env.DB);await ensureAlertsSchema(env.DB);
@@ -26,7 +27,7 @@ export async function onRequestPost({request,env}){
  if(!env.DB)return json({error:'Alert storage is not configured.'},503);
  try{
   const member=await authorized(request,env);
-  if(!member)return json({error:'An active monthly membership is required for instant alerts.'},401);
+  if(!member)return json({error:'An active VIP membership is required for instant alerts.'},401);
   const payload=await bodyOf(request);
   const now=Date.now(),ready=alertReady(env),email=member.email;
   const action=payload.action;
