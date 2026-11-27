@@ -389,8 +389,8 @@ function wire(){
  }));
  // The first invitation appears within one minute, followed by a two-minute
  // re-invitation after dismissal. Requests stop prompts for this page session.
- setTimeout(()=>{if(!state.member&&!state.requestSent&&!$('access-dialog').open)openDialog('request')},45000);
- setInterval(()=>{if(!state.member&&!state.requestSent&&state.offerSeen&&!$('access-dialog').open)openDialog('request')},120000);
+ setTimeout(()=>{if(!state.member&&!state.requestSent&&!document.querySelector('dialog[open]'))openDialog('request')},45000);
+ setInterval(()=>{if(!state.member&&!state.requestSent&&state.offerSeen&&!document.querySelector('dialog[open]'))openDialog('request')},120000);
  setInterval(loadData,30000);
  setInterval(async()=>{
   if(state.member&&state.expiresAt&&Date.now()>=state.expiresAt){updateAccess(false);state.days=30;await loadData();openDialog('login')}
@@ -398,7 +398,7 @@ function wire(){
 }
 wire();
 const requestedPlan=new URLSearchParams(location.search).get('plan');
-if(PLAN_LABELS[requestedPlan]){
+if(PLAN_LABELS[requestedPlan]&&new URLSearchParams(location.search).get('pay')!=='crypto'){
  choosePlan(requestedPlan);
  // Preserve the plan in the popup without leaving a query string on the page.
  history.replaceState(null,'',location.pathname+location.hash);

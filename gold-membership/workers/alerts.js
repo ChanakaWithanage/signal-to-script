@@ -1,3 +1,4 @@
+import {runVipChannel,vipReady} from './vip.js';
 import {publicChannelConfig,runPublicChannel} from './public-telegram.js';
 import {BAR_MS,ensureSchema} from '../functions/_lib/access.js';
 import {fetchGoldCandles,runGoldBreakout} from '../functions/_lib/gold-market.js';
@@ -46,6 +47,13 @@ export async function runAlertScan(env,ctx,{now=Date.now(),feedProvider=fetchGol
  const asOf=Date.parse(feed.asOf);
  const latestBarOpen=asOf-BAR_MS;
  if(!Number.isFinite(latestBarOpen)||!feed.bars?.length)throw Error('Gold feed has no confirmed candles');
+ if(vipReady(env)){
+  const vip=runVipChannel(env,feed,now).then(r=>{if(r.sent)console.log('VIP channel alerts sent',r.sent)})
+   .catch(error=>console.error('VIP channel scan failed',String(error.message).slice(0,130)));
+  if(typeof ctx?.waitUntil==='function')ctx.waitUntil(vip);
+  else await vip;
+ }
+
  // Public marketing is independent of private delivery and runs even when
  // there are no new member events. Reuse the same fetched market data.
  if(publicChannelConfig(env)){

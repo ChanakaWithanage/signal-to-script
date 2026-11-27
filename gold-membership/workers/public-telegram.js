@@ -14,10 +14,10 @@ const weeklyPrice=money(GOLD_PLANS.weekly.priceCents);
 const root='https://gold.signaltoscript.com';
 const tag=kind=>'utm_source=telegram&utm_medium=channel&utm_campaign=gold_room&utm_content='+encodeURIComponent(kind);
 const buttons=kind=>({inline_keyboard:[
- [{text:'⚡ Get instant alerts · '+weeklyPrice,url:root+'/?plan=weekly&'+tag(kind)+'#pricing'}],
+ [{text:'🔒 Join Gold VIP · '+weeklyPrice,url:root+'/?plan=weekly&'+tag(kind)+'#pricing'}],
  [{text:'View all plans',url:root+'/pricing.html?'+tag(kind)},{text:'See every trade',url:root+'/?'+tag(kind)+'#results'}]
 ]});
-const footer='Public updates are delayed by at least 30 minutes. Members get confirmed signals without the added delay, from '+weeklyPrice+' for 7 days.';
+const footer='Public updates are delayed by at least 30 minutes. Gold VIP members get confirmed signals without the added delay, from '+weeklyPrice+' for 7 days.';
 const modelNote='Modeled strategy P&L · $100,000 starting capital · fixed 1% risk per trade · $0.30 spread · no compounding.';
 const source=feed=>feed.symbol==='GC=F'?'COMEX Gold futures (GC=F)':feed.symbol==='XAUUSD'?'Gold spot (XAUUSD)':'Gold data';
 const post=(id,kind,text,due)=>({id,kind,text,due,reply_markup:buttons(kind)});
@@ -43,7 +43,7 @@ export function buildPublicPosts(feed,now,started){
   const result=trade?' \nModeled trade result: '+usd(goldTradeUsd(trade.r))+'\n'+modelNote:'';
   posts.push(post('signal:'+e.id,'signal_'+e.type.toLowerCase(),
    (e.type==='EXIT'?'🏁':e.side==='LONG'?'🟢':'🔴')+' GOLD 15M | '+action+'\n\n'+
-   'Signal price: '+price(e.price)+'\nConfirmed: '+utc(close)+'\n'+e.reason+
+   'Signal price: '+price(e.price)+'\n'+(e.type==='ENTRY'&&Number.isFinite(e.stop)?'Stop loss: '+price(e.stop)+'\nTake profit: EXIT will be notified (no fixed TP).\n':'')+'Confirmed: '+utc(close)+'\n'+e.reason+
    '\nInstrument: '+source(feed)+result+'\n\n'+footer,due));
  }
  const start=dayStart(now),weekday=new Date(start+OFFSET).getUTCDay(),date=dateAt(now);

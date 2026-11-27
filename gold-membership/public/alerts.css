@@ -131,3 +131,5 @@
 @media(prefers-reduced-motion:reduce){
  .alert-locked,.alert-promo,.alert-channel,.alert-toggle span,.alert-toggle span:after{transition:none}
 }
+
+.alert-vip-channel{background:#fffaf0;border:1px solid #e5d2a9;border-radius:12px;padding:15px;margin-top:13px}.alert-vip-channel strong{display:block;color:#906822;font-size:13px}.alert-vip-channel p{font-size:12px;color:#637985;line-height:1.6;margin:8px 0}.alert-vip-channel small{display:block;color:#81919c;font-size:11px;margin-top:8px}

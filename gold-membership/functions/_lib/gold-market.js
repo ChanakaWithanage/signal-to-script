@@ -205,7 +205,7 @@ export function runGoldBreakout(input,{days=30}={}){
     const stop=side==='LONG'?price*(1-STOP_PCT):price*(1+STOP_PCT);
     const id=d+'-'+side;
     position={side,entry:price,stop,time:bar.time,id};
-    events.push(event('ENTRY',bar.time,price,'Range breakout',side,id));
+    events.push({...event('ENTRY',bar.time,price,'Range breakout',side,id),stop:round(stop)});
     // On an entry candle, a stop hit is conservatively counted as a loss.
     if(side==='LONG'&&bar.low<=stop)exit(bar.time,Math.min(bar.open,stop),'Stop-loss');
     else if(side==='SHORT'&&bar.high>=stop)exit(bar.time,Math.max(bar.open,stop),'Stop-loss');

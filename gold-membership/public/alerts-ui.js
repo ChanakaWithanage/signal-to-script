@@ -46,6 +46,8 @@
   $('alert-telegram-status').textContent=!settings.available.telegram?'Telegram bot setup pending':
    settings.telegramConnected?'Private notifications enabled':'Connect to your Gold alert bot';
   $('alert-telegram-card').classList.toggle('enabled',!!settings.telegramConnected);
+  $('alert-vip-channel').hidden=!settings.vipChannelEnabled;
+  $('alert-vip-join').disabled=!settings.telegramConnected;
   $('alert-telegram-connect').textContent=settings.telegramConnected?'Change Telegram':'Connect Telegram ↗';
   $('alert-telegram-connect').disabled=!settings.available.telegram;
   $('alert-telegram-test').hidden=!settings.telegramConnected;
@@ -122,7 +124,21 @@
  $('alert-telegram-connect').addEventListener('click',async()=>{
   await update({action:'telegram-link'});
  });
- $('alert-telegram-remove').addEventListener('click',async()=>{
+ $('alert-vip-join').addEventListener('click',async()=>{
+  const btn=$('alert-vip-join');btn.disabled=true;
+  try{
+   const res=await fetch('/api/vip-invite',{method:'POST',credentials:'same-origin',headers:{Origin:location.origin}});
+   const result=await res.json();
+   if(!res.ok)throw Error(result.error||'Unable to create VIP invite');
+   const url=new URL(result.inviteUrl);
+   if(url.protocol!=='https:'||url.hostname!=='t.me'||!url.pathname.startsWith('/+'))throw Error('Invalid Telegram invitation');
+   const link=document.createElement('a');link.href=url.href;link.target='_blank';link.rel='noopener noreferrer';link.textContent='Open private VIP channel ↗';
+   const holder=$('alert-telegram-link');holder.replaceChildren('Your personal VIP invitation (valid for 10 minutes): ',link);holder.hidden=false;
+   feedback('Open the VIP invitation in Telegram using the same account you connected to the bot.');
+  }catch(error){feedback(error.message,true)}
+  finally{btn.disabled=false}
+ });
+  $('alert-telegram-remove').addEventListener('click',async()=>{
   await update({action:'telegram-remove'},{message:'Telegram notifications disconnected.'});
  });
  for(const channel of ['email','discord','telegram']){

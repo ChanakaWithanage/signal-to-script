@@ -1,3 +1,4 @@
+import {vipMemberJoined} from '../../workers/vip.js';
 import {digest,ensureSchema} from '../_lib/access.js';
 import {ensureAlertsSchema} from '../_lib/alerts.js';
 
@@ -12,6 +13,11 @@ export async function onRequestPost({request,env}){
   const raw=await request.text();
   if(raw.length>6000)return new Response('Payload too large',{status:413});
   const update=JSON.parse(raw),message=update?.message;
+  if(update?.chat_member){
+   await vipMemberJoined(env.DB,env,update.chat_member);
+   return new Response('OK');
+  }
+
   const match=/^\/start\s+([a-f0-9]{32})$/i.exec(String(message?.text||''));
   if(!match||message.chat?.type!=='private'||!Number.isSafeInteger(message.chat.id))
    return new Response('OK');

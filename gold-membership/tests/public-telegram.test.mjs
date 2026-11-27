@@ -21,6 +21,8 @@ test('The public channel cannot disclose entry until a full 30 minutes after can
  const signal=posts.find(p=>p.kind==='signal_entry');
  assert.ok(signal);
  assert.match(signal.text,/BUY \/ LONG/);
+ assert.match(signal.text,/Stop loss:/);
+ assert.match(signal.text,/EXIT will be notified/);
  assert.match(signal.text,/delayed by at least 30 minutes/);
  assert.match(signal.text,/GC=F/);
  assert.match(signal.reply_markup.inline_keyboard[0][0].url,/plan=weekly&.*utm_source=telegram/);
