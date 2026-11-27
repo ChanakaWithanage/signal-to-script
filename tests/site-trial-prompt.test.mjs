@@ -42,9 +42,9 @@ test('Gold Room promotion opens at 30 seconds and repeats two minutes after dism
  h.tick(29);assert.equal(h.dialogs.length,0);
  h.tick(1);assert.equal(h.dialogs.length,1);
  assert.equal(h.last().open,true);
- assert.match(h.last().innerHTML,/BLACK FRIDAY.*60% OFF/);
- assert.match(h.last().innerHTML,/\$4\.99/);
- assert.match(h.last().innerHTML,/<del>\$12\.49<\/del>/);
+ assert.match(h.last().innerHTML,/BLACK FRIDAY.*37\.5% OFF/);
+ assert.match(h.last().innerHTML,/\$25\.00/);
+ assert.match(h.last().innerHTML,/<del>\$40\.00<\/del>/);
  assert.match(h.last().innerHTML,/https:\/\/gold\.signaltoscript\.com\/pricing\.html/);
  h.last().close();h.tick(119);assert.equal(h.last().open,false);
  h.tick(1);assert.equal(h.last().open,true);
@@ -78,7 +78,7 @@ test('Every main-domain HTML page retains site.js; new offer does not call legac
   assert.match(html,/src="\/site\.js"/,p);
  }
  const site=await readFile(new URL('../public/site.js',import.meta.url),'utf8');
- assert.match(site,/site-trial-prompt\.js\?v=20261126-black-friday/);
+ assert.match(site,/site-trial-prompt\.js\?v=20261127-gold-pricing/);
  assert.doesNotMatch(script,/\/api\/trial\//);
  assert.doesNotMatch(script,/Get my free/);
 });
